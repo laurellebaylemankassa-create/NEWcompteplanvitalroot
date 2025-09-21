@@ -260,12 +260,21 @@ export default function Repas() {
       </div>
       {/* Debug : liste des repas du jour et leurs calories (toujours visible) */}
       {/* Bloc debug supprimé, affichage calories uniquement dans suivi.js */}
-      <button
-        onClick={() => window.history.back()}
-        style={{ marginBottom: 16, background: "#1976d2", color: "#fff", border: "none", borderRadius: 6, padding: "8px 20px", cursor: "pointer" }}
-      >
-        ← Retour
-      </button>
+      <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+        <button
+          onClick={() => window.history.back()}
+          style={{ background: "#1976d2", color: "#fff", border: "none", borderRadius: 6, padding: "8px 20px", cursor: "pointer", fontWeight: 600 }}
+        >
+          ← Retour
+        </button>
+        <a href="/tableau-de-bord" style={{ textDecoration: 'none' }}>
+          <button
+            style={{ background: "#43a047", color: "#fff", border: "none", borderRadius: 6, padding: "8px 20px", cursor: "pointer", fontWeight: 600 }}
+          >
+            🏠 Voir mon tableau de bord
+          </button>
+        </a>
+      </div>
       <h1 style={{ textAlign: "center", marginBottom: 24 }}>🗑️ Gérer mes repas</h1>
 
       {/* Formulaire d'édition (s'affiche uniquement si on est en mode édition) */}

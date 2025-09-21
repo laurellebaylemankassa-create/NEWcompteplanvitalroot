@@ -25,64 +25,10 @@ function RetourArriere() {
 }
 
 const Defis = () => {
-    // Handler pour supprimer un défi en cours
-    const handleSupprimerDefi = async (defiId) => {
-        setLoading(true);
-        const { error: deleteError } = await supabase
-            .from('defis')
-            .delete()
-            .eq('id', defiId);
-        if (deleteError) {
-            setSnackbar({ open: true, message: `Erreur Supabase : ${deleteError.message || deleteError}`, type: 'error' });
-            setLoading(false);
-            return;
-        }
-        // Recharger la liste des défis
-        const { data: updatedDefis, error: fetchError } = await supabase
-            .from('defis')
-            .select('*');
-        if (fetchError) {
-            setSnackbar({ open: true, message: `Erreur Supabase : ${fetchError.message || fetchError}`, type: 'error' });
-            setLoading(false);
-            return;
-        }
-        setDefis(updatedDefis);
-        setSnackbar({ open: true, message: 'Défi supprimé avec succès !', type: 'success' });
-        setLoading(false);
-    };
     const [defis, setDefis] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [tab, setTab] = useState('disponibles'); // onglet actif
-    const [snackbar, setSnackbar] = useState({ open: false, message: '', type: 'info' });
-
-    // Handler pour commencer un défi
-    const handleCommencerDefi = async (defiId) => {
-        console.log('Handler appelé pour defiId:', defiId);
-        setLoading(true);
-        // Mettre à jour le défi : progress = 1, status = 'en cours'
-        const { error: updateError } = await supabase
-            .from('defis')
-            .update({ progress: 1, status: 'en cours' })
-            .eq('id', defiId);
-        if (updateError) {
-            setSnackbar({ open: true, message: `Erreur Supabase : ${updateError.message || updateError}`, type: 'error' });
-            setLoading(false);
-            return;
-        }
-        // Recharger la liste des défis
-        const { data: updatedDefis, error: fetchError } = await supabase
-            .from('defis')
-            .select('*');
-        if (fetchError) {
-            setSnackbar({ open: true, message: `Erreur Supabase : ${fetchError.message || fetchError}`, type: 'error' });
-            setLoading(false);
-            return;
-        }
-        setDefis(updatedDefis);
-        setSnackbar({ open: true, message: 'Défi démarré avec succès !', type: 'success' });
-        setLoading(false);
-    };
 
     // Récupérer les défis (mono-utilisateur)
     useEffect(() => {
@@ -157,9 +103,6 @@ const Defis = () => {
         fetchDefis();
     }, []);
 
-    // Affichage du snackbar pour les erreurs et succès
-    const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
-
     if (loading) {
         return <div>Chargement des défis...</div>;
     }
@@ -180,33 +123,6 @@ const Defis = () => {
 
     return (
         <div>
-            {/* Snackbar pour feedback utilisateur */}
-            {snackbar.open && (
-                <div
-                    style={{
-                        position: "fixed",
-                        bottom: 32,
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        background: snackbar.type === "error" ? "#f44336" : "#4caf50",
-                        color: "#fff",
-                        padding: "12px 32px",
-                        borderRadius: 32,
-                        boxShadow: "0 2px 16px 0 rgba(0,0,0,0.15)",
-                        zIndex: 1000,
-                        fontWeight: 500,
-                        fontSize: 16,
-                        minWidth: 180,
-                        textAlign: "center",
-                        cursor: "pointer"
-                    }}
-                    onClick={handleCloseSnackbar}
-                    tabIndex={0}
-                    aria-live="polite"
-                >
-                    {snackbar.message}
-                </div>
-            )}
             <RetourArriere />
             <h1>Mes défis</h1>
             <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
@@ -257,26 +173,7 @@ const Defis = () => {
                                     <div style={{ margin: '8px 0', color: '#1976d2', fontWeight: 600 }}>Durée : {max} {defi.unite}</div>
                                     <div style={{ marginBottom: 12, color: '#555' }}>Ce qu’il faut faire : <br /><span style={{ fontWeight: 500 }}>{defi.description}</span></div>
                                     <div style={{ marginBottom: 10, color: '#ff9800', fontWeight: 500 }}>Récompense : possibilité de débloquer un badge</div>
-                                    <button
-                                        style={{
-                                            marginTop: 10,
-                                            padding: '8px 24px',
-                                            borderRadius: 8,
-                                            background: '#1976d2',
-                                            color: '#fff',
-                                            border: '2px solid #1976d2',
-                                            cursor: 'pointer',
-                                            fontWeight: 700,
-                                            fontSize: 16,
-                                            boxShadow: '0 2px 8px #1976d233',
-                                            outline: 'none',
-                                            transition: 'background 0.2s',
-                                            pointerEvents: 'auto',
-                                        }}
-                                        onClick={() => handleCommencerDefi(defi.id)}
-                                        tabIndex={0}
-                                        aria-label={`Commencer le défi ${defi.nom}`}
-                                    >
+                                    <button style={{ marginTop: 10, padding: '8px 24px', borderRadius: 8, background: '#1976d2', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 16 }}>
                                         Commencer ce défi
                                     </button>
                                 </li>
@@ -302,14 +199,6 @@ const Defis = () => {
                                     <div style={{ fontSize: 12, color: '#888' }}>Créé le : {new Date(defi.created_at).toLocaleDateString('fr-FR')}</div>
                                     <button style={{ marginTop: 10, padding: '6px 16px', borderRadius: 6, background: '#80cbc4', color: '#fff', border: 'none', cursor: 'pointer' }}>
                                         J’ai accompli une étape
-                                    </button>
-                                    <button
-                                        style={{ marginTop: 10, marginLeft: 10, padding: '6px 16px', borderRadius: 6, background: '#f44336', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700 }}
-                                        onClick={() => handleSupprimerDefi(defi.id)}
-                                        tabIndex={0}
-                                        aria-label={`Supprimer le défi ${defi.nom}`}
-                                    >
-                                        Supprimer ce défi
                                     </button>
                                 </li>
                             );
