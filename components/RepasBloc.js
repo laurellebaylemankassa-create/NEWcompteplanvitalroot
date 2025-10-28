@@ -76,6 +76,12 @@ export default function RepasBloc({
   const [supabaseError, setSupabaseError] = useState(null);
   const [repasConforme, setRepasConforme] = useState(false);
   const [aliment, setAliment] = useState('');
+    // Champ heure de prise du repas (non obligatoire, pré-rempli à l'heure actuelle)
+    const getDefaultHeure = () => {
+      const now = new Date();
+      return now.toTimeString().slice(0,5);
+    };
+    const [heureRepas, setHeureRepas] = useState(getDefaultHeure());
   const [categorie, setCategorie] = useState('');
   const [quantite, setQuantite] = useState('');
   const [kcal, setKcal] = useState('');

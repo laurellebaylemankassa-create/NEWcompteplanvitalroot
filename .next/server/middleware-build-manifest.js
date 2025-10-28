@@ -20,11 +20,6 @@ globalThis.__BUILD_MANIFEST = {
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/defis": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/defis.js"
-    ],
     "/suivi": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",

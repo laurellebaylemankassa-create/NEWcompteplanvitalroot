@@ -478,6 +478,11 @@ export default function Suivi() {
     ? Math.round((caloriesDuJour / objectifCalorique) * 100)
     : 0;
   // Calcul du score discipline journalier (repas alignés)
+  // Score de régularité de saisie (motivation à la saisie)
+  const repasTypes = ["Petit-déjeuner", "Déjeuner", "Collation", "Dîner"];
+  const repasDuJourRegularite = repasSemaine.filter(r => r.date === selectedDate);
+  const nbRepasSaisis = repasTypes.reduce((acc, type) => acc + (repasDuJourRegularite.some(r => r.type === type) ? 1 : 0), 0);
+  const scoreRegularite = Math.round((nbRepasSaisis / repasTypes.length) * 100);
   // Fonction utilitaire pour score discipline
   function isRepasAligne(r, plan) {
     // Repas conforme au planning
@@ -987,7 +992,7 @@ export default function Suivi() {
         </>
       )}
 
-      {/* ----------- SCORE CALORIQUE ET DISCIPLINE ----------- */}
+  {/* ----------- SCORE CALORIQUE, DISCIPLINE ET RÉGULARITÉ ----------- */}
       <div style={{
         marginTop: 24,
         background: "#fafafa",
@@ -996,6 +1001,16 @@ export default function Suivi() {
         boxShadow: "0 1px 5px rgba(0,0,0,0.03)"
       }}>
         <h2 style={{ margin: "0 0 16px 0" }}>Mes scores</h2>
+        <div style={{ marginBottom: 12 }}>
+          <span style={{ fontWeight: 500 }}>Score de régularité de saisie : </span>
+          <span style={{ fontWeight: 700, color: "#8e24aa", fontSize: 18 }}>{scoreRegularite}%</span>
+          <ProgressBar value={scoreRegularite} color="#8e24aa" />
+          <div style={{ fontSize: 13, color: scoreRegularite === 100 ? '#43a047' : '#888', marginTop: 4 }}>
+            {scoreRegularite === 100
+              ? "Bravo, tu as saisi tous tes repas principaux aujourd’hui !"
+              : `Repas saisis aujourd’hui : ${nbRepasSaisis} / ${repasTypes.length}`}
+          </div>
+        </div>
         <div style={{ marginBottom: 12 }}>
           <span style={{ fontWeight: 500 }}>Score calorique du jour : </span>
           <span style={{ fontWeight: 700, color: "#ff9800", fontSize: 18 }}>

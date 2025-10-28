@@ -4,6 +4,11 @@ function DefiExcuses({ defi, refreshDefis }) {
     const [message, setMessage] = useState('');
     const [erreur, setErreur] = useState('');
     const [typeRepas, setTypeRepas] = useState('Déjeuner');
+    const getDefaultHeure = () => {
+        const now = new Date();
+        return now.toTimeString().slice(0,5);
+    };
+    const [heureRepas, setHeureRepas] = useState(getDefaultHeure());
     if (!defi) return null;
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -37,6 +42,16 @@ function DefiExcuses({ defi, refreshDefis }) {
                     </select>
                 </label>
             </div>
+            <div style={{ margin: '8px 0' }}>
+                Heure de prise du repas (optionnel) :
+                <input
+                    type="time"
+                    value={heureRepas}
+                    onChange={e => setHeureRepas(e.target.value)}
+                    style={{ marginLeft: 8, width: 110 }}
+                />
+                <span style={{ color: '#888', fontSize: 13, marginLeft: 8 }}>(pré-rempli à l'heure actuelle, modifiable)</span>
+            </div>
             <div style={{marginTop:8}}>
                 <label>
                     <input type="checkbox" checked={confirmation} onChange={e => setConfirmation(e.target.checked)} />
@@ -56,6 +71,11 @@ function DefiFauxAllie({ defi, refreshDefis }) {
     const [message, setMessage] = useState('');
     const [erreur, setErreur] = useState('');
     const [date, setDate] = useState(new Date().toISOString().slice(0,10));
+    const getDefaultHeure = () => {
+        const now = new Date();
+        return now.toTimeString().slice(0,5);
+    };
+    const [heureRepas, setHeureRepas] = useState(getDefaultHeure());
     if (!defi) return null;
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -84,6 +104,16 @@ function DefiFauxAllie({ defi, refreshDefis }) {
                     Aucun aliment gras n’a été pris pour compenser un extra aujourd’hui
                 </label>
             </div>
+            <div style={{ margin: '8px 0' }}>
+                Heure de prise du repas (optionnel) :
+                <input
+                    type="time"
+                    value={heureRepas}
+                    onChange={e => setHeureRepas(e.target.value)}
+                    style={{ marginLeft: 8, width: 110 }}
+                />
+                <span style={{ color: '#888', fontSize: 13, marginLeft: 8 }}>(pré-rempli à l'heure actuelle, modifiable)</span>
+            </div>
             {erreur && <p style={{color:'red'}}>{erreur}</p>}
             {message && <p style={{color:'green'}}>{message}</p>}
             <button type="submit">Valider l’étape</button>
@@ -97,6 +127,11 @@ function DefiBriseChaine({ defi, refreshDefis }) {
     const [message, setMessage] = useState('');
     const [erreur, setErreur] = useState('');
     const [date, setDate] = useState(new Date().toISOString().slice(0,10));
+    const getDefaultHeure = () => {
+        const now = new Date();
+        return now.toTimeString().slice(0,5);
+    };
+    const [heureRepas, setHeureRepas] = useState(getDefaultHeure());
     if (!defi) return null;
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -124,6 +159,16 @@ function DefiBriseChaine({ defi, refreshDefis }) {
                     <input type="checkbox" checked={confirmation} onChange={e => setConfirmation(e.target.checked)} />
                     Aucun enchaînement sucre-gras aujourd’hui
                 </label>
+            </div>
+            <div style={{ margin: '8px 0' }}>
+                Heure de prise du repas (optionnel) :
+                <input
+                    type="time"
+                    value={heureRepas}
+                    onChange={e => setHeureRepas(e.target.value)}
+                    style={{ marginLeft: 8, width: 110 }}
+                />
+                <span style={{ color: '#888', fontSize: 13, marginLeft: 8 }}>(pré-rempli à l'heure actuelle, modifiable)</span>
             </div>
             {erreur && <p style={{color:'red'}}>{erreur}</p>}
             {message && <p style={{color:'green'}}>{message}</p>}
@@ -311,6 +356,11 @@ function DefiEcouteVentre({ defi, refreshDefis }) {
     const [message, setMessage] = useState('');
     const [erreur, setErreur] = useState('');
     const [typeRepas, setTypeRepas] = useState('Déjeuner');
+    const getDefaultHeure = () => {
+        const now = new Date();
+        return now.toTimeString().slice(0,5);
+    };
+    const [heureRepas, setHeureRepas] = useState(getDefaultHeure());
     if (!defi) return null;
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -344,6 +394,16 @@ function DefiEcouteVentre({ defi, refreshDefis }) {
                     </select>
                 </label>
             </div>
+            <div style={{ margin: '8px 0' }}>
+                Heure de prise du repas (optionnel) :
+                <input
+                    type="time"
+                    value={heureRepas}
+                    onChange={e => setHeureRepas(e.target.value)}
+                    style={{ marginLeft: 8, width: 110 }}
+                />
+                <span style={{ color: '#888', fontSize: 13, marginLeft: 8 }}>(pré-rempli à l'heure actuelle, modifiable)</span>
+            </div>
             <div style={{marginTop:8}}>
                 <label>
                     <input type="checkbox" checked={confirmation} onChange={e => setConfirmation(e.target.checked)} />
@@ -363,6 +423,11 @@ function DefiChaudDoux({ defi, refreshDefis }) {
     const [confirmation, setConfirmation] = useState(false);
     const [message, setMessage] = useState('');
     const [erreur, setErreur] = useState('');
+    const getDefaultHeure = () => {
+        const now = new Date();
+        return now.toTimeString().slice(0,5);
+    };
+    const [heureRepas, setHeureRepas] = useState(getDefaultHeure());
     if (!defi) return null;
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -394,6 +459,16 @@ function DefiChaudDoux({ defi, refreshDefis }) {
                         <option value="autre">Autre</option>
                     </select>
                 </label>
+            </div>
+            <div style={{ margin: '8px 0' }}>
+                Heure de prise du repas (optionnel) :
+                <input
+                    type="time"
+                    value={heureRepas}
+                    onChange={e => setHeureRepas(e.target.value)}
+                    style={{ marginLeft: 8, width: 110 }}
+                />
+                <span style={{ color: '#888', fontSize: 13, marginLeft: 8 }}>(pré-rempli à l'heure actuelle, modifiable)</span>
             </div>
             <div style={{marginTop:8}}>
                 <label>
