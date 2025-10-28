@@ -25,10 +25,36 @@ function RetourArriere() {
 }
 
 const Defis = () => {
+    // Handler pour réinitialiser un défi
+    const handleReinitialiserDefi = async (defi) => {
+        setActionLoading(defi.id);
+        const { error: updateError } = await supabase
+            .from('defis')
+            .update({ progress: 0, status: 'disponible' })
+            .eq('id', defi.id);
+        if (updateError) {
+            setError('Erreur lors de la réinitialisation du défi');
+            setActionLoading(false);
+            return;
+        }
+        // Recharger la liste des défis
+        const { data: updatedData, error: reloadError } = await supabase
+            .from('defis')
+            .select('*');
+        if (reloadError) {
+            setError('Erreur lors du rechargement des défis');
+            setActionLoading(false);
+            return;
+        }
+        setDefis(updatedData);
+        setActionLoading(false);
+    };
+    // Hooks d'état
     const [defis, setDefis] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [tab, setTab] = useState('disponibles'); // onglet actif
+    const [actionLoading, setActionLoading] = useState(false); // Pour feedback bouton
 
     // Récupérer les défis (mono-utilisateur)
     useEffect(() => {
@@ -103,6 +129,55 @@ const Defis = () => {
         fetchDefis();
     }, []);
 
+    // Handler pour démarrer un défi
+    const handleCommencerDefi = async (defiId) => {
+        setActionLoading(defiId); // Pour feedback visuel
+        // On passe le défi en "en cours" (progress = 1, status = 'en cours')
+        const { error: updateError } = await supabase
+            .from('defis')
+            .update({ progress: 1, status: 'en cours' })
+            .eq('id', defiId);
+        if (updateError) {
+            setError('Erreur lors du démarrage du défi');
+            setActionLoading(false);
+            return;
+        }
+        // Recharger la liste des défis
+        const { data: updatedData, error: reloadError } = await supabase
+            .from('defis')
+            .select('*');
+        if (reloadError) {
+            setError('Erreur lors du rechargement des défis');
+            setActionLoading(false);
+            return;
+        }
+        setDefis(updatedData);
+        setActionLoading(false);
+    };
+
+    // Handler pour incrémenter la progression d'un défi en cours
+    const handleAccomplirEtape = async (defi) => {
+        setActionLoading(defi.id);
+        const { validerEtapeDefi } = await import('../lib/defisUtils');
+        const res = await validerEtapeDefi(defi);
+        if (!res.success) {
+            setError(res.error || 'Erreur lors de la progression du défi');
+            setActionLoading(false);
+            return;
+        }
+        // Recharger la liste des défis
+        const { data: updatedData, error: reloadError } = await supabase
+            .from('defis')
+            .select('*');
+        if (reloadError) {
+            setError('Erreur lors du rechargement des défis');
+            setActionLoading(false);
+            return;
+        }
+        setDefis(updatedData);
+        setActionLoading(false);
+    };
+
     if (loading) {
         return <div>Chargement des défis...</div>;
     }
@@ -173,8 +248,12 @@ const Defis = () => {
                                     <div style={{ margin: '8px 0', color: '#1976d2', fontWeight: 600 }}>Durée : {max} {defi.unite}</div>
                                     <div style={{ marginBottom: 12, color: '#555' }}>Ce qu’il faut faire : <br /><span style={{ fontWeight: 500 }}>{defi.description}</span></div>
                                     <div style={{ marginBottom: 10, color: '#ff9800', fontWeight: 500 }}>Récompense : possibilité de débloquer un badge</div>
-                                    <button style={{ marginTop: 10, padding: '8px 24px', borderRadius: 8, background: '#1976d2', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 16 }}>
-                                        Commencer ce défi
+                                    <button
+                                        style={{ marginTop: 10, padding: '8px 24px', borderRadius: 8, background: '#1976d2', color: '#fff', border: 'none', cursor: actionLoading === defi.id ? 'wait' : 'pointer', fontWeight: 700, fontSize: 16, opacity: actionLoading === defi.id ? 0.7 : 1 }}
+                                        onClick={() => handleCommencerDefi(defi.id)}
+                                        disabled={!!actionLoading}
+                                    >
+                                        {actionLoading === defi.id ? 'Démarrage...' : 'Commencer ce défi'}
                                     </button>
                                 </li>
                             );
@@ -197,8 +276,19 @@ const Defis = () => {
                                     <div>Progression : {defi.progress} / {max}</div>
                                     <div>Status : {defi.status}</div>
                                     <div style={{ fontSize: 12, color: '#888' }}>Créé le : {new Date(defi.created_at).toLocaleDateString('fr-FR')}</div>
-                                    <button style={{ marginTop: 10, padding: '6px 16px', borderRadius: 6, background: '#80cbc4', color: '#fff', border: 'none', cursor: 'pointer' }}>
-                                        J’ai accompli une étape
+                                    <button
+                                        style={{ marginTop: 10, padding: '6px 16px', borderRadius: 6, background: '#80cbc4', color: '#fff', border: 'none', cursor: actionLoading === defi.id ? 'wait' : 'pointer', opacity: actionLoading === defi.id ? 0.7 : 1 }}
+                                        onClick={() => handleAccomplirEtape(defi)}
+                                        disabled={!!actionLoading}
+                                    >
+                                        {actionLoading === defi.id ? 'Mise à jour...' : 'J’ai accompli une étape'}
+                                    </button>
+                                    <button
+                                        style={{ marginTop: 10, marginLeft: 10, padding: '6px 16px', borderRadius: 6, background: '#e57373', color: '#fff', border: 'none', cursor: actionLoading === defi.id ? 'wait' : 'pointer', opacity: actionLoading === defi.id ? 0.7 : 1 }}
+                                        onClick={() => handleReinitialiserDefi(defi)}
+                                        disabled={!!actionLoading}
+                                    >
+                                        {actionLoading === defi.id ? 'Réinitialisation...' : 'Réinitialiser'}
                                     </button>
                                 </li>
                             );
@@ -226,6 +316,13 @@ const Defis = () => {
                                         <span>Badge débloqué !</span>
                                         <span style={{ fontSize: 24 }}>🏅</span>
                                     </div>
+                                    <button
+                                        style={{ marginTop: 10, padding: '6px 16px', borderRadius: 6, background: '#e57373', color: '#fff', border: 'none', cursor: actionLoading === defi.id ? 'wait' : 'pointer', opacity: actionLoading === defi.id ? 0.7 : 1 }}
+                                        onClick={() => handleReinitialiserDefi(defi)}
+                                        disabled={!!actionLoading}
+                                    >
+                                        {actionLoading === defi.id ? 'Réinitialisation...' : 'Réinitialiser'}
+                                    </button>
                                 </li>
                             );
                         })}

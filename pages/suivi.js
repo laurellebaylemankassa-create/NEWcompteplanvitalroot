@@ -28,6 +28,8 @@ import { supabase } from '../lib/supabaseClient';
 import Link from 'next/link';
 import RepasBloc from "../components/RepasBloc";
 import TimelineProgression from "../components/TimelineProgression";
+import SaisieDefiAlimentaire from "../components/SaisieDefiAlimentaire";
+import { useDefis } from "../components/DefisContext";
 
 // Utilitaire message cyclique
 function pickMessage(array, key) {
@@ -358,6 +360,16 @@ function ZoneBadgesProgression({ progression, history, palier }) {
 // MAIN COMPONENT
 export default function Suivi() {
   // ----------- HANDLER POUR LA SAUVEGARDE D'UN REPAS -----------
+  // Import du contexte défis pour savoir si un défi alimentaire est en cours
+  // Respecte la checklist : hooks, logique, handlers déclarés avant le rendu
+  // Utilisation du hook useDefis pour la réactivité
+  // Utilisation standard du hook useDefis pour la réactivité du contexte
+  const { defisEnCours, refreshDefis, loading: loadingDefis, error: errorDefis } = useDefis ? useDefis() : { defisEnCours: [], refreshDefis: () => {}, loading: false, error: null };
+  const defiAlimentaireActif = defisEnCours && defisEnCours.some(d => d.nom === '🧀 1 portion ça suffit');
+  // (déplacé ci-dessus)
+  // Affichage de la saisie dédiée au défi alimentaire en cours (ex : 1 portion ça suffit)
+  // Respecte la checklist : hooks, logique, handlers déclarés avant le rendu
+  // Affiche le composant avant la sélection du type de repas
   const handleSaveRepas = async (repasData) => {
     try {
       // Enregistrement du repas dans Supabase
@@ -836,55 +848,68 @@ export default function Suivi() {
         />
       </div>
 
+      {/* Debug affichage défis en cours + bouton refresh + message d'erreur explicite */}
+      <div style={{background:'#f3f3f3', border:'1px solid #ccc', borderRadius:8, padding:8, marginBottom:12, fontSize:13}}>
+        <b>DEBUG :</b> defisEnCours = {JSON.stringify(defisEnCours)}<br/>
+        defiAlimentaireActif = {String(defiAlimentaireActif)}<br/>
+        <button style={{marginTop:6, background:'#1976d2', color:'#fff', border:'none', borderRadius:6, padding:'4px 12px', fontWeight:600, cursor:'pointer'}} onClick={refreshDefis} disabled={loadingDefis}>🔄 Rafraîchir les défis</button>
+        {errorDefis && <div style={{color:'red', marginTop:4}}>Erreur défis : {errorDefis}</div>}
+        {(!loadingDefis && defisEnCours.length === 0) && <div style={{color:'orange', marginTop:4}}>Aucun défi en cours détecté dans le contexte. Si tu as bien un défi actif dans /defis, clique sur "Rafraîchir les défis" ou recharge la page.</div>}
+      </div>
       {loading ? (
         <div style={{ textAlign: "center", margin: "48px 0" }}>
           <span style={{ fontSize: 24 }}>⏳</span>
           <div>Chargement en cours…</div>
         </div>
       ) : (
-        !selectedType ? (
-          <div style={{ textAlign: "center", margin: "2rem 0" }}>
-            <h2>Quel repas veux-tu consigner ?</h2>
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button onClick={() => setSelectedType("Petit-déjeuner")}>🥐 Petit-déjeuner</button>
-              <button onClick={() => setSelectedType("Déjeuner")}>🍽️ Déjeuner</button>
-              <button onClick={() => setSelectedType("Collation")}>🍏 Collation</button>
-              <button onClick={() => setSelectedType("Dîner")}>🍲 Dîner</button>
-              <button onClick={() => setSelectedType("Autre")}>🍴 Autre</button>
-            </div>
-          </div>
-        ) : (
-          <div
-            style={{
-              background: "#fff",
-              borderRadius: 16,
-              boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
-              padding: 20,
-              marginBottom: 24,
-              borderLeft: `6px solid ${{
-                "Petit-déjeuner": "#ffa726",
-                "Déjeuner": "#29b6f6",
-                "Collation": "#66bb6a",
-                "Dîner": "#ab47bc",
-                "Autre": "#ff7043",
-              }[selectedType]}`,
-              transition: "box-shadow 0.2s"
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
-              <span style={{ fontSize: 24 }}>{repasIcons[selectedType]}</span>
-              <span style={{ fontWeight: 600, fontSize: 18 }}>{selectedType}</span>
-            </div>
-            <div
-              style={{
-                background: "#f5f5f5",
-                borderRadius: 8,
-                padding: "8px 12px",
-                marginBottom: 6,
-                color: "#333",
-                fontSize: 15,
-              }}
-            >
+        <>
+          {/* Affichage conditionnel strict selon la checklist */}
+          {defiAlimentaireActif ? (
+            <SaisieDefiAlimentaire />
+          ) : (
+            !selectedType ? (
+              <div style={{ textAlign: "center", margin: "2rem 0" }}>
+                <h2>Quel repas veux-tu consigner ?</h2>
+                <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+                  <button onClick={() => setSelectedType("Petit-déjeuner")}>🥐 Petit-déjeuner</button>
+                  <button onClick={() => setSelectedType("Déjeuner")}>🍽️ Déjeuner</button>
+                  <button onClick={() => setSelectedType("Collation")}>🍏 Collation</button>
+                  <button onClick={() => setSelectedType("Dîner")}>🍲 Dîner</button>
+                  <button onClick={() => setSelectedType("Autre")}>🍴 Autre</button>
+                </div>
+              </div>
+            ) : (
+              <div
+                style={{
+                  background: "#fff",
+                  borderRadius: 16,
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
+                  padding: 20,
+                  marginBottom: 24,
+                  borderLeft: `6px solid ${{
+                    "Petit-déjeuner": "#ffa726",
+                    "Déjeuner": "#29b6f6",
+                    "Collation": "#66bb6a",
+                    "Dîner": "#ab47bc",
+                    "Autre": "#ff7043",
+                  }[selectedType]}`,
+                  transition: "box-shadow 0.2s"
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+                  <span style={{ fontSize: 24 }}>{repasIcons[selectedType]}</span>
+                  <span style={{ fontWeight: 600, fontSize: 18 }}>{selectedType}</span>
+                </div>
+                <div
+                  style={{
+                    background: "#f5f5f5",
+                    borderRadius: 8,
+                    padding: "8px 12px",
+                    marginBottom: 6,
+                    color: "#333",
+                    fontSize: 15,
+                  }}
+                >
               <strong>Repas prévu :</strong>{" "}
               {repasPlan[selectedType]?.aliment ? (
                 <>
@@ -958,7 +983,8 @@ export default function Suivi() {
               </button>
             </div>
           </div>
-        )
+          ))}
+        </>
       )}
 
       {/* ----------- SCORE CALORIQUE ET DISCIPLINE ----------- */}

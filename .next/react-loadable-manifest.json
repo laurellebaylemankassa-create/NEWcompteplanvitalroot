@@ -1,8 +1,12 @@
 {
-  "components/BadgeCard.js -> canvas-confetti": {
-    "id": "components/BadgeCard.js -> canvas-confetti",
+  "components/RepasBloc.js -> ../lib/supabaseClient": {
+    "id": "components/RepasBloc.js -> ../lib/supabaseClient",
+    "files": []
+  },
+  "components/SaisieDefiAlimentaire.js -> ../lib/defisUtils": {
+    "id": "components/SaisieDefiAlimentaire.js -> ../lib/defisUtils",
     "files": [
-      "static/chunks/_pages-dir-browser_node_modules_canvas-confetti_dist_confetti_module_mjs.js"
+      "static/chunks/_pages-dir-browser_lib_defisUtils_js.js"
     ]
   },
   "node_modules/@supabase/auth-js/dist/module/lib/helpers.js -> @supabase/node-fetch": {
@@ -21,8 +25,10 @@
     "id": "node_modules/@supabase/storage-js/dist/module/lib/helpers.js -> @supabase/node-fetch",
     "files": []
   },
-  "pages/repas.js -> ../lib/supabaseClient": {
-    "id": "pages/repas.js -> ../lib/supabaseClient",
-    "files": []
+  "pages/defis.js -> ../lib/defisUtils": {
+    "id": "pages/defis.js -> ../lib/defisUtils",
+    "files": [
+      "static/chunks/_pages-dir-browser_lib_defisUtils_js.js"
+    ]
   }
 }
