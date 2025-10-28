@@ -54,7 +54,6 @@ export default function SaisieDefiAlimentaire() {
                 note,
                 ressenti,
                 planifie: false,
-                conforme: true,
                 fastFood: false,
                 satiete: '',
             }]);

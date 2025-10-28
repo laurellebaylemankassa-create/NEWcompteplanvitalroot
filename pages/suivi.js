@@ -853,14 +853,6 @@ export default function Suivi() {
         />
       </div>
 
-      {/* Debug affichage défis en cours + bouton refresh + message d'erreur explicite */}
-      <div style={{background:'#f3f3f3', border:'1px solid #ccc', borderRadius:8, padding:8, marginBottom:12, fontSize:13}}>
-        <b>DEBUG :</b> defisEnCours = {JSON.stringify(defisEnCours)}<br/>
-        defiAlimentaireActif = {String(defiAlimentaireActif)}<br/>
-        <button style={{marginTop:6, background:'#1976d2', color:'#fff', border:'none', borderRadius:6, padding:'4px 12px', fontWeight:600, cursor:'pointer'}} onClick={refreshDefis} disabled={loadingDefis}>🔄 Rafraîchir les défis</button>
-        {errorDefis && <div style={{color:'red', marginTop:4}}>Erreur défis : {errorDefis}</div>}
-        {(!loadingDefis && defisEnCours.length === 0) && <div style={{color:'orange', marginTop:4}}>Aucun défi en cours détecté dans le contexte. Si tu as bien un défi actif dans /defis, clique sur "Rafraîchir les défis" ou recharge la page.</div>}
-      </div>
       {loading ? (
         <div style={{ textAlign: "center", margin: "48px 0" }}>
           <span style={{ fontSize: 24 }}>⏳</span>
