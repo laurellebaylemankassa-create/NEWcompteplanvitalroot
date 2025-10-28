@@ -1,53 +1,82 @@
+
 import React, { useState } from 'react';
 import { useDefis } from './DefisContext';
-import { defisReferentiel } from '../lib/defisReferentiel';
 import { supabase } from '../lib/supabaseClient';
 
 export default function SaisieDefiAlimentaire() {
     const { defisEnCours, refreshDefis } = useDefis();
-    // On cible le défi "🧀 1 portion ça suffit" pour l'exemple
     const defi = defisEnCours.find(d => d.nom === '🧀 1 portion ça suffit');
-    const [aliments, setAliments] = useState([{ nom: '', portion: 1 }]);
+    const repasTypes = ["Petit-déjeuner", "Déjeuner", "Collation", "Dîner", "Autre"];
+    const getDefaultHeure = () => {
+        const now = new Date();
+        return now.toTimeString().slice(0,5);
+    };
+    // Champs principaux
+    const [type, setType] = useState('Déjeuner');
+    const [date, setDate] = useState(new Date().toISOString().slice(0,10));
+    const [heure, setHeure] = useState(getDefaultHeure());
+    const [aliment, setAliment] = useState('');
+    const [categorie, setCategorie] = useState('');
+    const [quantite, setQuantite] = useState('1');
+    const [kcal, setKcal] = useState('');
+    const [note, setNote] = useState('');
+    const [ressenti, setRessenti] = useState('');
     const [confirmation, setConfirmation] = useState(false);
     const [message, setMessage] = useState('');
     const [erreur, setErreur] = useState('');
 
     if (!defi) return null;
 
-    const handleAlimentChange = (idx, field, value) => {
-        const next = aliments.map((a, i) => i === idx ? { ...a, [field]: value } : a);
-        setAliments(next);
-    };
-
-    const handleAddAliment = () => {
-        setAliments([...aliments, { nom: '', portion: 1 }]);
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage('');
         setErreur('');
-        // Vérification : chaque aliment ne doit apparaître qu'une fois et portion = 1
-        const noms = aliments.map(a => a.nom.trim()).filter(Boolean);
-        const unique = new Set(noms);
-        if (noms.length !== unique.size) {
-            setErreur('Chaque aliment ne doit être saisi qu’une seule fois.');
+        if (!aliment.trim()) {
+            setErreur('Merci de saisir un aliment.');
             return;
         }
         if (!confirmation) {
             setErreur('Merci de confirmer que tu as respecté une seule portion de chaque aliment.');
             return;
         }
-        // Validation centralisée de l'étape du défi (progression + badge)
+        // 1. Enregistrer le repas dans Supabase
+        const { data, error } = await supabase
+            .from("repas_reels")
+            .insert([{
+                type,
+                date,
+                heure,
+                aliment,
+                categorie,
+                quantite,
+                kcal,
+                est_extra: false,
+                note,
+                ressenti,
+                planifie: false,
+                conforme: true,
+                fastFood: false,
+                satiete: '',
+            }]);
+        if (error) {
+            setErreur("Erreur Supabase : " + error.message);
+            return;
+        }
+        // 2. Valider l’étape du défi (progression + badge)
         const { validerEtapeDefi } = await import('../lib/defisUtils');
         const res = await validerEtapeDefi(defi);
         if (res.success) {
-            setMessage('Bravo ! Une étape de ton défi a été validée.');
+            setMessage('Bravo ! Repas enregistré et étape du défi validée.');
             refreshDefis();
-            setAliments([{ nom: '', portion: 1 }]);
+            setAliment('');
+            setCategorie('');
+            setQuantite('1');
+            setKcal('');
+            setNote('');
+            setRessenti('');
             setConfirmation(false);
         } else {
-            setErreur(res.error || 'Erreur lors de la validation.');
+            setErreur(res.error || 'Erreur lors de la validation du défi.');
         }
     };
 
@@ -56,29 +85,53 @@ export default function SaisieDefiAlimentaire() {
             <h3>Défi en cours : {defi.nom}</h3>
             <p>{defi.description}</p>
             <form onSubmit={handleSubmit}>
-                <div>
-                    <strong>Liste des aliments consommés (une seule portion chacun) :</strong>
-                    {aliments.map((aliment, idx) => (
-                        <div key={idx} style={{ marginBottom: 8 }}>
-                            <input
-                                type="text"
-                                placeholder="Nom de l'aliment"
-                                value={aliment.nom}
-                                onChange={e => handleAlimentChange(idx, 'nom', e.target.value)}
-                                required
-                                style={{ marginRight: 8 }}
-                            />
-                            <input
-                                type="number"
-                                min={1}
-                                max={1}
-                                value={aliment.portion}
-                                readOnly
-                                style={{ width: 60 }}
-                            /> portion
-                        </div>
-                    ))}
-                    <button type="button" onClick={handleAddAliment} style={{ marginTop: 8 }}>Ajouter un aliment</button>
+                <div style={{ marginBottom: 10 }}>
+                    <label>Type de repas :
+                        <select value={type} onChange={e => setType(e.target.value)} style={{ marginLeft: 8 }}>
+                            {repasTypes.map(rt => <option key={rt}>{rt}</option>)}
+                        </select>
+                    </label>
+                </div>
+                <div style={{ marginBottom: 10 }}>
+                    <label>Date :
+                        <input type="date" value={date} onChange={e => setDate(e.target.value)} style={{ marginLeft: 8 }} />
+                    </label>
+                </div>
+                <div style={{ marginBottom: 10 }}>
+                    <label>Heure de prise du repas (optionnel) :
+                        <input type="time" value={heure} onChange={e => setHeure(e.target.value)} style={{ marginLeft: 8, width: 110 }} />
+                        <span style={{ color: '#888', fontSize: 13, marginLeft: 8 }}>(pré-rempli à l'heure actuelle, modifiable)</span>
+                    </label>
+                </div>
+                <div style={{ marginBottom: 10 }}>
+                    <label>Aliment mangé :
+                        <input type="text" value={aliment} onChange={e => setAliment(e.target.value)} placeholder="Saisissez un aliment" style={{ marginLeft: 8 }} required />
+                    </label>
+                </div>
+                <div style={{ marginBottom: 10 }}>
+                    <label>Catégorie :
+                        <input type="text" value={categorie} onChange={e => setCategorie(e.target.value)} style={{ marginLeft: 8 }} />
+                    </label>
+                </div>
+                <div style={{ marginBottom: 10 }}>
+                    <label>Quantité :
+                        <input type="text" value={quantite} onChange={e => setQuantite(e.target.value)} style={{ marginLeft: 8, width: 60 }} />
+                    </label>
+                </div>
+                <div style={{ marginBottom: 10 }}>
+                    <label>Kcal :
+                        <input type="number" value={kcal} onChange={e => setKcal(e.target.value)} style={{ marginLeft: 8, width: 80 }} />
+                    </label>
+                </div>
+                <div style={{ marginBottom: 10 }}>
+                    <label>Note (contexte, réflexion, etc.) :
+                        <input type="text" value={note} onChange={e => setNote(e.target.value)} style={{ marginLeft: 8, width: 220 }} />
+                    </label>
+                </div>
+                <div style={{ marginBottom: 10 }}>
+                    <label>Ressenti physique après le repas :
+                        <input type="text" value={ressenti} onChange={e => setRessenti(e.target.value)} style={{ marginLeft: 8, width: 180 }} />
+                    </label>
                 </div>
                 <div style={{ marginTop: 16 }}>
                     <label>
@@ -91,7 +144,7 @@ export default function SaisieDefiAlimentaire() {
                 </div>
                 {erreur && <p style={{ color: 'red' }}>{erreur}</p>}
                 {message && <p style={{ color: 'green' }}>{message}</p>}
-                <button type="submit" style={{ marginTop: 16 }}>Valider l’étape du défi</button>
+                <button type="submit" style={{ marginTop: 16 }}>Valider l’étape du défi et enregistrer le repas</button>
             </form>
         </div>
     );
