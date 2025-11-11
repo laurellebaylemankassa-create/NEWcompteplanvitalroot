@@ -2,7 +2,6 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/tableau-de-bord": "pages/tableau-de-bord.js",
-  "/ideaux": "pages/ideaux.js",
-  "/suivi-poids": "pages/suivi-poids.js"
+  "/": "pages/index.js",
+  "/ideaux": "pages/ideaux.js"
 }

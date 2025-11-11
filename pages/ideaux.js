@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { generateAnchoringPlan } from '../lib/generateAnchoringPlan';
 
 export default function IdeauxPage() {
   const [ideaux, setIdeaux] = useState([]);
@@ -65,6 +66,46 @@ export default function IdeauxPage() {
       if (fileInputRef.current) fileInputRef.current.value = '';
       fetchIdeaux();
     }
+  }
+
+  // Pour l'affichage du plan généré
+  const [planVisible, setPlanVisible] = useState(false);
+  const [planData, setPlanData] = useState(null);
+  // Pour personnalisation rapide
+  const [planParams, setPlanParams] = useState(null);
+  const [showDetails, setShowDetails] = useState(false);
+
+  function handleGeneratePlan(ideal) {
+    // Valeurs par défaut personnalisables
+    const params = {
+      titre: ideal.titre,
+      indicateur: ideal.indicateur_principal,
+      dateCible: ideal.date_cible,
+      frequence: 3,
+      duree: 15,
+      intensite: '7,6 km/h',
+      joursProposes: ['lundi', 'mercredi', 'samedi'],
+      dateDebut: new Date()
+    };
+    setPlanParams(params);
+    const plan = generateAnchoringPlan(params);
+    setPlanData(plan);
+    setShowDetails(false);
+    setPlanVisible(true);
+  }
+
+  function closePlanModal() {
+    setPlanVisible(false);
+    setPlanData(null);
+    setPlanParams(null);
+    setShowDetails(false);
+  }
+
+  // Mise à jour rapide des paramètres du plan
+  function updatePlanParam(key, value) {
+    const newParams = { ...planParams, [key]: value };
+    setPlanParams(newParams);
+    setPlanData(generateAnchoringPlan(newParams));
   }
 
   return (
@@ -202,8 +243,93 @@ export default function IdeauxPage() {
                 boxShadow:'0 1px 4px #00bcd422',
               }}>{ideal.statut || 'en cours'}</span>
             </div>
+            {/* Bouton pour générer le plan d'action */}
+            <div style={{marginTop:18, textAlign:'center'}}>
+              <button onClick={() => handleGeneratePlan(ideal)} style={{
+                background:'#00bcd4', color:'#fff', border:'none', borderRadius:8, padding:'8px 22px', fontWeight:700, fontSize:15, cursor:'pointer', boxShadow:'0 1px 6px #00bcd422', letterSpacing:'0.5px'
+              }}>Décomposer en plan d'action</button>
+            </div>
           </div>
         ))}
+        {/* Modale d'affichage du plan généré */}
+        {planVisible && planData && planParams && (
+          <div style={{position:'fixed', top:0, left:0, width:'100vw', height:'100vh', background:'rgba(0,0,0,0.25)', zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center'}}>
+            <div style={{background:'#fff', borderRadius:16, boxShadow:'0 4px 24px #00bcd455', padding:'2.2rem 2.5rem', minWidth:340, maxWidth:600, maxHeight:'90vh', overflow:'auto', position:'relative'}}>
+              <button onClick={closePlanModal} style={{position:'absolute', top:12, right:16, background:'none', border:'none', fontSize:22, color:'#888', cursor:'pointer'}}>×</button>
+              <h2 style={{color:'#1976d2', marginTop:0, marginBottom:8}}>🚀 Proposition de plan d'action</h2>
+              <div style={{background:'#e0f7fa', borderRadius:10, padding:'12px 18px', marginBottom:18}}>
+                <div style={{fontWeight:700, color:'#00bcd4', fontSize:18, marginBottom:4}}>
+                  {planData.ideal.titre}
+                </div>
+                <div style={{color:'#1976d2', fontWeight:600, marginBottom:2}}>Indicateur : {planData.ideal.indicateur}</div>
+                <div style={{color:'#888', marginBottom:2}}>Date cible : {planData.ideal.date_cible}</div>
+                <div style={{color:'#43a047', fontWeight:600, marginBottom:2}}>
+                  {planData.objectifs[0].routines.length * planData.objectifs[0].actions?.length || 0} séances prévues ({planData.objectifs[0].frequence_par_semaine}x/semaine)
+                </div>
+                <div style={{color:'#ffa726', fontWeight:600, marginBottom:2}}>
+                  Jours proposés : {planParams.joursProposes.map(j => <span key={j} style={{background:'#00bcd4', color:'#fff', borderRadius:6, padding:'2px 10px', marginRight:6, fontSize:13, fontWeight:700}}>{j}</span>)}
+                </div>
+                <div style={{marginTop:8, color:'#1976d2', fontWeight:500}}>
+                  Durée : <input type="number" min="5" max="180" value={planParams.duree} onChange={e=>updatePlanParam('duree', parseInt(e.target.value)||15)} style={{width:50, borderRadius:6, border:'1px solid #b2ebf2', padding:'2px 6px', fontWeight:600, fontSize:15, marginRight:6}} /> minutes
+                  &nbsp;| Intensité : <input type="text" value={planParams.intensite} onChange={e=>updatePlanParam('intensite', e.target.value)} style={{width:80, borderRadius:6, border:'1px solid #b2ebf2', padding:'2px 6px', fontWeight:600, fontSize:15}} />
+                </div>
+                <div style={{marginTop:8, color:'#1976d2', fontWeight:500}}>
+                  Fréquence : <input type="number" min="1" max="7" value={planParams.frequence} onChange={e=>updatePlanParam('frequence', parseInt(e.target.value)||3)} style={{width:40, borderRadius:6, border:'1px solid #b2ebf2', padding:'2px 6px', fontWeight:600, fontSize:15, marginRight:6}} /> fois/semaine
+                </div>
+                <div style={{marginTop:8, color:'#1976d2', fontWeight:500}}>
+                  Jours : {['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'].map(jour => (
+                    <label key={jour} style={{marginRight:8, fontWeight:600, fontSize:14}}>
+                      <input type="checkbox" checked={planParams.joursProposes.includes(jour)} onChange={e => {
+                        let jours = planParams.joursProposes.slice();
+                        if(e.target.checked) jours.push(jour); else jours = jours.filter(j => j!==jour);
+                        updatePlanParam('joursProposes', Array.from(new Set(jours)));
+                      }} /> {jour}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div style={{marginBottom:18, color:'#1976d2', fontWeight:700, fontSize:16}}>
+                {showDetails ? 'Détail du plan (semaine par semaine)' : 'Résumé du plan'}
+              </div>
+              {!showDetails && (
+                <div style={{textAlign:'center', marginBottom:18}}>
+                  <button onClick={()=>setShowDetails(true)} style={{background:'#00bcd4', color:'#fff', border:'none', borderRadius:8, padding:'8px 22px', fontWeight:700, fontSize:15, cursor:'pointer', boxShadow:'0 1px 6px #00bcd422', letterSpacing:'0.5px'}}>Voir le détail semaine par semaine</button>
+                </div>
+              )}
+              {showDetails && planData.objectifs.map((obj, i) => (
+                <div key={i} style={{marginBottom:18, padding:'12px 16px', background:'#e0f7fa', borderRadius:10, maxHeight:300, overflowY:'auto'}}>
+                  <div style={{fontWeight:700, color:'#00bcd4', marginBottom:6}}>{obj.titre}</div>
+                  <div>Fréquence : {obj.frequence_par_semaine}x/semaine</div>
+                  <div>Durée : {obj.duree_unite} {obj.unite_duree}</div>
+                  <div>Intensité : {obj.intensite}</div>
+                  <div>Période : {obj.periode}</div>
+                  <div style={{marginTop:8, fontWeight:600}}>Routines proposées :</div>
+                  <ul style={{margin:'6px 0 0 18px', padding:0}}>
+                    {obj.routines.map((r, j) => (
+                      <li key={j} style={{marginBottom:4}}>
+                        <span style={{background:'#00bcd4', color:'#fff', borderRadius:6, padding:'2px 10px', fontSize:13, fontWeight:700, marginRight:6}}>{r.jour}</span> ({r.action_type}, {r.moment})
+                        <ul style={{margin:'2px 0 0 18px', fontSize:13, color:'#888'}}>
+                          {r.actions.map((a, k) => (
+                            <li key={k}>{a.date} : {a.statut}</li>
+                          ))}
+                        </ul>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+              <div style={{marginTop:18, textAlign:'center'}}>
+                <button onClick={closePlanModal} style={{background:'#43a047', color:'#fff', border:'none', borderRadius:8, padding:'10px 28px', fontWeight:700, fontSize:16, cursor:'pointer', boxShadow:'0 1px 6px #00bcd422', letterSpacing:'0.5px', marginRight:12}}>Valider ce plan</button>
+                {showDetails && (
+                  <button onClick={()=>setShowDetails(false)} style={{background:'#ffa726', color:'#fff', border:'none', borderRadius:8, padding:'10px 28px', fontWeight:700, fontSize:16, cursor:'pointer', boxShadow:'0 1px 6px #00bcd422', letterSpacing:'0.5px'}}>Revenir au résumé</button>
+                )}
+              </div>
+              <div style={{marginTop:18, color:'#1976d2', fontWeight:600, textAlign:'center', fontSize:15}}>
+                💡 Chaque séance réalisée te rapproche de ton idéal. Tu peux ajuster ce plan avant de le valider !
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
