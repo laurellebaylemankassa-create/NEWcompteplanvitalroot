@@ -13,6 +13,7 @@ export default function Home() {
           <li>Gérer votre profil utilisateur</li>
           <li>Suivre vos repas et vos signaux de satiété</li>
           <li>Analyser vos données comportementales</li>
+          <li>Définir et suivre vos idéaux/routines de vie</li>
         </ul>
       </div>
       <p style={{ marginTop: '2rem' }}>
@@ -24,9 +25,22 @@ export default function Home() {
             color: '#fff',
             borderRadius: '5px',
             textDecoration: 'none',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            marginRight: '1rem'
           }}>
           → Accéder à mon profil
+        </Link>
+        <Link href="/ideaux"
+          style={{ 
+            display: 'inline-block',
+            padding: '0.75rem 1.5rem',
+            backgroundColor: '#8e24aa',
+            color: '#fff',
+            borderRadius: '5px',
+            textDecoration: 'none',
+            fontWeight: 'bold'
+          }}>
+          🌟 Mes idéaux / routines
         </Link>
       </p>
     </div>

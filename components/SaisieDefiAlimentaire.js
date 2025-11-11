@@ -1,12 +1,15 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDefis } from './DefisContext';
 import { supabase } from '../lib/supabaseClient';
 
 export default function SaisieDefiAlimentaire() {
     const { defisEnCours, refreshDefis } = useDefis();
     const defi = defisEnCours.find(d => d.nom === '🧀 1 portion ça suffit');
-    const repasTypes = ["Petit-déjeuner", "Déjeuner", "Collation", "Dîner", "Autre", "Jeûne"];
+    const repasTypes = ["Petit-déjeuner", "Déjeuner", "Collation", "Dîner", "Autre"];
+    // Catégories de repas, inclut 'Jeûne' pour la logique métier
+    const categorieOptions = [
+        "féculent", "protéines", "légumes", "fruit", "extra", "poisson", "volaille", "viande", "autres", "fromage", "boisson", "produit laitier", "Jeûne"
+    ];
     const getDefaultHeure = () => {
         const now = new Date();
         return now.toTimeString().slice(0,5);
@@ -27,12 +30,22 @@ export default function SaisieDefiAlimentaire() {
 
     if (!defi) return null;
 
+    // Remise à zéro automatique des champs non requis si catégorie = Jeûne
+    useEffect(() => {
+        if (categorie === "Jeûne") {
+            setAliment('');
+            setQuantite('');
+            setKcal('');
+        }
+    }, [categorie]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage('');
         setErreur('');
-        // Si le type est "Jeûne", on autorise la validation sans aliment/kcal
-        if (type !== "Jeûne" && !aliment.trim()) {
+        // Si catégorie = Jeûne, on n'exige pas les champs aliments/quantité/kcal
+        const isJeune = categorie === "Jeûne";
+        if (!isJeune && !aliment.trim()) {
             setErreur('Merci de saisir un aliment.');
             return;
         }
@@ -40,17 +53,21 @@ export default function SaisieDefiAlimentaire() {
             setErreur('Merci de confirmer que tu as respecté une seule portion de chaque aliment.');
             return;
         }
-        // 1. Enregistrer le repas dans Supabase
+        // Correction : envoyer null pour quantite et kcal si Jeûne
+        const quantiteToSend = isJeune ? null : (quantite === '' ? null : isNaN(Number(quantite)) ? quantite : Number(quantite));
+        const kcalToSend = isJeune ? null : (kcal === '' ? null : isNaN(Number(kcal)) ? kcal : Number(kcal));
+        const alimentToSend = isJeune ? '' : aliment;
+        const categorieToSend = isJeune ? 'Jeûne' : categorie;
         const { data, error } = await supabase
             .from("repas_reels")
             .insert([{
                 type,
                 date,
                 heure,
-                aliment,
-                categorie,
-                quantite,
-                kcal,
+                aliment: alimentToSend,
+                categorie: categorieToSend,
+                quantite: quantiteToSend,
+                kcal: kcalToSend,
                 est_extra: false,
                 note,
                 ressenti,
@@ -105,28 +122,25 @@ export default function SaisieDefiAlimentaire() {
                 </div>
                 <div style={{ marginBottom: 10 }}>
                     <label>Aliment mangé :
-                        <input type="text" value={aliment} onChange={e => setAliment(e.target.value)} placeholder="Saisissez un aliment" style={{ marginLeft: 8 }}
-                            required={type !== "Jeûne"}
-                            disabled={type === "Jeûne"}
-                        />
+                        <input type="text" value={aliment} onChange={e => setAliment(e.target.value)} placeholder="Saisissez un aliment" style={{ marginLeft: 8 }} required={categorie !== "Jeûne"} />
                     </label>
                 </div>
                 <div style={{ marginBottom: 10 }}>
                     <label>Catégorie :
-                        <input type="text" value={categorie} onChange={e => setCategorie(e.target.value)} style={{ marginLeft: 8 }} />
+                        <input list="categorieOptions" type="text" value={categorie} onChange={e => setCategorie(e.target.value)} style={{ marginLeft: 8 }} />
+                        <datalist id="categorieOptions">
+                            {categorieOptions.map(opt => <option key={opt} value={opt} />)}
+                        </datalist>
                     </label>
                 </div>
                 <div style={{ marginBottom: 10 }}>
                     <label>Quantité :
-                        <input type="text" value={quantite} onChange={e => setQuantite(e.target.value)} style={{ marginLeft: 8, width: 60 }} />
+                        <input type="text" value={quantite} onChange={e => setQuantite(e.target.value)} style={{ marginLeft: 8, width: 60 }} required={categorie !== "Jeûne"} />
                     </label>
                 </div>
                 <div style={{ marginBottom: 10 }}>
                     <label>Kcal :
-                        <input type="number" value={kcal} onChange={e => setKcal(e.target.value)} style={{ marginLeft: 8, width: 80 }}
-                            required={type !== "Jeûne"}
-                            disabled={type === "Jeûne"}
-                        />
+                        <input type="number" value={kcal} onChange={e => setKcal(e.target.value)} style={{ marginLeft: 8, width: 80 }} required={categorie !== "Jeûne"} />
                     </label>
                 </div>
                 <div style={{ marginBottom: 10 }}>

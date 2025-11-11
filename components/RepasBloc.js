@@ -287,10 +287,13 @@ function getSuggestionsFromNotes(repasList) {
       if (!categorieFinal && typeof categoriePrevu === 'string' && categoriePrevu.length > 0) categorieFinal = categoriePrevu;
       if (!quantiteFinal && typeof quantitePrevu === 'string' && quantitePrevu.length > 0) quantiteFinal = quantitePrevu;
       if (!kcalFinal && typeof kcalPrevu === 'string' && kcalPrevu.length > 0) kcalFinal = kcalPrevu;
-      if (!alimentFinal || !categorieFinal || !quantiteFinal || !kcalFinal) {
+      // --- Correction logique Jeûne ---
+      const isJeune = categorieFinal === 'Jeûne';
+      if (!isJeune && (!alimentFinal || !categorieFinal || !quantiteFinal || !kcalFinal)) {
         alert("Merci de remplir manuellement les champs manquants (aliment, catégorie, quantité, kcal) pour assurer le suivi.");
         return;
       }
+      // Si Jeûne, on autorise l'enregistrement même si les champs sont vides
       import('../lib/supabaseClient').then(({ supabase }) => {
         supabase.auth.getUser().then(({ data: userData }) => {
           const user_id = userData?.user?.id || null;
@@ -299,10 +302,10 @@ function getSuggestionsFromNotes(repasList) {
               user_id,
               date,
               type,
-              aliment: alimentFinal,
-              categorie: categorieFinal,
-              quantite: quantiteFinal === '' ? null : isNaN(Number(quantiteFinal)) ? quantiteFinal : Number(quantiteFinal),
-              kcal: kcalFinal === '' ? null : isNaN(Number(kcalFinal)) ? kcalFinal : Number(kcalFinal),
+              aliment: isJeune ? '' : alimentFinal,
+              categorie: isJeune ? 'Jeûne' : categorieFinal,
+              quantite: isJeune ? null : (quantiteFinal === '' ? null : isNaN(Number(quantiteFinal)) ? quantiteFinal : Number(quantiteFinal)),
+              kcal: isJeune ? null : (kcalFinal === '' ? null : isNaN(Number(kcalFinal)) ? kcalFinal : Number(kcalFinal)),
               est_extra: false,
               satiete,
               pourquoi,
@@ -335,9 +338,17 @@ function getSuggestionsFromNotes(repasList) {
     }
     // Enregistrement du repas classique
     onSave && onSave({
-      type, date, aliment, categorie, quantite, kcal,
+      // Correction : si Jeûne, envoyer null pour quantite/kcal et '' pour aliment
+      type,
+      date,
+      aliment: categorie === 'Jeûne' ? '' : aliment,
+      categorie: categorie === 'Jeûne' ? 'Jeûne' : categorie,
+      quantite: categorie === 'Jeûne' ? null : (quantite === '' ? null : isNaN(Number(quantite)) ? quantite : Number(quantite)),
+      kcal: categorie === 'Jeûne' ? null : (kcal === '' ? null : isNaN(Number(kcal)) ? kcal : Number(kcal)),
       est_extra: estExtra,
-      satiete, pourquoi, ressenti,
+      satiete,
+      pourquoi,
+      ressenti,
       details_signaux: detailsSignaux,
       note
     });
@@ -547,7 +558,7 @@ function getSuggestionsFromNotes(repasList) {
           onChange={e => setAliment(e.target.value)}
           placeholder="Saisissez un aliment"
           autoComplete="off"
-          required={!repasConforme}
+          required={categorie !== 'Jeûne'}
           style={{ marginBottom: 0 }}
         />
         {/* ...existing code... */}
@@ -557,7 +568,7 @@ function getSuggestionsFromNotes(repasList) {
           list="categories"
           value={categorie}
           onChange={e => setCategorie(e.target.value)}
-          required={!repasConforme}
+          required={categorie !== 'Jeûne'}
         />
         <datalist id="categories">
           <option value="féculent" />
@@ -572,10 +583,11 @@ function getSuggestionsFromNotes(repasList) {
           <option value="fromage" />
           <option value="boisson" />
           <option value="produit laitier" />
+          <option value="Jeûne" />
         </datalist>
 
         <label>Quantité</label>
-  <input value={quantite} onChange={e => setQuantite(e.target.value)} required={!repasConforme} />
+        <input value={quantite} onChange={e => setQuantite(e.target.value)} required={categorie !== 'Jeûne'} />
 
         <label>Kcal {loadingKcal && "(recherche...)"}</label>
   <input value={kcal} onChange={e => setKcal(e.target.value)} />
@@ -593,7 +605,7 @@ function getSuggestionsFromNotes(repasList) {
         </label>
 
         <label>Satiété respectée ?</label>
-  <select value={satiete} onChange={e => setSatiete(e.target.value)} required={!repasConforme}>
+  <select value={satiete} onChange={e => setSatiete(e.target.value)} required={categorie !== 'Jeûne'}>
           <option value="">Choisir…</option>
           <option value="oui">Oui, j’ai respecté ma satiété</option>
           <option value="non">Non, j’ai dépassé ma satiété</option>
@@ -696,48 +708,10 @@ function getSuggestionsFromNotes(repasList) {
           const suggestions = getSuggestionsFromNotes(repasSemaine);
           if (suggestions.length === 0) return null;
           return (
-            <div style={{ background: '#e3f2fd', color: '#1976d2', borderRadius: 8, padding: 12, marginTop: 16 }}>
-              <strong>Suggestions personnalisées (analyse IA symbolique) :</strong>
-              <ul style={{ marginTop: 8 }}>
-                {suggestions.map((s, i) => (
-                  <li key={i} style={{ marginBottom: 4 }}>{s}</li>
-                ))}
-              </ul>
-            </div>
-          );
-        })()
-      )}
-      {/* Bouton En savoir plus pour afficher l'historique des repas avec note */}
-      <div style={{ marginTop: 24 }}>
-        <button type="button" onClick={() => setShowNotesHistory(v => !v)} style={{ background: '#1976d2', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 18px', fontWeight: 600, fontSize: 16, cursor: 'pointer' }}>
-          {showNotesHistory ? 'Masquer' : 'En savoir plus'}
-        </button>
-      </div>
-      {showNotesHistory && (
-        (() => {
-          const repasAvecNote = repasSemaine.filter(r => r.note && r.note.trim().length > 0);
-          if (repasAvecNote.length === 0) {
-            return <div style={{ marginTop: 16, color: '#888' }}>Aucun repas avec note cette semaine.</div>;
-          }
-          return (
-            <div style={{ marginTop: 16, background: '#f5f5f5', borderRadius: 8, padding: 16 }}>
-              <strong>Repas avec note (analyse comportementale) :</strong>
-              <ul style={{ marginTop: 8, paddingLeft: 0 }}>
-                {repasAvecNote.map((r, i) => (
-                  <li key={i} style={{ marginBottom: 12, listStyle: 'none', borderBottom: '1px solid #e0e0e0', paddingBottom: 8 }}>
-                    <div><b>Date :</b> {r.date} <b>Type :</b> {r.type}</div>
-                    <div><b>Aliment :</b> {r.aliment} <b>Catégorie :</b> {r.categorie}</div>
-                    <div><b>Quantité :</b> {r.quantite} <b>Kcal :</b> {r.kcal}</div>
-                    <div><b>Note :</b> {r.note}</div>
-                    {r.ressenti && <div><b>Ressenti :</b> {r.ressenti}</div>}
-                    {r.pourquoi && <div><b>Pourquoi :</b> {r.pourquoi}</div>}
-                    {r.details_signaux && r.details_signaux.length > 0 && (
-                      <div><b>Signaux ignorés :</b> {Array.isArray(r.details_signaux) ? r.details_signaux.join(', ') : r.details_signaux}</div>
-                    )}
-                    {r.est_extra && <div style={{ color: '#b71c1c' }}><b>Extra</b></div>}
-                    {(r.isFastFood || r.fastFoodType) && <div style={{ color: '#b71c1c' }}><b>Fast food</b></div>}
-                  </li>
-                ))}
+            <div style={{ background: '#f3e5f5', borderRadius: 8, padding: 10, margin: '12px 0' }}>
+              <b>Suggestions IA :</b>
+              <ul>
+                {suggestions.map((s, i) => <li key={i}>{s}</li>)}
               </ul>
             </div>
           );

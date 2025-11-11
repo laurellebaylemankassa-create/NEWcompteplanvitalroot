@@ -1,0 +1,258 @@
+🌟 1. Le concept : la “Chaîne d’ancrage”
+a) Niveau 1 – Idéal ou rêve
+C’est le “pourquoi vibrant”, l’image finale que tu veux atteindre.
+Exemples :
+🏃‍♀️ “Refaire la Stay Fair 6,08 km à 7,6 km/h en 2023”
+
+
+💪 “Avoir un corps tonique et léger, sentir que je peux courir sans effort.”
+
+
+🌅 “Revivre cette sensation de liberté que j’avais pendant la course.”
+
+
+L’app te demande de décrire ton idéal en une phrase émotionnelle + une donnée mesurable.
+→ Elle s’en servira comme boussole.
+
+b) Niveau 2 – Objectif concret (mesurable)
+Ce sont les étapes de matérialisation du rêve.
+Exemple (à partir du tien) :
+“Courir 3 fois par semaine pendant 15 minutes à une vitesse moyenne de 8 km/h.”
+L’app enregistre :
+fréquence : 3× / semaine
+
+
+durée : 15 min
+
+
+intensité : vitesse 8 km/h
+
+
+période : sur 2 mois
+
+
+Et surtout : elle calcule automatiquement la progression logique :
+Semaine 1–2 : 2x/semaine à 7 km/h
+
+
+Semaine 3–4 : 3x/semaine à 7,5 km/h
+
+
+Semaine 5–6 : 3x/semaine à 8 km/h
+
+
+👉 Tu avances sans te cramer.
+
+c) Niveau 3 – Routine intégrée
+À partir de l’objectif, l’app génère la routine adaptée :
+Lundi / mercredi / samedi → “Séance course 15 min”
+
+
+Rappel doux la veille : “Demain tu cours — prépare tes baskets.”
+
+
+Si tu marques “fait” → progression affichée
+
+
+Si tu marques “pas fait” → elle te propose une alternative de continuité :
+
+
+“Tu peux transformer la course en 20 min de marche. L’important c’est la constance.”
+
+
+L’app apprend à ne jamais te laisser rompre la chaîne.
+
+d) Niveau 4 – Actions dynamiques (micro-leviers)
+Quand ton énergie baisse, elle réagit intelligemment :
+Si tu n’as pas fait tes 2 dernières séances → elle t’envoie un message du type :
+
+ “Tu n’as rien perdu. Repars léger aujourd’hui : 10 min, sans chrono, juste toi et ton souffle.”
+
+
+Si tu as validé ta semaine complète →
+
+ “Ton corps intègre la nouvelle norme. La régularité fait plus que la perfection.”
+
+
+Et si tu es en baisse d’énergie, elle peut adapter le plan :
+remplacer “course” par “étirements + respiration”
+
+
+te proposer une “mini-victoire” (ex. juste mettre les baskets et sortir 5 min)
+
+
+
+🧩 2. Structure logique à intégrer dans ton application
+Table 1 : 
+Ideaux
+id
+
+
+user_id
+
+
+titre (ex : “Refaire la Stay Fair”)
+
+
+description_emotionnelle (“Retrouver la sensation de liberté en courant”)
+
+
+indicateur_principal (“6,08 km à 7,6 km/h”)
+
+
+date_cible
+
+
+statut (en cours / atteint / suspendu)
+
+
+
+Table 2 : 
+Objectifs
+id
+
+
+ideal_id (lien avec l’idéal parent)
+
+
+titre (“Courir 3x/semaine 15 min à 8 km/h”)
+
+
+frequence (ex : 3/semaine)
+
+
+duree
+
+
+intensite
+
+
+periode (début-fin)
+
+
+progression (%)
+
+
+statut
+
+
+
+Table 3 : 
+Routines
+id
+
+
+objectif_id
+
+
+jour (lundi, mercredi, samedi)
+
+
+action_type (“course”, “marche”, “repos actif”)
+
+
+moment (“matin”, “soir”)
+
+
+est_pilier (oui/non)
+
+
+
+Table 4 : 
+Actions (journal d’exécution)
+id
+
+
+routine_id
+
+
+date
+
+
+statut (fait, adapté, non fait)
+
+
+commentaire
+
+
+energie (1–5)
+
+
+
+Table 5 : 
+Alternatives
+action_id
+
+
+contexte (“baisse énergie”, “surcharge”, “malade”)
+
+
+suggestion (“Marche douce 10 min”, “Étirements au lit”)
+
+
+message (“Tu restes en mouvement, c’est ce qui compte.”)
+
+
+
+🔥 3. Le “moteur de motivation”
+Tu veux une app qui rallume ton feu intérieur.
+Trois règles :
+Toujours valoriser le mouvement, jamais la perfection.
+
+
+Toujours proposer un plan B réaliste.
+
+
+Toujours relier l’action au rêve.
+
+
+Exemple de message :
+“Chaque pas d’aujourd’hui construit la version de toi qui refera la Stay Fair.
+Même si tu cours 8 minutes au lieu de 15, c’est un pas de plus vers elle.”
+Tu vois ? Le lien émotionnel + la donnée mesurable = ancrage durable.
+
+⚙️ 4. Concrètement, comment intégrer ça dans ton app
+Nouvelle page ou module : “Mes idéaux / routines”
+
+
+Tu ajoutes un bouton : “Créer un idéal”
+
+
+Ensuite, l’app te guide :
+
+
+Étape 1 : Décris ton rêve
+
+
+Étape 2 : Transforme-le en objectif concret
+
+
+Étape 3 : Planifie ta routine
+
+
+Étape 4 : Active les rappels
+
+
+Le moteur comportemental s’appuie sur les tables :
+
+
+Ideaux → Objectifs → Routines → Actions
+
+
+la détection du contexte (baisse d’énergie, surcharge, extras…)
+
+
+Page de visualisation :
+
+ Un cercle ou une jauge “Progression vers mon idéal” avec :
+
+
+% de constance
+
+
+dernière action faite
+
+
+message de motivation personnalisé
+
+

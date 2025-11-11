@@ -865,6 +865,23 @@ export default function TableauDeBord() {
             📅 Planifier mes repas
           </button>
         </Link>
+        <Link href="/ideaux">
+          <button
+            style={{
+              background: "#00bcd4",
+              color: "#fff",
+              border: "none",
+              borderRadius: 8,
+              padding: "10px 28px",
+              fontWeight: 700,
+              fontSize: 17,
+              cursor: "pointer",
+              boxShadow: "0 1px 6px #e0e0e0",
+            }}
+          >
+            🌟 Mes idéaux / routines
+          </button>
+        </Link>
         <Link href="/tableau-de-bord">
           <button
             style={{
