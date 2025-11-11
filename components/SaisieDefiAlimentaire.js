@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabaseClient';
 export default function SaisieDefiAlimentaire() {
     const { defisEnCours, refreshDefis } = useDefis();
     const defi = defisEnCours.find(d => d.nom === '🧀 1 portion ça suffit');
-    const repasTypes = ["Petit-déjeuner", "Déjeuner", "Collation", "Dîner", "Autre"];
+    const repasTypes = ["Petit-déjeuner", "Déjeuner", "Collation", "Dîner", "Autre", "Jeûne"];
     const getDefaultHeure = () => {
         const now = new Date();
         return now.toTimeString().slice(0,5);
@@ -31,7 +31,8 @@ export default function SaisieDefiAlimentaire() {
         e.preventDefault();
         setMessage('');
         setErreur('');
-        if (!aliment.trim()) {
+        // Si le type est "Jeûne", on autorise la validation sans aliment/kcal
+        if (type !== "Jeûne" && !aliment.trim()) {
             setErreur('Merci de saisir un aliment.');
             return;
         }
@@ -104,7 +105,10 @@ export default function SaisieDefiAlimentaire() {
                 </div>
                 <div style={{ marginBottom: 10 }}>
                     <label>Aliment mangé :
-                        <input type="text" value={aliment} onChange={e => setAliment(e.target.value)} placeholder="Saisissez un aliment" style={{ marginLeft: 8 }} required />
+                        <input type="text" value={aliment} onChange={e => setAliment(e.target.value)} placeholder="Saisissez un aliment" style={{ marginLeft: 8 }}
+                            required={type !== "Jeûne"}
+                            disabled={type === "Jeûne"}
+                        />
                     </label>
                 </div>
                 <div style={{ marginBottom: 10 }}>
@@ -119,7 +123,10 @@ export default function SaisieDefiAlimentaire() {
                 </div>
                 <div style={{ marginBottom: 10 }}>
                     <label>Kcal :
-                        <input type="number" value={kcal} onChange={e => setKcal(e.target.value)} style={{ marginLeft: 8, width: 80 }} />
+                        <input type="number" value={kcal} onChange={e => setKcal(e.target.value)} style={{ marginLeft: 8, width: 80 }}
+                            required={type !== "Jeûne"}
+                            disabled={type === "Jeûne"}
+                        />
                     </label>
                 </div>
                 <div style={{ marginBottom: 10 }}>

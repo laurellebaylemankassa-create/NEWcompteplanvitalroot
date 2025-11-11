@@ -13,6 +13,7 @@ function RepasForm({ initial, onCancel, onSave }) {
       kcal: "",
     }
   );
+  const repasTypes = ["Petit-déjeuner", "Déjeuner", "Collation", "Dîner", "Autre", "Jeûne"];
   const [isFastFood, setIsFastFood] = useState(false);
 
   const handleChange = (e) => {
@@ -53,20 +54,23 @@ function RepasForm({ initial, onCancel, onSave }) {
           required
           style={{ flex: 1, minWidth: 120 }}
         />
-        <input
+        <select
           name="type"
-          placeholder="Type (petit-déj, déjeuner, etc.)"
           value={form.type || ""}
           onChange={handleChange}
           required
           style={{ flex: 1, minWidth: 120 }}
-        />
+        >
+          <option value="">Type de repas</option>
+          {repasTypes.map(rt => <option key={rt} value={rt}>{rt}</option>)}
+        </select>
         <input
           name="aliment"
           placeholder="Aliment"
           value={form.aliment || ""}
           onChange={handleChange}
-          required
+          required={form.type !== "Jeûne"}
+          disabled={form.type === "Jeûne"}
           style={{ flex: 1, minWidth: 120 }}
         />
         <input
@@ -74,7 +78,8 @@ function RepasForm({ initial, onCancel, onSave }) {
           placeholder="Catégorie"
           value={form.categorie || ""}
           onChange={handleChange}
-          required
+          required={form.type !== "Jeûne"}
+          disabled={form.type === "Jeûne"}
           style={{ flex: 1, minWidth: 120 }}
         />
         <input
@@ -82,7 +87,8 @@ function RepasForm({ initial, onCancel, onSave }) {
           placeholder="Quantité"
           value={form.quantite || ""}
           onChange={handleChange}
-          required
+          required={form.type !== "Jeûne"}
+          disabled={form.type === "Jeûne"}
           style={{ flex: 1, minWidth: 80 }}
         />
         <input
@@ -91,7 +97,8 @@ function RepasForm({ initial, onCancel, onSave }) {
           type="number"
           value={form.kcal || ""}
           onChange={handleChange}
-          required
+          required={form.type !== "Jeûne"}
+          disabled={form.type === "Jeûne"}
           style={{ flex: 1, minWidth: 80 }}
         />
       </div>
