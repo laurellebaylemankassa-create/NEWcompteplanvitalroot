@@ -24,6 +24,11 @@ globalThis.__BUILD_MANIFEST = {
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/ideaux.js"
+    ],
+    "/tableau-de-bord": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/tableau-de-bord.js"
     ]
   },
   "ampFirstPages": []

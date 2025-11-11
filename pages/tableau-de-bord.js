@@ -69,6 +69,9 @@ export default function TableauDeBord() {
   const [fastFoodCount, setFastFoodCount] = useState(0);
   const [nextFastFoodDate, setNextFastFoodDate] = useState(null);
   const [fastFoodDelay, setFastFoodDelay] = useState(0);
+  // Idéaux et progression
+  const [ideauxList, setIdeauxList] = useState([]);
+  const [ideauxProgress, setIdeauxProgress] = useState([]);
   // Ajout : gestion de la période sélectionnée
   const [periode, setPeriode] = useState('semaine'); // 'semaine', 'mois', 'annee'
   const [periodeLabel, setPeriodeLabel] = useState('');
@@ -349,6 +352,47 @@ export default function TableauDeBord() {
     // eslint-disable-next-line
   }, [periode]);
 
+  // Récupérer les idéaux et calculer une progression sommaire pour le tableau de bord
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data: ideaux, error } = await supabase
+          .from('ideaux')
+          .select('*')
+          .order('date_cible', { ascending: true });
+        console.log('[DEBUG] Résultat Supabase ideaux:', ideaux, error);
+        if (!error && Array.isArray(ideaux)) {
+          setIdeauxList(ideaux);
+        }
+      } catch (e) {
+        console.log('[DEBUG] Exception récupération ideaux:', e);
+      }
+    })();
+  }, []);
+
+  // Calculer la progression par idéal (palier/mois courant) — logique identique à pages/ideaux.js
+  useEffect(() => {
+    const progs = (ideauxList || []).map((ideal) => {
+      if (ideal.plan_existant && ideal.planData && ideal.planData.mois) {
+        const mois = ideal.planData.mois[0];
+        const prevues = (mois.semaines || []).reduce((acc, s) => acc + (s.actions ? s.actions.length : 0), 0);
+        const realises = (ideal.seances_reelles || []).filter(s => s.fait && s.mois === mois.numero && s.annee === mois.annee).length || 0;
+        const pourcentage = prevues > 0 ? Math.round((realises / prevues) * 100) : 0;
+        return {
+          id: ideal.id,
+          titre: ideal.titre,
+          image_url: ideal.image_url,
+          realise: realises,
+          prevues,
+          pourcentage,
+          statut: ideal.statut || 'en cours'
+        };
+      }
+      return null;
+    }).filter(Boolean);
+    setIdeauxProgress(progs);
+  }, [ideauxList]);
+
   // Graphiques
   const poidsChartData = {
     labels: poidsData.map((p) =>
@@ -543,6 +587,35 @@ export default function TableauDeBord() {
       </div>
 
       {/* --- Graphique évolution Extras --- */}
+      {/* --- Progression des idéaux (widget) --- */}
+      {ideauxProgress && ideauxProgress.length > 0 && (
+        <div style={{padding:'1.2rem', background:'#fff', borderRadius:12, boxShadow:'0 2px 8px #e0e0e0', marginBottom:'1.2rem'}}>
+          <h2 style={{marginTop:0, color:'#00bcd4'}}>Progression de mes idéaux</h2>
+          <div style={{display:'flex', gap:12, flexWrap:'wrap'}}>
+            {ideauxProgress.map(ip => (
+              <div key={ip.id} style={{flex:'1 1 260px', minWidth:220, background:'#fafafa', borderRadius:12, padding:12, display:'flex', gap:12, alignItems:'center'}}>
+                <div style={{width:64, height:64, borderRadius:10, overflow:'hidden', flexShrink:0, background:'#eee'}}>
+                  {ip.image_url ? (
+                    <img src={ip.image_url} alt="visuel" style={{width:'100%', height:'100%', objectFit:'cover', display:'block', filter: `blur(${Math.round(12 * (1 - (ip.pourcentage/100)))}px)`, transition:'filter 0.4s'}} />
+                  ) : (
+                    <div style={{width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center', color:'#888'}}>{ip.titre ? ip.titre[0] : '–'}</div>
+                  )}
+                </div>
+                <div style={{flex:1}}>
+                  <div style={{fontWeight:700, color:'#1976d2', marginBottom:6, fontSize:15}}>{ip.titre}</div>
+                  <div style={{height:10, background:'#e0e0e0', borderRadius:8, overflow:'hidden', marginBottom:6}} aria-hidden>
+                    <div style={{width:`${Math.min(100, ip.pourcentage)}%`, height:'100%', background: ip.pourcentage >= 80 ? '#43a047' : ip.pourcentage >= 50 ? '#ffa726' : '#1976d2', transition:'width 0.5s'}} />
+                  </div>
+                  <div style={{fontSize:13, color:'#555', display:'flex', justifyContent:'space-between'}}>
+                    <div>{ip.realise} / {ip.prevues} séances</div>
+                    <div style={{fontWeight:800}}>{ip.pourcentage}%</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       <div style={{padding:'1.5rem', background:'#fafafa', borderRadius:'15px', boxShadow:'0 2px 8px #e0e0e0', textAlign:'center', marginBottom:'2rem'}}>
         <h2 style={{marginTop:0, color:COLORS[2]}}>Évolution des Extras</h2>
         <Line
