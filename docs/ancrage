@@ -3,63 +3,40 @@ a) Niveau 1 – Idéal ou rêve
 C’est le “pourquoi vibrant”, l’image finale que tu veux atteindre.
 Exemples :
 🏃‍♀️ “Refaire la Stay Fair 6,08 km à 7,6 km/h en 2023”
-
-
 💪 “Avoir un corps tonique et léger, sentir que je peux courir sans effort.”
-
-
 🌅 “Revivre cette sensation de liberté que j’avais pendant la course.”
 
 
 L’app te demande de décrire ton idéal en une phrase émotionnelle + une donnée mesurable.
 → Elle s’en servira comme boussole.
 
+La logique :
 b) Niveau 2 – Objectif concret (mesurable)
 Ce sont les étapes de matérialisation du rêve.
 Exemple (à partir du tien) :
 “Courir 3 fois par semaine pendant 15 minutes à une vitesse moyenne de 8 km/h.”
 L’app enregistre :
 fréquence : 3× / semaine
-
-
 durée : 15 min
-
-
 intensité : vitesse 8 km/h
-
-
 période : sur 2 mois
-
-
 Et surtout : elle calcule automatiquement la progression logique :
 Semaine 1–2 : 2x/semaine à 7 km/h
-
-
 Semaine 3–4 : 3x/semaine à 7,5 km/h
-
-
 Semaine 5–6 : 3x/semaine à 8 km/h
 
 
 👉 Tu avances sans te cramer.
 
-c) Niveau 3 – Routine intégrée
+c) Niveau 3 – Routine intégrée en mode palier 
 À partir de l’objectif, l’app génère la routine adaptée :
 Lundi / mercredi / samedi → “Séance course 15 min”
-
-
 Rappel doux la veille : “Demain tu cours — prépare tes baskets.”
 
-
 Si tu marques “fait” → progression affichée
-
-
 Si tu marques “pas fait” → elle te propose une alternative de continuité :
-
-
 “Tu peux transformer la course en 20 min de marche. L’important c’est la constance.”
-
-
+ou comment adapter sur la semaine suivante ou les jours suivant par rapport au plan d'action saisie et le jour de saisie et heure 
 L’app apprend à ne jamais te laisser rompre la chaîne.
 
 d) Niveau 4 – Actions dynamiques (micro-leviers)
@@ -68,18 +45,13 @@ Si tu n’as pas fait tes 2 dernières séances → elle t’envoie un message d
 
  “Tu n’as rien perdu. Repars léger aujourd’hui : 10 min, sans chrono, juste toi et ton souffle.”
 
-
 Si tu as validé ta semaine complète →
 
  “Ton corps intègre la nouvelle norme. La régularité fait plus que la perfection.”
-
-
 Et si tu es en baisse d’énergie, elle peut adapter le plan :
 remplacer “course” par “étirements + respiration”
 
-
 te proposer une “mini-victoire” (ex. juste mettre les baskets et sortir 5 min)
-
 
 
 🧩 2. Structure logique à intégrer dans ton application
@@ -198,11 +170,7 @@ message (“Tu restes en mouvement, c’est ce qui compte.”)
 Tu veux une app qui rallume ton feu intérieur.
 Trois règles :
 Toujours valoriser le mouvement, jamais la perfection.
-
-
 Toujours proposer un plan B réaliste.
-
-
 Toujours relier l’action au rêve.
 
 
@@ -210,37 +178,27 @@ Exemple de message :
 “Chaque pas d’aujourd’hui construit la version de toi qui refera la Stay Fair.
 Même si tu cours 8 minutes au lieu de 15, c’est un pas de plus vers elle.”
 Tu vois ? Le lien émotionnel + la donnée mesurable = ancrage durable.
-
+voir comment agir avec l image de son ideal floutée et qui se defloute en fonction de la progression
 ⚙️ 4. Concrètement, comment intégrer ça dans ton app
 Nouvelle page ou module : “Mes idéaux / routines”
 
-
 Tu ajoutes un bouton : “Créer un idéal”
-
 
 Ensuite, l’app te guide :
 
-
 Étape 1 : Décris ton rêve
-
 
 Étape 2 : Transforme-le en objectif concret
 
-
-Étape 3 : Planifie ta routine
-
-
+Étape 3 : Planifie ta routine par palier dans le but est d arriver à ton idéal
 Étape 4 : Active les rappels
 
 
 Le moteur comportemental s’appuie sur les tables :
 
-
 Ideaux → Objectifs → Routines → Actions
 
-
 la détection du contexte (baisse d’énergie, surcharge, extras…)
-
 
 Page de visualisation :
 
@@ -249,7 +207,6 @@ Page de visualisation :
 
 % de constance
 
-
 dernière action faite
 
 
@@ -257,23 +214,7 @@ message de motivation personnalisé
 
 
 
-
-
-En bref
-👉 Oui, c’est faisable.
-Mais pas “magiquement” dès qu’on écrit un idéal.
-L’app peut apprendre à le faire si on lui donne la bonne logique, étape par étape.
-Concrètement : poser un idéal, ce n’est que la graine.
-Pour qu’elle “comprenne” comment t’amener au résultat, il faut lui fournir :
-une structure de logique interne (les tables & les relations),
-
-
-un moteur de règles comportementales (des if/then simples au début),
-
-
-et, à terme, une couche d’IA légère pour personnaliser les suggestions.
-
-
+plan :
 
 ⚙️ Étape par étape — ce que l’app peut 
 réellement faire
@@ -290,9 +231,6 @@ ton objectif mesurable (km, vitesse)
 
 ta date cible
 
-
-➡️ À ce stade, l’app ne sait pas encore quoi faire pour y arriver.
-Elle a besoin qu’on lui apprenne à traduire ça en plan d’action.
 
 Étape 2 – Générer automatiquement un “objectif concret”
 Grâce à des règles simples, elle peut déduire une première étape réaliste :
@@ -333,8 +271,6 @@ crée une “action” à cocher
 affiche un message de motivation basé sur ton statut précédent (Fait / Pas fait)
 
 
-👉 Ça, c’est du workflow classique (déjà faisable dans Supabase + Next.js).
-
 Étape 5 – Ajouter la logique comportementale intelligente
 Là, on rentre dans ce que tu veux vraiment :
 “Que l’app prenne le relais quand j’ai pas la forme.”
@@ -374,4 +310,6 @@ Tu coches “énergique” → elle ajoute une micro-action bonus (“5 min de p
 Tu coches “stressée” → elle remplace par une marche + respiration.
 
 
-➡️ Ce moteur peut être créé sans IA au début, juste avec des conditions.
+gestion de la progeession: 
+quand l utilisateur creer son idreau il peut joindre une image celle ci est son pourquoi la motivation elle est flouté à 100% ET au vu de la réalisation des actiosn programme par palier il y a un defloutage jusqua la realisation finale programme si respecte des echeance ou avance bien dans les echeance ex seace supplementaire ect le deflou
+est plus rapide par contre si c est l inverse alors on refloute 

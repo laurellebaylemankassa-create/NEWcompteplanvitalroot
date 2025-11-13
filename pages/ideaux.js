@@ -100,6 +100,7 @@ export default function IdeauxPage() {
   const [planParams, setPlanParams] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
   const [currentIdealId, setCurrentIdealId] = useState(null); // ID de l'idéal affiché dans la modale
+  const [isPlanValide, setIsPlanValide] = useState(false); // Le plan a été validé et on est en mode suivi
 
   async function handleGeneratePlan(ideal) {
     // Valeurs par défaut personnalisables
@@ -116,9 +117,41 @@ export default function IdeauxPage() {
       dateDebut: new Date(planDateDebut)
     };
     setPlanParams(params);
-    const plan = generateAnchoringPlan(params);
+    const plan = ideal.plan_data || generateAnchoringPlan(params);
     setPlanData(plan);
-    setShowDetails(false);
+    
+    // Vérifier si le plan a déjà été validé (il y a des séances réelles)
+    const { data: seancesExistantes } = await supabase
+      .from('seances_reelles')
+      .select('id')
+      .eq('ideal_id', ideal.id)
+      .limit(1);
+    
+    const planDejaValide = seancesExistantes && seancesExistantes.length > 0;
+    setIsPlanValide(planDejaValide);
+    
+    if (planDejaValide) {
+      // Mode suivi : charger les séances réelles
+      setShowDetails(true);
+      await loadSeancesReelles(ideal.id);
+    } else {
+      // Mode création : initialiser un tableau vide
+      setShowDetails(false);
+      const nbSemaines = params.palierDuree || 4;
+      let semaines = [];
+      let count = 0;
+      for (let m of plan.mois || []) {
+        for (let s of m.semaines) {
+          if (count < nbSemaines) {
+            semaines.push(s);
+            count++;
+          }
+        }
+        if (count >= nbSemaines) break;
+      }
+      setReel(semaines.map(s => s.actions.map(() => ({ fait: false, duree: params.duree || 15 }))));
+    }
+    
     setPlanVisible(true);
     setCurrentIdealId(ideal.id); // Stocker l'ID de l'idéal
     // Initialiser le suivi réel pour le palier courant
@@ -222,18 +255,90 @@ export default function IdeauxPage() {
         if (seancesError) console.error('Erreur séances:', seancesError);
       }
       
-      setMessage('✅ Plan validé et sauvegardé ! Tu peux maintenant suivre ta progression.');
-      setTimeout(() => setMessage(''), 4000);
-      closePlanModal();
-      await fetchIdeaux();
+      setMessage('✅ Plan validé et sauvegardé ! Redirection vers ton plan d\'action...');
+      setIsPlanValide(true);
+      
+      // Fermer la modale puis rediriger
+      setTimeout(() => {
+        closePlanModal();
+        setTimeout(() => {
+          window.location.href = `/plan-action?id=${currentIdealId}`;
+        }, 300);
+      }, 1500);
     } catch (err) {
       console.error('Erreur validation plan:', err);
       setMessage('❌ Erreur lors de la validation : ' + err.message);
     }
   }
 
+  // Charger les séances réelles depuis Supabase
+  async function loadSeancesReelles(idealId) {
+    try {
+      const { data, error } = await supabase
+        .from('seances_reelles')
+        .select('*')
+        .eq('ideal_id', idealId)
+        .order('date_prevue', { ascending: true });
+      
+      if (error) throw error;
+      
+      // Reconstituer l'état reel à partir des données Supabase
+      if (data && planData) {
+        const nbSemaines = planParams.palierDuree || 4;
+        let semaines = [];
+        let count = 0;
+        for (let m of planData.mois || []) {
+          for (let s of m.semaines) {
+            if (count < nbSemaines) {
+              semaines.push({ ...s, mois: m.numero, annee: m.annee });
+              count++;
+            }
+          }
+          if (count >= nbSemaines) break;
+        }
+        
+        const newReel = semaines.map((sem) => {
+          return sem.actions.map((action) => {
+            const seance = data.find(s => s.date_prevue === action.date);
+            return {
+              fait: seance?.statut === 'fait',
+              duree: seance?.duree_reelle || seance?.duree_prevue || planParams.duree || 15,
+              distance_km: seance?.distance_km || null,
+              vitesse: seance?.vitesse || null,
+              date: action.date
+            };
+          });
+        });
+        
+        setReel(newReel);
+      }
+    } catch (err) {
+      console.error('Erreur chargement séances:', err);
+    }
+  }
+
+  // Calculer la semaine courante en fonction de la date actuelle
+  function getSemaineCourante(semaines) {
+    const today = new Date();
+    for (let i = 0; i < semaines.length; i++) {
+      const debutSemaine = new Date(semaines[i].debut);
+      const finSemaine = new Date(debutSemaine);
+      finSemaine.setDate(debutSemaine.getDate() + 6);
+      
+      if (today >= debutSemaine && today <= finSemaine) {
+        return i; // Semaine courante
+      }
+    }
+    // Si on est après toutes les semaines, retourner la dernière
+    if (today > new Date(semaines[semaines.length - 1].debut)) {
+      return semaines.length - 1;
+    }
+    // Si on est avant toutes les semaines, retourner la première
+    return 0;
+  }
+
   // Sauvegarder une séance réalisée
-  async function handleSaveSeanceReelle(semIdx, actIdx, fait, duree) {
+  async function handleSaveSeanceReelle(semIdx, actIdx, fait, duree, distanceKm, vitesse) {
     if (!currentIdealId || !planData) return;
     
     const nbSemaines = planParams.palierDuree || 4;
@@ -250,6 +355,10 @@ export default function IdeauxPage() {
     }
     
     const sem = semaines[semIdx];
+    if (!sem || !sem.actions || !sem.actions[actIdx]) {
+      console.error('Semaine ou action introuvable:', { semIdx, actIdx, sem });
+      return;
+    }
     const action = sem.actions[actIdx];
     
     try {
@@ -263,6 +372,8 @@ export default function IdeauxPage() {
           action_type: action.action_type,
           duree_prevue: planParams.duree || 15,
           duree_reelle: fait ? (duree || planParams.duree || 15) : null,
+          distance_km: fait ? (distanceKm || null) : null,
+          vitesse: fait ? (vitesse || null) : null,
           intensite: planParams.intensite,
           statut: fait ? 'fait' : 'à faire',
           semaine_numero: sem.numero,
@@ -569,7 +680,18 @@ export default function IdeauxPage() {
               {/* Flou progressif sur l'image motivante selon la progression globale */}
               <div style={{color:'#888', fontSize:15, marginBottom: 8}}>{ideal.description_emotionnelle}</div>
               <div style={{fontSize:15, marginBottom: 6}}><b>Indicateur :</b> {ideal.indicateur_principal}</div>
-              <div style={{fontSize:15, marginBottom: 6}}><b>Date cible :</b> {ideal.date_cible || '—'}</div>
+              <div style={{fontSize: 15, marginBottom: 6}}><b>Date cible :</b> {ideal.date_cible || '—'}</div>
+              {/* Indicateur de progression si plan validé */}
+              {ideal.plan_data && (() => {
+                const mois = ideal.plan_data.mois?.[0];
+                if (!mois) return null;
+                const totalActions = mois.semaines.slice(0, 4).reduce((acc, s) => acc + s.actions.length, 0);
+                return (
+                  <div style={{marginTop: 8, padding: '8px', background: '#e8f5e9', borderRadius: 6}}>
+                    <div style={{fontSize: 13, color: '#43a047', fontWeight: 600}}>📊 Plan en cours ({totalActions} séances prévues)</div>
+                  </div>
+                );
+              })()}
               <div style={{position:'absolute', top:18, right:18}}>
                 <span style={{
                   display:'inline-block',
@@ -717,7 +839,7 @@ export default function IdeauxPage() {
                       copy[semIdx][actIdx].duree = semaines[semIdx].actions[actIdx].duree || planParams.duree || 15;
                     }
                     // Sauvegarder automatiquement dans Supabase
-                    handleSaveSeanceReelle(semIdx, actIdx, newFait, copy[semIdx][actIdx].duree);
+                    handleSaveSeanceReelle(semIdx, actIdx, newFait, copy[semIdx][actIdx].duree, copy[semIdx][actIdx].distance_km, copy[semIdx][actIdx].vitesse);
                     return copy;
                   });
                 };
@@ -728,7 +850,31 @@ export default function IdeauxPage() {
                     copy[semIdx][actIdx].duree = newDuree;
                     // Sauvegarder automatiquement si la séance est cochée
                     if (copy[semIdx][actIdx].fait) {
-                      handleSaveSeanceReelle(semIdx, actIdx, true, newDuree);
+                      handleSaveSeanceReelle(semIdx, actIdx, true, newDuree, copy[semIdx][actIdx].distance_km, copy[semIdx][actIdx].vitesse);
+                    }
+                    return copy;
+                  });
+                };
+                const handleDistanceChange = (semIdx, actIdx, val) => {
+                  setReel(reel => {
+                    const copy = reel.map(arr => arr.map(obj => ({...obj})));
+                    const newDistance = parseFloat(val)||null;
+                    copy[semIdx][actIdx].distance_km = newDistance;
+                    // Sauvegarder automatiquement si la séance est cochée
+                    if (copy[semIdx][actIdx].fait) {
+                      handleSaveSeanceReelle(semIdx, actIdx, true, copy[semIdx][actIdx].duree, newDistance, copy[semIdx][actIdx].vitesse);
+                    }
+                    return copy;
+                  });
+                };
+                const handleVitesseChange = (semIdx, actIdx, val) => {
+                  setReel(reel => {
+                    const copy = reel.map(arr => arr.map(obj => ({...obj})));
+                    const newVitesse = parseFloat(val)||null;
+                    copy[semIdx][actIdx].vitesse = newVitesse;
+                    // Sauvegarder automatiquement si la séance est cochée
+                    if (copy[semIdx][actIdx].fait) {
+                      handleSaveSeanceReelle(semIdx, actIdx, true, copy[semIdx][actIdx].duree, copy[semIdx][actIdx].distance_km, newVitesse);
                     }
                     return copy;
                   });
@@ -741,14 +887,99 @@ export default function IdeauxPage() {
                     return copy;
                   });
                 };
+                // Batch save toutes les séances cochées de la semaine
+                const handleBatchSaveSemaine = async () => {
+                  if (!currentIdealId || !planData) return;
+                  
+                  const seancesToSave = [];
+                  const sem = semaines[selectedSemaine];
+                  
+                  // Parcourir toutes les séances de la semaine sélectionnée
+                  reel[selectedSemaine]?.forEach((seance, actIdx) => {
+                    if (seance && seance.fait && actIdx < sem.actions.length) {
+                      const action = sem.actions[actIdx];
+                      seancesToSave.push({
+                        ideal_id: currentIdealId,
+                        date_prevue: action.date,
+                        date_reelle: new Date().toISOString().slice(0, 10),
+                        jour: action.jour,
+                        action_type: action.action_type,
+                        duree_prevue: planParams.duree || 15,
+                        duree_reelle: seance.duree || planParams.duree || 15,
+                        distance_km: seance.distance_km || null,
+                        vitesse: seance.vitesse || null,
+                        intensite: planParams.intensite,
+                        statut: 'fait',
+                        semaine_numero: sem.numero,
+                        mois_numero: sem.mois,
+                        annee: sem.annee
+                      });
+                    }
+                  });
+                  
+                  if (seancesToSave.length === 0) {
+                    setMessage('⚠️ Aucune séance cochée à sauvegarder.');
+                    setTimeout(() => setMessage(''), 3000);
+                    return;
+                  }
+                  
+                  try {
+                    const { error } = await supabase
+                      .from('seances_reelles')
+                      .upsert(seancesToSave, { onConflict: 'ideal_id,date_prevue' });
+                    
+                    if (error) throw error;
+                    
+                    setMessage(`✅ ${seancesToSave.length} séance(s) sauvegardée(s) !`);
+                    setTimeout(() => setMessage(''), 3000);
+                  } catch (err) {
+                    console.error('Erreur batch save:', err);
+                    setMessage('❌ Erreur lors de la sauvegarde');
+                    setTimeout(() => setMessage(''), 3000);
+                  }
+                };
                 return (
                   <div style={{marginBottom:18, padding:'12px 16px', background:'#e0f7fa', borderRadius:10, maxHeight:400, overflowY:'auto'}}>
+                    {/* Indicateur de progression globale */}
+                    {isPlanValide && (() => {
+                      const totalSeances = semaines.reduce((acc, s) => acc + s.actions.length, 0);
+                      const seancesFaites = reel.flat().filter(obj => obj && obj.fait).length;
+                      const pourcentage = totalSeances > 0 ? Math.round((seancesFaites / totalSeances) * 100) : 0;
+                      return (
+                        <div style={{marginBottom:16, padding:'12px', background:'#fff', borderRadius:8, border:'2px solid #43a047'}}>
+                          <div style={{fontWeight:700, color:'#43a047', marginBottom:6, fontSize:17}}>📊 Progression du palier</div>
+                          <div style={{background:'#e0e0e0', height:24, borderRadius:12, overflow:'hidden', marginBottom:6}}>
+                            <div style={{background:'linear-gradient(90deg, #43a047, #66bb6a)', height:'100%', width:`${pourcentage}%`, transition:'width 0.3s'}}></div>
+                          </div>
+                          <div style={{color:'#43a047', fontWeight:600, fontSize:15}}>{seancesFaites}/{totalSeances} séances réalisées ({pourcentage}%)</div>
+                        </div>
+                      );
+                    })()}
+                    
                     <div style={{display:'flex', gap:8, marginBottom:12, flexWrap:'wrap'}}>
-                      {semaines.map((s, i) => (
-                        <button key={i} onClick={()=>setSelectedSemaine(i)} style={{background: selectedSemaine===i?'#00bcd4':'#b2ebf2', color:selectedSemaine===i?'#fff':'#1976d2', border:'none', borderRadius:6, padding:'4px 14px', fontWeight:700, fontSize:15, cursor:'pointer'}}>
-                          Semaine {i+1}
-                        </button>
-                      ))}
+                      {semaines.map((s, i) => {
+                        const semaineCourante = getSemaineCourante(semaines);
+                        const isCourante = i === semaineCourante;
+                        const isPast = i < semaineCourante;
+                        const isFuture = i > semaineCourante;
+                        
+                        return (
+                          <button key={i} onClick={()=>setSelectedSemaine(i)} style={{
+                            background: selectedSemaine===i ? '#00bcd4' : isCourante ? '#43a047' : isFuture ? '#e0e0e0' : '#b2ebf2',
+                            color: selectedSemaine===i ? '#fff' : isCourante ? '#fff' : isFuture ? '#999' : '#1976d2',
+                            border: isCourante ? '3px solid #2e7d32' : 'none',
+                            borderRadius:6,
+                            padding:'4px 14px',
+                            fontWeight:700,
+                            fontSize:15,
+                            cursor:'pointer',
+                            position:'relative'
+                          }}>
+                            Semaine {i+1}
+                            {isCourante && <span style={{position:'absolute', top:-8, right:-8, background:'#ffa726', color:'#fff', borderRadius:'50%', width:20, height:20, fontSize:12, display:'flex', alignItems:'center', justifyContent:'center'}}>🔥</span>}
+                          </button>
+                        );
+                      })}
                     </div>
                     <div style={{fontWeight:700, color:'#00bcd4', marginBottom:6}}>
                       Semaine {selectedSemaine+1} ({semaines[selectedSemaine].debut})
@@ -763,7 +994,11 @@ export default function IdeauxPage() {
                           <span style={{background:'#00bcd4', color:'#fff', borderRadius:6, padding:'2px 10px', fontSize:13, fontWeight:700, marginRight:6}}>{a.jour}</span>
                           {a.date} — {a.action_type}, {a.moment}
                           {reel[selectedSemaine]?.[j]?.fait && (
-                            <input type="number" min="1" max="300" value={reel[selectedSemaine][j].duree || ''} onChange={e=>handleDureeChange(selectedSemaine, j, e.target.value)} placeholder="Durée (min)" style={{marginLeft:10, width:60, borderRadius:6, border:'1px solid #b2ebf2', padding:'2px 6px', fontWeight:600}} />
+                            <>
+                              <input type="number" min="1" max="300" value={reel[selectedSemaine][j].duree || ''} onChange={e=>handleDureeChange(selectedSemaine, j, e.target.value)} placeholder="Durée (min)" style={{marginLeft:10, width:60, borderRadius:6, border:'1px solid #b2ebf2', padding:'2px 6px', fontWeight:600}} />
+                              <input type="number" min="0" max="200" step="0.1" value={reel[selectedSemaine][j].distance_km || ''} onChange={e=>handleDistanceChange(selectedSemaine, j, e.target.value)} placeholder="KM" style={{marginLeft:6, width:60, borderRadius:6, border:'1px solid #b2ebf2', padding:'2px 6px', fontWeight:600}} />
+                              <input type="number" min="0" max="50" step="0.1" value={reel[selectedSemaine][j].vitesse || ''} onChange={e=>handleVitesseChange(selectedSemaine, j, e.target.value)} placeholder="Vitesse" style={{marginLeft:6, width:70, borderRadius:6, border:'1px solid #b2ebf2', padding:'2px 6px', fontWeight:600}} />
+                            </>
                           )}
                         </li>
                       ))}
@@ -793,7 +1028,12 @@ export default function IdeauxPage() {
                         </li>
                       ))}
                     </ul>
-                    <button onClick={()=>handleAddBonus(selectedSemaine)} style={{marginTop:8, background:'#ffa726', color:'#fff', border:'none', borderRadius:8, padding:'6px 18px', fontWeight:700, fontSize:15, cursor:'pointer'}}>Ajouter une séance bonus</button>
+                    <div style={{display:'flex', gap:10, marginTop:8}}>
+                      <button onClick={()=>handleAddBonus(selectedSemaine)} style={{background:'#ffa726', color:'#fff', border:'none', borderRadius:8, padding:'6px 18px', fontWeight:700, fontSize:15, cursor:'pointer'}}>➕ Ajouter une séance bonus</button>
+                      {isPlanValide && reel[selectedSemaine]?.some(s => s && s.fait) && (
+                        <button onClick={handleBatchSaveSemaine} style={{background:'#43a047', color:'#fff', border:'none', borderRadius:8, padding:'6px 18px', fontWeight:700, fontSize:15, cursor:'pointer', boxShadow:'0 2px 8px #43a04733'}}>✅ Valider les séances de cette semaine</button>
+                      )}
+                    </div>
                     <div style={{marginTop:10, color: (reel[selectedSemaine]?.filter(Boolean).length || 0) === semaines[selectedSemaine].actions.length ? '#43a047' : '#ffa726', fontWeight:600}}>
                       {(reel[selectedSemaine]?.filter(Boolean).length || 0) === semaines[selectedSemaine].actions.length
                         ? '✅ Toutes les séances prévues sont réalisées !'
@@ -805,7 +1045,11 @@ export default function IdeauxPage() {
                 );
               })()}
               <div style={{marginTop:18, textAlign:'center'}}>
-                <button onClick={handleValiderPlan} style={{background:'#43a047', color:'#fff', border:'none', borderRadius:8, padding:'10px 28px', fontWeight:700, fontSize:16, cursor:'pointer', boxShadow:'0 1px 6px #00bcd422', letterSpacing:'0.5px', marginRight:12}}>✅ Valider et commencer le suivi</button>
+                {!isPlanValide ? (
+                  <button onClick={handleValiderPlan} style={{background:'#43a047', color:'#fff', border:'none', borderRadius:8, padding:'10px 28px', fontWeight:700, fontSize:16, cursor:'pointer', boxShadow:'0 1px 6px #00bcd422', letterSpacing:'0.5px', marginRight:12}}>✅ Valider et commencer le suivi</button>
+                ) : (
+                  <button onClick={() => window.location.href = `/plan-action?id=${currentIdealId}`} style={{background:'#1976d2', color:'#fff', border:'none', borderRadius:8, padding:'10px 28px', fontWeight:700, fontSize:16, cursor:'pointer', boxShadow:'0 1px 6px #1976d244', letterSpacing:'0.5px', marginRight:12}}>📊 Voir mon plan d'action</button>
+                )}
                 {showDetails && (
                   <button onClick={()=>setShowDetails(false)} style={{background:'#ffa726', color:'#fff', border:'none', borderRadius:8, padding:'10px 28px', fontWeight:700, fontSize:16, cursor:'pointer', boxShadow:'0 1px 6px #00bcd422', letterSpacing:'0.5px'}}>Revenir au résumé</button>
                 )}
