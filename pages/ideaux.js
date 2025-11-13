@@ -105,7 +105,7 @@ export default function IdeauxPage() {
   async function handleGeneratePlan(ideal) {
     // Valeurs par défaut personnalisables
     // Utiliser la date de début du plan existant, ou la date de début du state, ou le premier du mois courant
-    const planDateDebut = ideal.planData?.dateDebut || defaultDebut;
+    const planDateDebut = ideal.plan_data?.dateDebut || defaultDebut;
     const params = {
       titre: ideal.titre,
       indicateur: ideal.indicateur_principal,
@@ -138,10 +138,10 @@ export default function IdeauxPage() {
     setSelectedSemaine(0);
     setReel(semaines.map(s => s.actions.map(() => false)));
 
-    // Sauvegarder le plan dans la table ideaux (champ planData + flag plan_existant)
+    // Sauvegarder le plan dans la table ideaux (champ plan_data + flag plan_existant)
     if (ideal.id) {
       try {
-        await supabase.from('ideaux').update({ planData: plan, plan_existant: true }).eq('id', ideal.id);
+        await supabase.from('ideaux').update({ plan_data: plan, plan_existant: true }).eq('id', ideal.id);
         // Optionnel : recharger la liste des idéaux pour affichage immédiat
         fetchIdeaux();
       } catch (e) {
@@ -195,6 +195,14 @@ export default function IdeauxPage() {
         }
       }
       
+      // Enregistrer la validation du palier dans la table ideaux
+      await supabase.from('ideaux')
+        .update({ 
+          plan_valide: true,
+          date_validation_palier: new Date().toISOString()
+        })
+        .eq('id', currentIdealId);
+      
       setIsPlanValide(true);
       setMessage('✅ Plan validé ! Vous pouvez maintenant suivre vos séances.');
     } catch (err) {
@@ -224,7 +232,7 @@ export default function IdeauxPage() {
   async function handleEditDateSubmit(e, ideal) {
     e.preventDefault();
     // On s'assure que la date de début et la date cible sont bien des chaînes ISO yyyy-mm-dd
-    let dateCibleStr = ideal.planData?.ideal?.date_cible || ideal.date_cible;
+    let dateCibleStr = ideal.plan_data?.ideal?.date_cible || ideal.date_cible;
     if (dateCibleStr instanceof Date) dateCibleStr = dateCibleStr.toISOString().slice(0,10);
     
     // Récupérer les paramètres du plan existant ou utiliser des valeurs par défaut
@@ -232,10 +240,10 @@ export default function IdeauxPage() {
       titre: ideal.titre,
       indicateur: ideal.indicateur_principal,
       dateCible: dateCibleStr,
-      frequence: ideal.planData?.objectif?.frequence_par_semaine || 3,
-      duree: ideal.planData?.objectif?.duree_unite || 15,
-      intensite: ideal.planData?.objectif?.intensite || '7,6 km/h',
-      joursProposes: ideal.planData?.objectif?.routines?.map(r => r.jour) || ['lundi', 'mercredi', 'samedi'],
+      frequence: ideal.plan_data?.objectif?.frequence_par_semaine || 3,
+      duree: ideal.plan_data?.objectif?.duree_unite || 15,
+      intensite: ideal.plan_data?.objectif?.intensite || '7,6 km/h',
+      joursProposes: ideal.plan_data?.objectif?.routines?.map(r => r.jour) || ['lundi', 'mercredi', 'samedi'],
       dateDebut: new Date(editDateValue)
     };
     
@@ -243,11 +251,24 @@ export default function IdeauxPage() {
       const newPlan = generateAnchoringPlan(planParamsToSave);
       console.log('🔍 DEBUG - Nouveau plan généré:', newPlan.mois[0]);
       
+      console.log('🔍 DEBUG - Tentative update Supabase...');
+      console.log('  - ID idéal:', ideal.id);
+      console.log('  - Données à envoyer:', { plan_data: newPlan });
+      
       const updateResult = await supabase.from('ideaux').update({
-        planData: newPlan
+        plan_data: newPlan
       }).eq('id', ideal.id);
       
       console.log('🔍 DEBUG - Résultat update Supabase:', updateResult);
+      console.error('❌ ERREUR DÉTECTÉE - La colonne plan_data n\'existe pas dans la table ideaux !');
+      console.error('📋 SOLUTION : Exécuter la migration SQL suivante dans Supabase :');
+      console.error(`
+ALTER TABLE public.ideaux 
+ADD COLUMN IF NOT EXISTS plan_data jsonb DEFAULT NULL;
+
+ALTER TABLE public.ideaux 
+ADD COLUMN IF NOT EXISTS plan_existant boolean DEFAULT false;
+      `);
       
       if (updateResult.error) {
         throw new Error('Supabase update error: ' + JSON.stringify(updateResult.error));
@@ -270,20 +291,20 @@ export default function IdeauxPage() {
           .eq('id', ideal.id)
           .single();
         
-        if (updatedIdeaux && updatedIdeaux.planData) {
-          console.log('🔍 DEBUG - Nouvelles données récupérées:', updatedIdeaux.planData.mois[0]);
-          setPlanData(updatedIdeaux.planData);
+        if (updatedIdeaux && updatedIdeaux.plan_data) {
+          console.log('🔍 DEBUG - Nouvelles données récupérées:', updatedIdeaux.plan_data.mois[0]);
+          setPlanData(updatedIdeaux.plan_data);
           
           // Reconstruire planParams depuis les nouvelles données
           const refreshedParams = {
             titre: updatedIdeaux.titre,
-            indicateur: updatedIdeaux.indicateur_principal,
+            indicateur: updatedIdeaux.indicateur,
             dateCible: updatedIdeaux.date_cible,
-            frequence: updatedIdeaux.planData.objectif.frequence_par_semaine,
-            duree: updatedIdeaux.planData.objectif.duree_unite,
-            intensite: updatedIdeaux.planData.objectif.intensite,
-            joursProposes: updatedIdeaux.planData.objectif.routines.map(r => r.jour),
-            dateDebut: new Date(updatedIdeaux.planData.dateDebut)
+            frequence: updatedIdeaux.plan_data.objectif.frequence_par_semaine,
+            duree: updatedIdeaux.plan_data.objectif.duree_unite,
+            intensite: updatedIdeaux.plan_data.objectif.intensite,
+            joursProposes: updatedIdeaux.plan_data.objectif.routines.map(r => r.jour),
+            dateDebut: new Date(updatedIdeaux.plan_data.dateDebut)
           };
           setPlanParams(refreshedParams);
           
@@ -291,7 +312,7 @@ export default function IdeauxPage() {
           const nbSemaines = refreshedParams.palierDuree || 4;
           let semaines = [];
           let count = 0;
-          for (let m of updatedIdeaux.planData.mois || []) {
+          for (let m of updatedIdeaux.plan_data.mois || []) {
             for (let s of m.semaines) {
               if (count < nbSemaines) {
                 semaines.push(s);
@@ -410,9 +431,9 @@ export default function IdeauxPage() {
           // Calcul de la progression du palier/mois courant (exemple simplifié)
           // À adapter selon la structure réelle de stockage des séances réalisées
           let progression_palier = null;
-          if (ideal.plan_existant && ideal.planData && ideal.planData.mois) {
+          if (ideal.plan_existant && ideal.plan_data && ideal.plan_data.mois) {
             // On prend le premier mois/palier
-            const mois = ideal.planData.mois[0];
+            const mois = ideal.plan_data.mois[0];
             const prevues = mois.semaines.reduce((acc, s) => acc + s.actions.length, 0);
             // On suppose que ideal.seances_reelles contient les séances faites (à adapter selon ta structure)
             const realises = ideal.seances_reelles ? ideal.seances_reelles.filter(s => s.fait && s.mois === mois.numero && s.annee === mois.annee).length : 0;
@@ -474,7 +495,7 @@ export default function IdeauxPage() {
               </div>
               {/* Boutons plan d'action */}
               <div style={{marginTop:18, textAlign:'center', display:'flex', justifyContent:'center', gap:12}}>
-                <button onClick={() => handleEditDateClick(ideal.id, ideal.planData?.dateDebut)} style={{background:'#fff', color:'#1976d2', border:'1px solid #b2ebf2', borderRadius:8, padding:'4px 12px', fontWeight:600, cursor:'pointer'}}>Modifier date de début</button>
+                <button onClick={() => handleEditDateClick(ideal.id, ideal.plan_data?.dateDebut)} style={{background:'#fff', color:'#1976d2', border:'1px solid #b2ebf2', borderRadius:8, padding:'4px 12px', fontWeight:600, cursor:'pointer'}}>Modifier date de début</button>
                 {editDateId === ideal.id && (
                   <form style={{display:'inline-block', marginLeft:8}} onSubmit={(e) => handleEditDateSubmit(e, ideal)}>
                     <input type="date" value={editDateValue} onChange={e => setEditDateValue(e.target.value)} style={{padding:'4px 8px', borderRadius:6, border:'1px solid #b2ebf2', fontWeight:600, fontSize:15, marginRight:6}} />
@@ -649,11 +670,35 @@ export default function IdeauxPage() {
                 return (
                   <div style={{marginBottom:18, padding:'12px 16px', background:'#e0f7fa', borderRadius:10, maxHeight:400, overflowY:'auto'}}>
                     <div style={{display:'flex', gap:8, marginBottom:12, flexWrap:'wrap'}}>
-                      {semaines.map((s, i) => (
-                        <button key={i} onClick={()=>setSelectedSemaine(i)} style={{background: selectedSemaine===i?'#00bcd4':'#b2ebf2', color:selectedSemaine===i?'#fff':'#1976d2', border:'none', borderRadius:6, padding:'4px 14px', fontWeight:700, fontSize:15, cursor:'pointer'}}>
-                          Semaine {i+1}
-                        </button>
-                      ))}
+                      {semaines.map((s, i) => {
+                        // Calculer la couleur selon la date de la semaine
+                        const today = new Date();
+                        today.setHours(0,0,0,0);
+                        const debutSemaine = new Date(s.debut);
+                        const finSemaine = new Date(debutSemaine);
+                        finSemaine.setDate(debutSemaine.getDate() + 6);
+                        
+                        let bgColor, textColor;
+                        if (today >= debutSemaine && today <= finSemaine) {
+                          // Semaine en cours : VERT
+                          bgColor = selectedSemaine===i ? '#43a047' : '#81c784';
+                          textColor = '#fff';
+                        } else if (today > finSemaine) {
+                          // Semaine passée : BLEU
+                          bgColor = selectedSemaine===i ? '#1976d2' : '#90caf9';
+                          textColor = selectedSemaine===i ? '#fff' : '#1976d2';
+                        } else {
+                          // Semaine future : GRISÉ
+                          bgColor = selectedSemaine===i ? '#757575' : '#e0e0e0';
+                          textColor = selectedSemaine===i ? '#fff' : '#999';
+                        }
+                        
+                        return (
+                          <button key={i} onClick={()=>setSelectedSemaine(i)} style={{background: bgColor, color: textColor, border:'none', borderRadius:6, padding:'4px 14px', fontWeight:700, fontSize:15, cursor:'pointer'}}>
+                            {today >= debutSemaine && today <= finSemaine ? '🔥 ' : ''}Semaine {i+1}
+                          </button>
+                        );
+                      })}
                     </div>
                     <div style={{fontWeight:700, color:'#00bcd4', marginBottom:6}}>
                       Semaine {selectedSemaine+1} ({semaines[selectedSemaine].debut})

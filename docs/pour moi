@@ -1,0 +1,47 @@
+suivre copilot garder les todo realisé pour suivre 
+ ⬜ Ajouter champ KM dans /plan-action.js
+⬜ Ajouter bouton 'Ajouter séance bonus' par semaine
+⬜ Afficher 'Palier 1 : Mois Année' en haut
+⬜ Charger et afficher les séances bonus existantes
+⬜ Mettre à jour handleSaveSeanceReelle avec distance_km
+⬜ Corriger la redirection après validation du plan
+⬜ Tests et validation 
+  Ajouter updated_at dans les upserts (Supabase le gère automatiquement)
+Modifier la modale pour :
+Ajouter input vitesse
+Bouton change après validation : "📊 Voir mon plan d'action"
+"Valider les séances de cette semaine" (saisie rapide)
+Synchronisation complète modale ↔️ /plan-action
+
+Ajouter champ vitesse dans la modale (saisie rapide)
+⬜ Changer le bouton après validation du plan
+⬜ Ajouter bouton 'Valider les séances de cette semaine'
+⬜ Charger les données réelles dans la modale
+⬜ Ajouter champ vitesse dans /plan-action
+⬜ Gérer updated_at dans les upserts
+⬜ Tests et validation finale
+Je commence maintenant par la 
+Charger les séances existantes dans la modale (corriger loadSeancesReelles et l'appel dans handleGeneratePlan)
+Afficher le bouton "✅ Valider les séances de cette semaine" (à droite de "Ajouter séance bonus")
+Supprimer la redirection automatique (garder seulement message + bouton cliquable)$
+
+✅ Suppression de la redirection automatique → Après validation, la modale reste ouverte et charge les séances pour saisie immédiate
+
+✅ Bouton "Valider les séances de cette semaine" maintenant visible → Apparaît dès que le plan est validé (pas besoin d'attendre qu'une séance soit cochée)
+
+✅ Chargement des séances après validation → Appel de loadSeancesReelles() + setShowDetails(true) pour afficher le détail des semaines
+
+Le bouton "📊 Voir mon plan d'action" devrait être bleu (#1976d2) après validation, mais je ne l'ai pas modifié dans le code.
+Le bouton devrait dire :
+
+AVANT validation : "✅ Valider le plan du Palier 1" (vert)
+APRÈS validation : Disparaître ou changer pour "✅ Plan du Palier 1 validé" (désactivé)
+
+
+GESTION ENREGISTREMENT DU PALIER 
+
+. Navigation semaine par semaine :
+Semaine courante : mise en évidence avec badge 🔥
+Semaines passées : accessibles (rattrapage possible)
+Semaines futures : grisées mais accessibles
+Progression globale : barre de progression en haut de la modale

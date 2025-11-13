@@ -1,12 +1,53 @@
-- A chaque conexion l app doit indiquer la date et l heure
-- lier ideaux avec suivi jour ou app normal you know
- - possibilite de crée soi meme son defis 
-- gerer le soucis avec les fast food
-- maj tableaux de bord 
-- préparartion aux jeune
-- partie spirituelle 
-- partie dev perso
-- revoir lutte contre la deriv
-revoir cahier des charge et technique toutes les amlioration ce qu il manque ce qui reste les choses a clean 
-passer a l action quoi !
- - liant de tout ça avec stat tableaux de bord 
+## 🔥 TODO SÉANCES BONUS & PLAN (EN COURS)
+
+### ✅ DÉJÀ FAIT (ne pas refaire) :
+- ✅ Bouton "✅ Valider le plan du Palier 1" (existe ligne 581 ideaux.js)
+- ✅ Suppression redirection automatique après validation
+- ✅ Chargement des séances après validation du plan
+- ✅ Bouton "Ajouter une séance bonus" (existe ligne 701 ideaux.js)
+- ✅ Affichage Palier 1 : Mois Année (existe ligne 520 ideaux.js)
+
+### ❌ FONCTIONNALITÉS MANQUANTES (À IMPLÉMENTER) :
+
+#### 1. **COULEURS DE VALIDATION DES SEMAINES** (PRIORITAIRE)
+**Règle perdue** : Les boutons semaines (ligne 653 ideaux.js) doivent avoir :
+- 🔵 **BLEU (#1976d2)** = Semaine passée (date < aujourd'hui)
+- 🟢 **VERT (#43a047)** = Semaine en cours (date actuelle dans la semaine)
+- ⚪ **GRISÉ (#e0e0e0)** = Semaines futures (date > aujourd'hui)
+
+**Actuellement** : `background: selectedSemaine===i?'#00bcd4':'#b2ebf2'` (ligne 653)
+**À corriger** : Ajouter logique conditionnelle basée sur `semaines[i].debut` vs date actuelle
+
+#### 2. **Champs KM & Vitesse pour séances BONUS**
+- Ajouter inputs `distance_km` et `vitesse` pour séances bonus (ideaux.js ligne ~697)
+- Ajouter même chose dans plan-action.js
+- Mettre à jour `handleSaveSeanceReelle` avec ces champs
+
+#### 3. **Bouton ❌ Supprimer séance bonus**
+- Ajouter bouton croix rouge à côté de chaque séance bonus (ligne ~677 ideaux.js)
+- Créer fonction `handleDeleteBonus(semIdx, bonusIdx)`
+- Suppression Supabase + mise à jour state local
+
+#### 4. **Bouton "📊 Voir mon plan d'action" après validation**
+- Actuellement bouton "Valider ce plan" (ligne 713) reste après validation
+- **À changer** : Après validation, remplacer par "📊 Voir mon plan d'action" (bleu #1976d2)
+- Redirection vers /plan-action.js avec l'ideal_id
+
+#### 5. **Bouton ✅ Validation visuelle séances bonus**
+- Ajouter checkbox ou emoji ✅ pour valider visuellement les séances bonus réalisées
+- Mettre à jour champ `fait:boolean` dans Supabase
+
+---
+
+## 🔜 FUTURES AMÉLIORATIONS (APRÈS TODO ACTUELLE)
+- A chaque connexion l'app doit indiquer la date et l'heure
+- Lier ideaux avec suivi jour ou app normal
+- Possibilité de créer soi-même son défi
+- Gérer le souci avec les fast food
+- MAJ tableaux de bord
+- Préparation aux jeûnes
+- Partie spirituelle
+- Partie dev perso
+- Revoir lutte contre la dérive
+- Revoir cahier des charges et technique
+- Liant de tout ça avec stat tableaux de bord 
