@@ -25,7 +25,7 @@ export default function PlanActionPage() {
       const { data, error } = await supabase
         .from('ideaux')
         .select('*')
-        .eq('id', id)
+        .eq('id', parseInt(id, 10))
         .single();
 
       if (error) throw error;
