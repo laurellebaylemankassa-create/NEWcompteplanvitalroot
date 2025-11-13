@@ -103,19 +103,36 @@ export default function IdeauxPage() {
   const [isPlanValide, setIsPlanValide] = useState(false); // État de validation du plan
 
   async function handleGeneratePlan(ideal) {
-    // Valeurs par défaut personnalisables
-    // Utiliser la date de début du plan existant, ou la date de début du state, ou le premier du mois courant
-    const planDateDebut = ideal.plan_data?.dateDebut || defaultDebut;
-    const params = {
-      titre: ideal.titre,
-      indicateur: ideal.indicateur_principal,
-      dateCible: ideal.date_cible,
-      frequence: 3,
-      duree: 15,
-      intensite: '7,6 km/h',
-      joursProposes: ['lundi', 'mercredi', 'samedi'],
-      dateDebut: new Date(planDateDebut)
-    };
+    // 🔥 CORRECTION : Charger les paramètres validés s'ils existent (FIGÉS après validation)
+    let params;
+    if (ideal.plan_valide && ideal.plan_params_valides) {
+      // Plan validé : charger les paramètres FIGÉS depuis la BDD
+      params = {
+        titre: ideal.titre,
+        indicateur: ideal.indicateur_principal,
+        dateCible: ideal.date_cible,
+        frequence: ideal.plan_params_valides.frequence,
+        duree: ideal.plan_params_valides.duree,
+        intensite: ideal.plan_params_valides.intensite,
+        joursProposes: ideal.plan_params_valides.joursProposes,
+        palierDuree: ideal.plan_params_valides.palierDuree || 4,
+        dateDebut: new Date(ideal.plan_params_valides.dateDebut)
+      };
+    } else {
+      // Plan non validé : valeurs par défaut personnalisables
+      const planDateDebut = ideal.plan_data?.dateDebut || defaultDebut;
+      params = {
+        titre: ideal.titre,
+        indicateur: ideal.indicateur_principal,
+        dateCible: ideal.date_cible,
+        frequence: 3,
+        duree: 15,
+        intensite: '7,6 km/h',
+        joursProposes: ['lundi', 'mercredi', 'samedi'],
+        dateDebut: new Date(planDateDebut)
+      };
+    }
+    
     setPlanParams(params);
     const plan = generateAnchoringPlan(params);
     setPlanData(plan);
@@ -144,6 +161,12 @@ export default function IdeauxPage() {
         await supabase.from('ideaux').update({ plan_data: plan, plan_existant: true }).eq('id', ideal.id);
         // Optionnel : recharger la liste des idéaux pour affichage immédiat
         fetchIdeaux();
+        
+        // Si le plan est déjà validé, charger les séances existantes
+        if (ideal.plan_valide) {
+          setIsPlanValide(true);
+          await loadSeancesReelles(ideal.id, plan);
+        }
       } catch (e) {
         // noop
       }
@@ -160,7 +183,7 @@ export default function IdeauxPage() {
   }
 
   async function handleValiderPlan() {
-    if (!currentIdealId || !planData) return;
+    if (!currentIdealId || !planData || !planParams) return;
     
     setMessage('⏳ Validation du plan en cours...');
     
@@ -179,11 +202,16 @@ export default function IdeauxPage() {
         if (count >= nbSemaines) break;
       }
       
+      console.log('🔍 DEBUG - Validation du plan:');
+      console.log('  - ID idéal:', currentIdealId);
+      console.log('  - Nombre de semaines:', nbSemaines);
+      console.log('  - Total séances à créer:', semaines.reduce((acc, s) => acc + s.actions.length, 0));
+      
       // Insérer chaque séance prévue
       for (let semIdx = 0; semIdx < semaines.length; semIdx++) {
         const sem = semaines[semIdx];
         for (let act of sem.actions) {
-          await supabase.from('seances_reelles').upsert({
+          const seanceData = {
             ideal_id: currentIdealId,
             date_prevue: act.date,
             duree_prevue: act.duree || planParams.duree || 15,
@@ -191,23 +219,215 @@ export default function IdeauxPage() {
             duree_reelle: null,
             distance_km: null,
             vitesse: null
-          }, { onConflict: 'ideal_id,date_prevue' });
+          };
+          
+          console.log('🔍 DEBUG - Tentative upsert séance:', seanceData);
+          
+          const { data, error } = await supabase.from('seances_reelles').upsert(seanceData, { onConflict: 'ideal_id,date_prevue' });
+          
+          if (error) {
+            console.error('❌ ERREUR UPSERT SÉANCE:', error);
+            console.error('  - Code:', error.code);
+            console.error('  - Message:', error.message);
+            console.error('  - Détails:', error.details);
+            console.error('  - Hint:', error.hint);
+            throw error;
+          } else {
+            console.log('✅ Séance insérée:', data);
+          }
         }
       }
       
-      // Enregistrer la validation du palier dans la table ideaux
-      await supabase.from('ideaux')
+      console.log('🔍 DEBUG - Tentative update ideaux avec plan_params_valides');
+      
+      // 🔥 CORRECTION : Enregistrer les paramètres du palier validé (FIGÉS)
+      const { data: updateData, error: updateError } = await supabase.from('ideaux')
         .update({ 
           plan_valide: true,
-          date_validation_palier: new Date().toISOString()
+          date_validation_palier: new Date().toISOString(),
+          plan_params_valides: {
+            duree: planParams.duree,
+            intensite: planParams.intensite,
+            frequence: planParams.frequence,
+            joursProposes: planParams.joursProposes,
+            palierDuree: planParams.palierDuree || 4,
+            dateDebut: planParams.dateDebut instanceof Date 
+              ? planParams.dateDebut.toISOString().slice(0, 10) 
+              : planParams.dateDebut
+          }
         })
         .eq('id', currentIdealId);
       
+      if (updateError) {
+        console.error('❌ ERREUR UPDATE IDEAUX:', updateError);
+        throw updateError;
+      } else {
+        console.log('✅ Idéal mis à jour:', updateData);
+      }
+      
       setIsPlanValide(true);
-      setMessage('✅ Plan validé ! Vous pouvez maintenant suivre vos séances.');
+      setMessage('✅ Plan du Palier 1 validé !');
+      
+      // Charger les séances créées pour afficher dans ZONE 2
+      await loadSeancesReelles(currentIdealId, planData);
     } catch (err) {
-      console.error('Erreur validation plan:', err);
-      setMessage('❌ Erreur lors de la validation du plan');
+      console.error('❌ ERREUR GLOBALE validation plan:', err);
+      setMessage('❌ Erreur lors de la validation du plan: ' + err.message);
+    }
+  }
+
+  // Charger les séances réelles depuis Supabase
+  async function loadSeancesReelles(idealId, plan) {
+    try {
+      console.log('🔍 DEBUG - Chargement séances réelles pour ideal_id:', idealId);
+      
+      const { data, error } = await supabase
+        .from('seances_reelles')
+        .select('*')
+        .eq('ideal_id', idealId)
+        .order('date_prevue', { ascending: true });
+
+      if (error) {
+        console.error('❌ ERREUR CHARGEMENT SÉANCES:', error);
+        console.error('  - Code:', error.code);
+        console.error('  - Message:', error.message);
+        console.error('  - Détails:', error.details);
+        throw error;
+      }
+      
+      console.log('✅ Séances chargées:', data?.length || 0, 'séances trouvées');
+
+      // Reconstituer l'état reel à partir des données Supabase
+      if (data && plan) {
+        const nbSemaines = planParams?.palierDuree || 4;
+        let semaines = [];
+        let count = 0;
+        for (let m of plan.mois || []) {
+          for (let s of m.semaines) {
+            if (count < nbSemaines) {
+              semaines.push({ ...s, mois: m.numero, annee: m.annee });
+              count++;
+            }
+          }
+          if (count >= nbSemaines) break;
+        }
+
+        // Séparer séances planifiées et bonus
+        const bonusSeances = data.filter(s => s.bonus === true);
+        const normalSeances = data.filter(s => !s.bonus);
+
+        const newReel = semaines.map((sem) => {
+          const seancesNormales = sem.actions.map((action) => {
+            const seance = normalSeances.find(s => s.date_prevue === action.date);
+            return {
+              fait: seance?.statut === 'fait',
+              duree: seance?.duree_reelle || seance?.duree_prevue || 15,
+              distance_km: seance?.distance_km || 0,
+              vitesse: seance?.vitesse || null,
+              date: action.date
+            };
+          });
+          
+          // Ajouter les séances bonus de cette semaine
+          const bonusSemaine = bonusSeances.filter(b => b.semaine_numero === sem.numero);
+          bonusSemaine.forEach(bonus => {
+            seancesNormales.push({
+              fait: true,
+              duree: bonus.duree_reelle || 15,
+              distance_km: bonus.distance_km || 0,
+              vitesse: bonus.vitesse || null,
+              date: bonus.date_prevue,
+              bonus: true
+            });
+          });
+          
+          return seancesNormales;
+        });
+
+        setReel(newReel);
+      }
+    } catch (err) {
+      console.error('Erreur chargement séances:', err);
+    }
+  }
+
+  // Sauvegarder les séances réelles de la semaine sélectionnée
+  async function handleSaveSeancesSemaine() {
+    if (!currentIdealId || !planData || selectedSemaine === null) return;
+    
+    setMessage('⏳ Sauvegarde en cours...');
+    
+    try {
+      const nbSemaines = planParams.palierDuree || 4;
+      let semaines = [];
+      let count = 0;
+      for (let m of planData.mois || []) {
+        for (let s of m.semaines) {
+          if (count < nbSemaines) {
+            semaines.push({ ...s, mois: m.numero, annee: m.annee });
+            count++;
+          }
+        }
+        if (count >= nbSemaines) break;
+      }
+
+      const sem = semaines[selectedSemaine];
+      if (!sem) {
+        setMessage('❌ Erreur : semaine introuvable');
+        return;
+      }
+
+      // Sauvegarder toutes les séances de la semaine (prévues + bonus)
+      for (let i = 0; i < reel[selectedSemaine].length; i++) {
+        const seance = reel[selectedSemaine][i];
+        
+        if (seance.bonus) {
+          // Séance bonus
+          await supabase.from('seances_reelles').upsert({
+            ideal_id: currentIdealId,
+            date_prevue: seance.date || new Date().toISOString().slice(0, 10),
+            date_reelle: seance.date || new Date().toISOString().slice(0, 10),
+            duree_prevue: seance.duree || planParams.duree || 15,
+            duree_reelle: seance.duree || planParams.duree || 15,
+            distance_km: seance.distance_km || null,
+            vitesse: seance.vitesse || null,
+            fait: true,
+            bonus: true,
+            statut: 'fait',
+            semaine_numero: sem.numero,
+            mois_numero: sem.mois,
+            annee: sem.annee
+          }, { onConflict: 'ideal_id,date_prevue' });
+        } else {
+          // Séance prévue
+          const action = sem.actions[i];
+          if (action && seance.fait) {
+            await supabase.from('seances_reelles').upsert({
+              ideal_id: currentIdealId,
+              date_prevue: action.date,
+              date_reelle: new Date().toISOString().slice(0, 10),
+              jour: action.jour,
+              action_type: action.action_type,
+              duree_prevue: action.duree || planParams.duree || 15,
+              duree_reelle: seance.duree || planParams.duree || 15,
+              distance_km: seance.distance_km || null,
+              vitesse: seance.vitesse || null,
+              intensite: planParams.intensite || '7,6 km/h',
+              statut: 'fait',
+              fait: true,
+              bonus: false,
+              semaine_numero: sem.numero,
+              mois_numero: sem.mois,
+              annee: sem.annee
+            }, { onConflict: 'ideal_id,date_prevue' });
+          }
+        }
+      }
+
+      setMessage('✅ Séances de la semaine ' + (selectedSemaine + 1) + ' sauvegardées !');
+    } catch (err) {
+      console.error('Erreur sauvegarde séances:', err);
+      setMessage('❌ Erreur lors de la sauvegarde');
     }
   }
 
@@ -550,11 +770,12 @@ ADD COLUMN IF NOT EXISTS plan_existant boolean DEFAULT false;
                 </div>
                 <div style={{marginBottom:10, color:'#1976d2', fontWeight:500}}>
                   Durée du palier initial :
-                  <select value={planParams.palierDuree || 4} onChange={e=>updatePlanParam('palierDuree', parseInt(e.target.value))} style={{marginLeft:8, borderRadius:6, border:'1px solid #b2ebf2', padding:'2px 8px', fontWeight:600, fontSize:15}}>
+                  <select value={planParams.palierDuree || 4} onChange={e=>updatePlanParam('palierDuree', parseInt(e.target.value))} disabled={isPlanValide} style={{marginLeft:8, borderRadius:6, border:'1px solid #b2ebf2', padding:'2px 8px', fontWeight:600, fontSize:15, backgroundColor: isPlanValide ? '#f5f5f5' : '#fff', cursor: isPlanValide ? 'not-allowed' : 'pointer'}}>
                     <option value={2}>2 semaines</option>
                     <option value={4}>4 semaines (1 mois)</option>
                     <option value={8}>8 semaines (2 mois)</option>
                   </select>
+                  {isPlanValide && <span style={{marginLeft:8, color:'#43a047', fontSize:13, fontWeight:700}}>🔒 Validé</span>}
                 </div>
                 <div style={{color:'#43a047', fontWeight:600, marginBottom:2}}>
                   {(() => {
@@ -577,28 +798,31 @@ ADD COLUMN IF NOT EXISTS plan_existant boolean DEFAULT false;
                   Jours proposés : {planParams.joursProposes.map(j => <span key={j} style={{background:'#00bcd4', color:'#fff', borderRadius:6, padding:'2px 10px', marginRight:6, fontSize:13, fontWeight:700}}>{j}</span>)}
                 </div>
                 <div style={{marginTop:8, color:'#1976d2', fontWeight:500}}>
-                  Durée : <input type="number" min="5" max="180" value={planParams.duree} onChange={e=>updatePlanParam('duree', parseInt(e.target.value)||15)} style={{width:50, borderRadius:6, border:'1px solid #b2ebf2', padding:'2px 6px', fontWeight:600, fontSize:15, marginRight:6}} /> minutes
-                  &nbsp;| Intensité : <input type="text" value={planParams.intensite} onChange={e=>updatePlanParam('intensite', e.target.value)} style={{width:80, borderRadius:6, border:'1px solid #b2ebf2', padding:'2px 6px', fontWeight:600, fontSize:15}} />
+                  Durée : <input type="number" min="5" max="180" value={planParams.duree} onChange={e=>updatePlanParam('duree', parseInt(e.target.value)||15)} disabled={isPlanValide} style={{width:50, borderRadius:6, border:'1px solid #b2ebf2', padding:'2px 6px', fontWeight:600, fontSize:15, marginRight:6, backgroundColor: isPlanValide ? '#f5f5f5' : '#fff', cursor: isPlanValide ? 'not-allowed' : 'text'}} /> minutes
+                  &nbsp;| Intensité : <input type="text" value={planParams.intensite} onChange={e=>updatePlanParam('intensite', e.target.value)} disabled={isPlanValide} style={{width:80, borderRadius:6, border:'1px solid #b2ebf2', padding:'2px 6px', fontWeight:600, fontSize:15, backgroundColor: isPlanValide ? '#f5f5f5' : '#fff', cursor: isPlanValide ? 'not-allowed' : 'text'}} />
+                  {isPlanValide && <span style={{marginLeft:8, color:'#43a047', fontSize:13, fontWeight:700}}>🔒 Validé</span>}
                 </div>
                 <div style={{marginTop:8, color:'#1976d2', fontWeight:500}}>
-                  Fréquence : <input type="number" min="1" max="7" value={planParams.frequence} onChange={e=>updatePlanParam('frequence', parseInt(e.target.value)||3)} style={{width:40, borderRadius:6, border:'1px solid #b2ebf2', padding:'2px 6px', fontWeight:600, fontSize:15, marginRight:6}} /> fois/semaine
+                  Fréquence : <input type="number" min="1" max="7" value={planParams.frequence} onChange={e=>updatePlanParam('frequence', parseInt(e.target.value)||3)} disabled={isPlanValide} style={{width:40, borderRadius:6, border:'1px solid #b2ebf2', padding:'2px 6px', fontWeight:600, fontSize:15, marginRight:6, backgroundColor: isPlanValide ? '#f5f5f5' : '#fff', cursor: isPlanValide ? 'not-allowed' : 'text'}} /> fois/semaine
+                  {isPlanValide && <span style={{marginLeft:8, color:'#43a047', fontSize:13, fontWeight:700}}>🔒 Validé</span>}
                 </div>
                 <div style={{marginTop:8, color:'#1976d2', fontWeight:500}}>
                   Jours : {['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'].map(jour => (
-                    <label key={jour} style={{marginRight:8, fontWeight:600, fontSize:14}}>
-                      <input type="checkbox" checked={planParams.joursProposes.includes(jour)} onChange={e => {
+                    <label key={jour} style={{marginRight:8, fontWeight:600, fontSize:14, opacity: isPlanValide ? 0.6 : 1, cursor: isPlanValide ? 'not-allowed' : 'pointer'}}>
+                      <input type="checkbox" checked={planParams.joursProposes.includes(jour)} disabled={isPlanValide} onChange={e => {
                         let jours = planParams.joursProposes.slice();
                         if(e.target.checked) jours.push(jour); else jours = jours.filter(j => j!==jour);
                         updatePlanParam('joursProposes', Array.from(new Set(jours)));
                       }} /> {jour}
                     </label>
                   ))}
+                  {isPlanValide && <span style={{marginLeft:8, color:'#43a047', fontSize:13, fontWeight:700}}>🔒 Validé</span>}
                 </div>
               </div>
               
               {/* Bouton de validation du plan du Palier 1 */}
-              {!isPlanValide && (
-                <div style={{textAlign:'center', marginBottom:18}}>
+              <div style={{textAlign:'center', marginBottom:18}}>
+                {!isPlanValide ? (
                   <button 
                     onClick={handleValiderPlan}
                     style={{
@@ -616,8 +840,26 @@ ADD COLUMN IF NOT EXISTS plan_existant boolean DEFAULT false;
                   >
                     ✅ Valider le plan du Palier 1
                   </button>
-                </div>
-              )}
+                ) : (
+                  <button 
+                    onClick={() => window.location.href = `/plan-action?id=${currentIdealId}`}
+                    style={{
+                      background: '#1976d2',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: 8,
+                      padding: '12px 28px',
+                      fontWeight: 700,
+                      fontSize: 16,
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 8px #1976d244',
+                      letterSpacing: '0.5px'
+                    }}
+                  >
+                    📊 Voir mon plan d'action
+                  </button>
+                )}
+              </div>
               
               <div style={{marginBottom:18, color:'#1976d2', fontWeight:700, fontSize:16}}>
                 {showDetails ? 'Détail du plan (semaine par semaine)' : 'Résumé du plan'}
@@ -708,12 +950,32 @@ ADD COLUMN IF NOT EXISTS plan_existant boolean DEFAULT false;
                     </div>
                     <ul style={{margin:'6px 0 0 18px', padding:0}}>
                       {semaines[selectedSemaine].actions.map((a, j) => (
-                        <li key={j} style={{marginBottom:6, display:'flex', alignItems:'center'}}>
-                          <input type="checkbox" checked={reel[selectedSemaine]?.[j]?.fait || false} onChange={()=>handleCheck(selectedSemaine, j)} style={{marginRight:8}} />
-                          <span style={{background:'#00bcd4', color:'#fff', borderRadius:6, padding:'2px 10px', fontSize:13, fontWeight:700, marginRight:6}}>{a.jour}</span>
-                          {a.date} — {a.action_type}, {a.moment}
+                        <li key={j} style={{marginBottom:6, display:'flex', alignItems:'center', flexWrap:'wrap'}}>
+                          <div style={{display:'flex', alignItems:'center', marginBottom:4}}>
+                            <input type="checkbox" checked={reel[selectedSemaine]?.[j]?.fait || false} onChange={()=>handleCheck(selectedSemaine, j)} style={{marginRight:8}} />
+                            <span style={{background:'#00bcd4', color:'#fff', borderRadius:6, padding:'2px 10px', fontSize:13, fontWeight:700, marginRight:6}}>{a.jour}</span>
+                            {a.date} — {a.action_type}, {a.moment}
+                          </div>
                           {reel[selectedSemaine]?.[j]?.fait && (
-                            <input type="number" min="1" max="300" value={reel[selectedSemaine][j].duree || ''} onChange={e=>handleDureeChange(selectedSemaine, j, e.target.value)} placeholder="Durée (min)" style={{marginLeft:10, width:60, borderRadius:6, border:'1px solid #b2ebf2', padding:'2px 6px', fontWeight:600}} />
+                            <div style={{display:'flex', gap:6, marginLeft:28}}>
+                              <input type="number" min="1" max="300" value={reel[selectedSemaine][j].duree || ''} onChange={e=>handleDureeChange(selectedSemaine, j, e.target.value)} placeholder="Durée (min)" style={{width:60, borderRadius:6, border:'1px solid #b2ebf2', padding:'2px 6px', fontWeight:600}} />
+                              <input type="number" min="0" step="0.1" value={reel[selectedSemaine][j].distance_km || ''} onChange={e=>{
+                                const val = e.target.value;
+                                setReel(reel => {
+                                  const copy = reel.map(arr => arr.map(obj => ({...obj})));
+                                  copy[selectedSemaine][j].distance_km = val ? parseFloat(val) : null;
+                                  return copy;
+                                });
+                              }} placeholder="km" style={{width:50, borderRadius:6, border:'1px solid #b2ebf2', padding:'2px 6px', fontWeight:600}} />
+                              <input type="number" min="0" step="0.1" value={reel[selectedSemaine][j].vitesse || ''} onChange={e=>{
+                                const val = e.target.value;
+                                setReel(reel => {
+                                  const copy = reel.map(arr => arr.map(obj => ({...obj})));
+                                  copy[selectedSemaine][j].vitesse = val ? parseFloat(val) : null;
+                                  return copy;
+                                });
+                              }} placeholder="km/h" style={{width:55, borderRadius:6, border:'1px solid #b2ebf2', padding:'2px 6px', fontWeight:600}} />
+                            </div>
                           )}
                         </li>
                       ))}
@@ -740,16 +1002,61 @@ ADD COLUMN IF NOT EXISTS plan_existant boolean DEFAULT false;
                             });
                           }} style={{marginLeft:6, marginRight:6, borderRadius:6, border:'1px solid #b2ebf2', padding:'2px 6px', fontWeight:600}} />
                           <input type="number" min="1" max="300" value={b.duree || ''} onChange={e=>handleDureeChange(selectedSemaine, semaines[selectedSemaine].actions.length + idx, e.target.value)} placeholder="Durée (min)" style={{marginLeft:6, width:60, borderRadius:6, border:'1px solid #b2ebf2', padding:'2px 6px', fontWeight:600}} />
+                          <input type="number" min="0" step="0.1" value={b.distance_km || ''} onChange={e=>{
+                            const val = e.target.value;
+                            setReel(reel => {
+                              const copy = reel.map(arr => arr.map(obj => ({...obj})));
+                              let bonusIdx = 0;
+                              for(let i=0;i<copy[selectedSemaine].length;i++){
+                                if(copy[selectedSemaine][i].bonus){
+                                  if(bonusIdx===idx){
+                                    copy[selectedSemaine][i].distance_km = val ? parseFloat(val) : null;
+                                    break;
+                                  }
+                                  bonusIdx++;
+                                }
+                              }
+                              return copy;
+                            });
+                          }} placeholder="km" style={{marginLeft:6, width:50, borderRadius:6, border:'1px solid #b2ebf2', padding:'2px 6px', fontWeight:600}} />
+                          <input type="number" min="0" step="0.1" value={b.vitesse || ''} onChange={e=>{
+                            const val = e.target.value;
+                            setReel(reel => {
+                              const copy = reel.map(arr => arr.map(obj => ({...obj})));
+                              let bonusIdx = 0;
+                              for(let i=0;i<copy[selectedSemaine].length;i++){
+                                if(copy[selectedSemaine][i].bonus){
+                                  if(bonusIdx===idx){
+                                    copy[selectedSemaine][i].vitesse = val ? parseFloat(val) : null;
+                                    break;
+                                  }
+                                  bonusIdx++;
+                                }
+                              }
+                              return copy;
+                            });
+                          }} placeholder="km/h" style={{marginLeft:6, width:55, borderRadius:6, border:'1px solid #b2ebf2', padding:'2px 6px', fontWeight:600}} />
                         </li>
                       ))}
                     </ul>
-                    <button onClick={()=>handleAddBonus(selectedSemaine)} style={{marginTop:8, background:'#ffa726', color:'#fff', border:'none', borderRadius:8, padding:'6px 18px', fontWeight:700, fontSize:15, cursor:'pointer'}}>Ajouter une séance bonus</button>
-                    <div style={{marginTop:10, color: (reel[selectedSemaine]?.filter(Boolean).length || 0) === semaines[selectedSemaine].actions.length ? '#43a047' : '#ffa726', fontWeight:600}}>
-                      {(reel[selectedSemaine]?.filter(Boolean).length || 0) === semaines[selectedSemaine].actions.length
-                        ? '✅ Toutes les séances prévues sont réalisées !'
-                        : (reel[selectedSemaine]?.filter(Boolean).length || 0) > semaines[selectedSemaine].actions.length
-                          ? '🔥 Tu as dépassé l’objectif de la semaine !'
-                          : 'Continue, tu peux encore valider des séances cette semaine.'}
+                    <div style={{display:'flex', gap:8, marginTop:8}}>
+                      <button onClick={()=>handleAddBonus(selectedSemaine)} style={{background:'#ffa726', color:'#fff', border:'none', borderRadius:8, padding:'6px 18px', fontWeight:700, fontSize:15, cursor:'pointer'}}>Ajouter une séance bonus</button>
+                      {isPlanValide && (
+                        <button onClick={handleSaveSeancesSemaine} style={{background:'#1976d2', color:'#fff', border:'none', borderRadius:8, padding:'6px 18px', fontWeight:700, fontSize:15, cursor:'pointer'}}>💾 Sauvegarder cette semaine</button>
+                      )}
+                    </div>
+                    <div style={{marginTop:10, fontWeight:600}}>
+                      {(() => {
+                        const nbRealisees = reel[selectedSemaine]?.filter(obj => obj.fait).length || 0;
+                        const nbPrevues = semaines[selectedSemaine].actions.length;
+                        if (nbRealisees === nbPrevues) {
+                          return <span style={{color:'#43a047'}}>✅ Toutes les séances prévues sont réalisées !</span>;
+                        }
+                        if (nbRealisees > nbPrevues) {
+                          return <span style={{color:'#ffa726'}}>🔥 Tu as dépassé l'objectif de la semaine !</span>;
+                        }
+                        return <span style={{color:'#ffa726'}}>Continue, tu peux encore valider des séances cette semaine.</span>;
+                      })()}
                     </div>
                   </div>
                 );

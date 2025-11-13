@@ -45,3 +45,26 @@ Semaine courante : mise en évidence avec badge 🔥
 Semaines passées : accessibles (rattrapage possible)
 Semaines futures : grisées mais accessibles
 Progression globale : barre de progression en haut de la modale
+
+validation palier 1 dans le modal doit etre figé 
+
+on est dacord que lorsue on valide le plan 1 les données sont 
+figé et cela va alimenyer les autres semaine du plan et que ensuiet ce que l utilisateur vour en bas detail du plan c'ets un apercu de la page ^lan d action al ou l utilisateur gere les seances reelemnt realisé ?
+en gros 
+🎯 Architecture complète :
+ZONE 1 - En haut (zone verte) = PARAMÈTRES DU PALIER 1 (FIGÉS)
+Durée : 15 min
+Intensité : 7,6 km/h
+Fréquence : 3x/semaine
+Jours : lundi, mercredi, samed
+Durée palier : 4 semaines
+→ Bouton "✅ Valider le plan du Palier 1" (ver
+→ Une fois validé, ces données sont FIGÉES et génèrent automatiquement les 4 semaines de séances prévues dans seances_reelles
+ZONE 2 - En bas "Détail du plan" = APERÇU/GESTION DES SÉANCES RÉELLES
+Affiche les semaines 1, 2, 3, 4
+L'utilisateur peut :
+✅ Cocher les séances réalisées
+✏️ Modifier durée/KM/vitesse réelles
+➕ Ajouter séances bonus
+💾 Bouton "Valider les séances de cette semaine"
+→ C'est un aperçu de la page /plan-action directement dans la modale
