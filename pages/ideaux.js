@@ -353,7 +353,17 @@ export default function IdeauxPage() {
 
   // Sauvegarder les séances réelles de la semaine sélectionnée
   async function handleSaveSeancesSemaine() {
-    if (!currentIdealId || !planData || selectedSemaine === null) return;
+    console.log('🔍 DEBUG - handleSaveSeancesSemaine appelée');
+    console.log('  - currentIdealId:', currentIdealId);
+    console.log('  - planData:', planData);
+    console.log('  - planParams:', planParams);
+    console.log('  - selectedSemaine:', selectedSemaine);
+    console.log('  - reel[selectedSemaine]:', reel[selectedSemaine]);
+    
+    if (!currentIdealId || !planData || selectedSemaine === null) {
+      console.error('❌ Conditions non remplies pour sauvegarder');
+      return;
+    }
     
     setMessage('⏳ Sauvegarde en cours...');
     
@@ -377,12 +387,17 @@ export default function IdeauxPage() {
         return;
       }
 
+      console.log('🔍 DEBUG - Début sauvegarde séances');
+      console.log('  - Nombre de séances à sauvegarder:', reel[selectedSemaine].length);
+      
       // Sauvegarder toutes les séances de la semaine (prévues + bonus)
       for (let i = 0; i < reel[selectedSemaine].length; i++) {
         const seance = reel[selectedSemaine][i];
+        console.log(`  - Séance ${i}:`, seance);
         
-        if (seance.bonus) {
-          // Séance bonus
+        if (seance.bonus && seance.fait) {
+          // Séance bonus validée
+          console.log('    → Sauvegarde séance BONUS');
           await supabase.from('seances_reelles').upsert({
             ideal_id: currentIdealId,
             date_prevue: seance.date || new Date().toISOString().slice(0, 10),
@@ -398,10 +413,11 @@ export default function IdeauxPage() {
             mois_numero: sem.mois,
             annee: sem.annee
           }, { onConflict: 'ideal_id,date_prevue' });
-        } else {
+        } else if (!seance.bonus) {
           // Séance prévue
           const action = sem.actions[i];
           if (action && seance.fait) {
+            console.log('    → Sauvegarde séance NORMALE:', action.date);
             await supabase.from('seances_reelles').upsert({
               ideal_id: currentIdealId,
               date_prevue: action.date,
@@ -982,6 +998,22 @@ ADD COLUMN IF NOT EXISTS plan_existant boolean DEFAULT false;
                       {/* Affichage des séances bonus */}
                       {reel[selectedSemaine]?.filter(obj => obj.bonus).map((b, idx) => (
                         <li key={'bonus'+idx} style={{marginBottom:6, display:'flex', alignItems:'center', background:'#ffe082', borderRadius:6, padding:'2px 8px'}}>
+                          <span onClick={() => {
+                            setReel(reel => {
+                              const copy = reel.map(arr => arr.map(obj => ({...obj})));
+                              let bonusIdx = 0;
+                              for(let i=0;i<copy[selectedSemaine].length;i++){
+                                if(copy[selectedSemaine][i].bonus){
+                                  if(bonusIdx===idx){
+                                    copy[selectedSemaine][i].fait = !copy[selectedSemaine][i].fait;
+                                    break;
+                                  }
+                                  bonusIdx++;
+                                }
+                              }
+                              return copy;
+                            });
+                          }} style={{marginRight:8, cursor:'pointer', fontSize:20}}>{b.fait ? '✅' : '⬜'}</span>
                           <span style={{background:'#ffa726', color:'#fff', borderRadius:6, padding:'2px 10px', fontSize:13, fontWeight:700, marginRight:6}}>Bonus</span>
                           <input type="date" value={b.date || ''} onChange={e=>{
                             const val = e.target.value;
