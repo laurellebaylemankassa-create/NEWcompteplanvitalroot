@@ -362,7 +362,10 @@ export default function TableauDeBord() {
           .order('date_cible', { ascending: true });
         console.log('[DEBUG] Résultat Supabase ideaux:', ideaux, error);
         if (!error && Array.isArray(ideaux)) {
-          setIdeauxList(ideaux);
+          setIdeauxList(ideaux.map(ideal => ({
+            ...ideal,
+            planData: ideal.plan_data // compatibilité camelCase JS
+          })));
         }
       } catch (e) {
         console.log('[DEBUG] Exception récupération ideaux:', e);

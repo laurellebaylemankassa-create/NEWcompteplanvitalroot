@@ -74,8 +74,8 @@ export default function IdeauxPage() {
         date_cible: dateCible,
         statut: 'en cours',
         image_url: imageUrl,
-        planData,
-        plan_existant: true
+        plan_data: planData,
+        date_debut: dateDebut
       },
     ]);
     setUploading(false);
@@ -99,9 +99,12 @@ export default function IdeauxPage() {
   // Pour personnalisation rapide
   const [planParams, setPlanParams] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [currentIdealId, setCurrentIdealId] = useState(null); // ID de l'idéal affiché dans la modale
 
   async function handleGeneratePlan(ideal) {
     // Valeurs par défaut personnalisables
+    // Utiliser la date de début du plan existant, ou la date de début du state, ou le premier du mois courant
+    const planDateDebut = ideal.date_debut || defaultDebut;
     const params = {
       titre: ideal.titre,
       indicateur: ideal.indicateur_principal,
@@ -110,13 +113,14 @@ export default function IdeauxPage() {
       duree: 15,
       intensite: '7,6 km/h',
       joursProposes: ['lundi', 'mercredi', 'samedi'],
-      dateDebut: new Date()
+      dateDebut: new Date(planDateDebut)
     };
     setPlanParams(params);
     const plan = generateAnchoringPlan(params);
     setPlanData(plan);
     setShowDetails(false);
     setPlanVisible(true);
+    setCurrentIdealId(ideal.id); // Stocker l'ID de l'idéal
     // Initialiser le suivi réel pour le palier courant
     const nbSemaines = params.palierDuree || 4;
     let semaines = [];
@@ -133,10 +137,10 @@ export default function IdeauxPage() {
     setSelectedSemaine(0);
     setReel(semaines.map(s => s.actions.map(() => false)));
 
-    // Sauvegarder le plan dans la table ideaux (champ planData + flag plan_existant)
+    // Sauvegarder le plan dans la table ideaux (champ plan_data)
     if (ideal.id) {
       try {
-        await supabase.from('ideaux').update({ planData: plan, plan_existant: true }).eq('id', ideal.id);
+        await supabase.from('ideaux').update({ plan_data: plan, date_debut: planDateDebut }).eq('id', ideal.id);
         // Optionnel : recharger la liste des idéaux pour affichage immédiat
         fetchIdeaux();
       } catch (e) {
@@ -150,6 +154,7 @@ export default function IdeauxPage() {
     setPlanData(null);
     setPlanParams(null);
     setShowDetails(false);
+    setCurrentIdealId(null);
   }
 
   // Mise à jour rapide des paramètres du plan
@@ -157,6 +162,266 @@ export default function IdeauxPage() {
     const newParams = { ...planParams, [key]: value };
     setPlanParams(newParams);
     setPlanData(generateAnchoringPlan(newParams));
+  }
+
+  // Valider et sauvegarder le plan final
+  async function handleValiderPlan() {
+    if (!currentIdealId || !planData) return;
+    
+    try {
+      // Sauvegarder le plan validé dans la table ideaux
+      const { error: updateError } = await supabase
+        .from('ideaux')
+        .update({
+          plan_data: planData,
+          date_debut: planData.dateDebut,
+          statut: 'en cours'
+        })
+        .eq('id', currentIdealId);
+      
+      if (updateError) throw updateError;
+      
+      // Créer les enregistrements de séances réelles pour le suivi
+      const nbSemaines = planParams.palierDuree || 4;
+      let semaines = [];
+      let count = 0;
+      for (let m of planData.mois || []) {
+        for (let s of m.semaines) {
+          if (count < nbSemaines) {
+            semaines.push({ ...s, mois: m.numero, annee: m.annee });
+            count++;
+          }
+        }
+        if (count >= nbSemaines) break;
+      }
+      
+      // Créer une séance réelle pour chaque action prévue
+      const seancesToInsert = [];
+      semaines.forEach((sem, semIdx) => {
+        sem.actions.forEach((action) => {
+          seancesToInsert.push({
+            ideal_id: currentIdealId,
+            date_prevue: action.date,
+            jour: action.jour,
+            action_type: action.action_type,
+            duree_prevue: planParams.duree || 15,
+            intensite: planParams.intensite,
+            statut: 'à faire',
+            semaine_numero: sem.numero,
+            mois_numero: sem.mois,
+            annee: sem.annee
+          });
+        });
+      });
+      
+      if (seancesToInsert.length > 0) {
+        const { error: seancesError } = await supabase
+          .from('seances_reelles')
+          .upsert(seancesToInsert, { onConflict: 'ideal_id,date_prevue' });
+        
+        if (seancesError) console.error('Erreur séances:', seancesError);
+      }
+      
+      setMessage('✅ Plan validé et sauvegardé ! Tu peux maintenant suivre ta progression.');
+      setTimeout(() => setMessage(''), 4000);
+      closePlanModal();
+      await fetchIdeaux();
+    } catch (err) {
+      console.error('Erreur validation plan:', err);
+      setMessage('❌ Erreur lors de la validation : ' + err.message);
+    }
+  }
+
+  // Sauvegarder une séance réalisée
+  async function handleSaveSeanceReelle(semIdx, actIdx, fait, duree) {
+    if (!currentIdealId || !planData) return;
+    
+    const nbSemaines = planParams.palierDuree || 4;
+    let semaines = [];
+    let count = 0;
+    for (let m of planData.mois || []) {
+      for (let s of m.semaines) {
+        if (count < nbSemaines) {
+          semaines.push({ ...s, mois: m.numero, annee: m.annee });
+          count++;
+        }
+      }
+      if (count >= nbSemaines) break;
+    }
+    
+    const sem = semaines[semIdx];
+    const action = sem.actions[actIdx];
+    
+    try {
+      const { error } = await supabase
+        .from('seances_reelles')
+        .upsert({
+          ideal_id: currentIdealId,
+          date_prevue: action.date,
+          date_reelle: fait ? new Date().toISOString().slice(0, 10) : null,
+          jour: action.jour,
+          action_type: action.action_type,
+          duree_prevue: planParams.duree || 15,
+          duree_reelle: fait ? (duree || planParams.duree || 15) : null,
+          intensite: planParams.intensite,
+          statut: fait ? 'fait' : 'à faire',
+          semaine_numero: sem.numero,
+          mois_numero: sem.mois,
+          annee: sem.annee
+        }, { onConflict: 'ideal_id,date_prevue' });
+      
+      if (error) console.error('Erreur sauvegarde séance:', error);
+    } catch (err) {
+      console.error('Erreur:', err);
+    }
+  }
+
+  // Gestion de la modification de la date de début d'un plan existant
+  function handleEditDateClick(idealId, currentDateDebut) {
+    setEditDateId(idealId);
+    setEditDateValue(currentDateDebut || defaultDebut);
+  }
+
+  function handleEditDateCancel() {
+    setEditDateId(null);
+    setEditDateValue('');
+  }
+
+  async function handleEditDateSubmit(e, ideal) {
+    e.preventDefault();
+    // On s'assure que la date de début et la date cible sont bien des chaînes ISO yyyy-mm-dd
+    let dateCibleStr = ideal.plan_data?.ideal?.date_cible || ideal.date_cible;
+    if (dateCibleStr instanceof Date) dateCibleStr = dateCibleStr.toISOString().slice(0,10);
+    
+    // Récupérer les paramètres du plan existant ou utiliser des valeurs par défaut
+    const planParamsToSave = {
+      titre: ideal.titre,
+      indicateur: ideal.indicateur_principal,
+      dateCible: dateCibleStr,
+      frequence: ideal.plan_data?.objectif?.frequence_par_semaine || 3,
+      duree: ideal.plan_data?.objectif?.duree_unite || 15,
+      intensite: ideal.plan_data?.objectif?.intensite || '7,6 km/h',
+      joursProposes: ideal.plan_data?.objectif?.routines?.map(r => r.jour) || ['lundi', 'mercredi', 'samedi'],
+      dateDebut: new Date(editDateValue)
+    };
+    
+    try {
+      const newPlan = generateAnchoringPlan(planParamsToSave);
+      console.log('🔍 DEBUG - Nouveau plan généré:', newPlan.mois[0]);
+      
+      const updateResult = await supabase.from('ideaux').update({
+        plan_data: newPlan,
+        date_debut: editDateValue
+      }).eq('id', ideal.id);
+      
+      console.log('🔍 DEBUG - Résultat update Supabase:', updateResult);
+      
+      if (updateResult.error) {
+        throw new Error('Supabase update error: ' + JSON.stringify(updateResult.error));
+      }
+      
+      // Recharger les données depuis Supabase
+      await fetchIdeaux();
+      
+      setEditDateId(null);
+      setEditDateValue('');
+      setMessage('✅ Date de début mise à jour ! Toutes les dates de semaines ont été recalculées.');
+      
+      console.log('🔍 DEBUG - planVisible:', planVisible, 'currentIdealId:', currentIdealId, 'ideal.id:', ideal.id);
+      
+      // Toujours récupérer les nouvelles données depuis Supabase
+      const { data: updatedIdeaux } = await supabase
+        .from('ideaux')
+        .select('*')
+        .eq('id', ideal.id)
+        .single();
+      
+      if (updatedIdeaux && updatedIdeaux.plan_data) {
+        console.log('🔍 DEBUG - Nouvelles données récupérées:', updatedIdeaux.plan_data.mois[0]);
+        
+        // Si la modale est ouverte pour cet idéal, rafraîchir le plan affiché
+        if (planVisible && currentIdealId === ideal.id) {
+          console.log('🔍 DEBUG - Modale ouverte, rafraîchissement...');
+          setPlanData(updatedIdeaux.plan_data);
+          
+          // Reconstruire planParams depuis les nouvelles données
+          const refreshedParams = {
+            titre: updatedIdeaux.titre,
+            indicateur: updatedIdeaux.indicateur_principal,
+            dateCible: updatedIdeaux.date_cible,
+            frequence: updatedIdeaux.plan_data.objectif.frequence_par_semaine,
+            duree: updatedIdeaux.plan_data.objectif.duree_unite,
+            intensite: updatedIdeaux.plan_data.objectif.intensite,
+            joursProposes: updatedIdeaux.plan_data.objectif.routines.map(r => r.jour),
+            dateDebut: new Date(updatedIdeaux.date_debut)
+          };
+          setPlanParams(refreshedParams);
+          
+          // Réinitialiser le suivi réel pour le nouveau palier
+          const nbSemaines = refreshedParams.palierDuree || 4;
+          let semaines = [];
+          let count = 0;
+          for (let m of updatedIdeaux.plan_data.mois || []) {
+            for (let s of m.semaines) {
+              if (count < nbSemaines) {
+                semaines.push(s);
+                count++;
+              }
+            }
+            if (count >= nbSemaines) break;
+          }
+          setSelectedSemaine(0);
+          setReel(semaines.map(s => s.actions.map(() => false)));
+        } else {
+          // Si la modale n'est pas ouverte, l'ouvrir automatiquement avec le nouveau plan
+          console.log('🔍 DEBUG - Modale fermée, ouverture automatique avec le nouveau plan...');
+          
+          // Fermer d'abord toute modale existante pour éviter les conflits
+          closePlanModal();
+          
+          // Attendre un court instant pour que React traite la fermeture
+          setTimeout(() => {
+            const refreshedParams = {
+              titre: updatedIdeaux.titre,
+              indicateur: updatedIdeaux.indicateur_principal,
+              dateCible: updatedIdeaux.date_cible,
+              frequence: updatedIdeaux.plan_data.objectif.frequence_par_semaine,
+              duree: updatedIdeaux.plan_data.objectif.duree_unite,
+              intensite: updatedIdeaux.plan_data.objectif.intensite,
+              joursProposes: updatedIdeaux.plan_data.objectif.routines.map(r => r.jour),
+              dateDebut: new Date(updatedIdeaux.date_debut)
+            };
+            setPlanParams(refreshedParams);
+            setPlanData(updatedIdeaux.plan_data);
+            setShowDetails(true); // Ouvrir directement en mode détail pour voir les semaines
+            setPlanVisible(true);
+            setCurrentIdealId(ideal.id);
+            
+            // Initialiser le suivi réel
+            const nbSemaines = refreshedParams.palierDuree || 4;
+            let semaines = [];
+            let count = 0;
+            for (let m of updatedIdeaux.plan_data.mois || []) {
+              for (let s of m.semaines) {
+                if (count < nbSemaines) {
+                  semaines.push(s);
+                  count++;
+                }
+              }
+              if (count >= nbSemaines) break;
+            }
+            setSelectedSemaine(0);
+            setReel(semaines.map(s => s.actions.map(() => false)));
+          }, 100);
+        }
+      }
+      
+      // Effacer le message après 4 secondes
+      setTimeout(() => setMessage(''), 4000);
+    } catch (err) {
+      console.error('❌ Erreur:', err);
+      setMessage('❌ Erreur : ' + err.message);
+    }
   }
 
   return (
@@ -253,42 +518,12 @@ export default function IdeauxPage() {
           <div style={{textAlign:'center', color:'#888', fontSize:18, gridColumn:'1/-1'}}>Aucun idéal enregistré pour le moment.</div>
         )}
         {ideaux.map(ideal => {
-          const handleEditDateClick = () => {
-            setEditDateId(ideal.id);
-            setEditDateValue(ideal.planData?.dateDebut ? ideal.planData.dateDebut.slice(0,10) : defaultDebut);
-          };
-          const handleEditDateCancel = () => {
-            setEditDateId(null);
-            setEditDateValue('');
-          };
-          const handleEditDateSubmit = async (e) => {
-            e.preventDefault();
-            // On s'assure que la date de début et la date cible sont bien des chaînes ISO yyyy-mm-dd
-            let dateCibleStr = ideal.planData?.ideal?.date_cible || ideal.date_cible;
-            if (dateCibleStr instanceof Date) dateCibleStr = dateCibleStr.toISOString().slice(0,10);
-            const planParams = {
-              ...ideal.planData,
-              dateDebut: editDateValue,
-              dateCible: dateCibleStr,
-            };
-            try {
-              const newPlan = generateAnchoringPlan(planParams);
-              await supabase.from('ideaux').update({
-                planData: newPlan
-              }).eq('id', ideal.id);
-              fetchIdeaux();
-              setEditDateId(null);
-              setEditDateValue('');
-            } catch (err) {
-              setMessage('Erreur : ' + err.message);
-            }
-          };
           // Calcul de la progression du palier/mois courant (exemple simplifié)
           // À adapter selon la structure réelle de stockage des séances réalisées
           let progression_palier = null;
-          if (ideal.plan_existant && ideal.planData && ideal.planData.mois) {
+          if (ideal.plan_data && ideal.plan_data.mois) {
             // On prend le premier mois/palier
-            const mois = ideal.planData.mois[0];
+            const mois = ideal.plan_data.mois[0];
             const prevues = mois.semaines.reduce((acc, s) => acc + s.actions.length, 0);
             // On suppose que ideal.seances_reelles contient les séances faites (à adapter selon ta structure)
             const realises = ideal.seances_reelles ? ideal.seances_reelles.filter(s => s.fait && s.mois === mois.numero && s.annee === mois.annee).length : 0;
@@ -350,9 +585,9 @@ export default function IdeauxPage() {
               </div>
               {/* Boutons plan d'action */}
               <div style={{marginTop:18, textAlign:'center', display:'flex', justifyContent:'center', gap:12}}>
-                <button onClick={handleEditDateClick} style={{background:'#fff', color:'#1976d2', border:'1px solid #b2ebf2', borderRadius:8, padding:'4px 12px', fontWeight:600, cursor:'pointer'}}>Modifier date de début</button>
+                <button onClick={() => handleEditDateClick(ideal.id, ideal.date_debut)} style={{background:'#fff', color:'#1976d2', border:'1px solid #b2ebf2', borderRadius:8, padding:'4px 12px', fontWeight:600, cursor:'pointer'}}>Modifier date de début</button>
                 {editDateId === ideal.id && (
-                  <form style={{display:'inline-block', marginLeft:8}} onSubmit={handleEditDateSubmit}>
+                  <form style={{display:'inline-block', marginLeft:8}} onSubmit={(e) => handleEditDateSubmit(e, ideal)}>
                     <input type="date" value={editDateValue} onChange={e => setEditDateValue(e.target.value)} style={{padding:'4px 8px', borderRadius:6, border:'1px solid #b2ebf2', fontWeight:600, fontSize:15, marginRight:6}} />
                     <button type="submit" style={{background:'#43a047', color:'#fff', border:'none', borderRadius:6, padding:'4px 10px', fontWeight:700, marginRight:4}}>Valider</button>
                     <button type="button" onClick={handleEditDateCancel} style={{background:'#e53935', color:'#fff', border:'none', borderRadius:6, padding:'4px 10px', fontWeight:700}}>Annuler</button>
@@ -371,6 +606,22 @@ export default function IdeauxPage() {
             <div style={{background:'#fff', borderRadius:16, boxShadow:'0 4px 24px #00bcd455', padding:'2.2rem 2.5rem', minWidth:340, maxWidth:600, maxHeight:'90vh', overflow:'auto', position:'relative'}}>
               <button onClick={closePlanModal} style={{position:'absolute', top:12, right:16, background:'none', border:'none', fontSize:22, color:'#888', cursor:'pointer'}}>×</button>
               <h2 style={{color:'#1976d2', marginTop:0, marginBottom:8}}>🚀 Proposition de plan d'action</h2>
+              
+              {/* Message de confirmation si présent */}
+              {message && (
+                <div style={{
+                  background: message.startsWith('✅') ? '#e8f5e9' : '#ffebee',
+                  color: message.startsWith('✅') ? '#43a047' : '#e53935',
+                  padding: '12px 16px',
+                  borderRadius: 8,
+                  marginBottom: 12,
+                  fontWeight: 600,
+                  fontSize: 15,
+                  textAlign: 'center',
+                  border: `2px solid ${message.startsWith('✅') ? '#43a047' : '#e53935'}`
+                }}>{message}</div>
+              )}
+              
               <div style={{background:'#e0f7fa', borderRadius:10, padding:'12px 18px', marginBottom:18}}>
                 <div style={{fontWeight:700, color:'#00bcd4', fontSize:18, marginBottom:4}}>
                   {planData.ideal.titre}
@@ -460,17 +711,25 @@ export default function IdeauxPage() {
                 const handleCheck = (semIdx, actIdx) => {
                   setReel(reel => {
                     const copy = reel.map(arr => arr.map(obj => ({...obj})));
-                    copy[semIdx][actIdx].fait = !copy[semIdx][actIdx].fait;
-                    if (copy[semIdx][actIdx].fait && !copy[semIdx][actIdx].duree) {
+                    const newFait = !copy[semIdx][actIdx].fait;
+                    copy[semIdx][actIdx].fait = newFait;
+                    if (newFait && !copy[semIdx][actIdx].duree) {
                       copy[semIdx][actIdx].duree = semaines[semIdx].actions[actIdx].duree || planParams.duree || 15;
                     }
+                    // Sauvegarder automatiquement dans Supabase
+                    handleSaveSeanceReelle(semIdx, actIdx, newFait, copy[semIdx][actIdx].duree);
                     return copy;
                   });
                 };
                 const handleDureeChange = (semIdx, actIdx, val) => {
                   setReel(reel => {
                     const copy = reel.map(arr => arr.map(obj => ({...obj})));
-                    copy[semIdx][actIdx].duree = parseInt(val)||null;
+                    const newDuree = parseInt(val)||null;
+                    copy[semIdx][actIdx].duree = newDuree;
+                    // Sauvegarder automatiquement si la séance est cochée
+                    if (copy[semIdx][actIdx].fait) {
+                      handleSaveSeanceReelle(semIdx, actIdx, true, newDuree);
+                    }
                     return copy;
                   });
                 };
@@ -546,7 +805,7 @@ export default function IdeauxPage() {
                 );
               })()}
               <div style={{marginTop:18, textAlign:'center'}}>
-                <button onClick={closePlanModal} style={{background:'#43a047', color:'#fff', border:'none', borderRadius:8, padding:'10px 28px', fontWeight:700, fontSize:16, cursor:'pointer', boxShadow:'0 1px 6px #00bcd422', letterSpacing:'0.5px', marginRight:12}}>Valider ce plan</button>
+                <button onClick={handleValiderPlan} style={{background:'#43a047', color:'#fff', border:'none', borderRadius:8, padding:'10px 28px', fontWeight:700, fontSize:16, cursor:'pointer', boxShadow:'0 1px 6px #00bcd422', letterSpacing:'0.5px', marginRight:12}}>✅ Valider et commencer le suivi</button>
                 {showDetails && (
                   <button onClick={()=>setShowDetails(false)} style={{background:'#ffa726', color:'#fff', border:'none', borderRadius:8, padding:'10px 28px', fontWeight:700, fontSize:16, cursor:'pointer', boxShadow:'0 1px 6px #00bcd422', letterSpacing:'0.5px'}}>Revenir au résumé</button>
                 )}
