@@ -704,9 +704,11 @@ function getSuggestionsFromNotes(repasList) {
           return '';
         })()}</label>
         <input value={quantite} onChange={e => setQuantite(e.target.value)} required={categorie !== 'Jeûne'} />
-        <div style={{ fontSize: 11, color: '#f59e0b', marginTop: 2, marginBottom: 8 }}>
-          ⚠️ Utilisez un <strong>point</strong> pour les décimales (ex: 0.5 et non 0,5)
-        </div>
+        {categorie !== 'Jeûne' && (
+          <div style={{ fontSize: 11, color: '#f59e0b', marginTop: 2, marginBottom: 8 }}>
+            ⚠️ Utilisez un <strong>point</strong> pour les décimales (ex: 0.5 et non 0,5)
+          </div>
+        )}
 
         <label>Kcal {loadingKcal && "(recherche...)"}</label>
         <input 
@@ -737,18 +739,22 @@ function getSuggestionsFromNotes(repasList) {
           </div>
         )}
 
-        <label>
-          <input type="checkbox" checked={estExtra} onChange={e => setEstExtra(e.target.checked)} />
-          Cet aliment est-il un extra ?
-        </label>
+        {categorie !== 'Jeûne' && (
+          <label>
+            <input type="checkbox" checked={estExtra} onChange={e => setEstExtra(e.target.checked)} />
+            Cet aliment est-il un extra ?
+          </label>
+        )}
 
-        <label>Satiété respectée ?</label>
-  <select value={satiete} onChange={e => setSatiete(e.target.value)} required={categorie !== 'Jeûne'}>
-          <option value="">Choisir…</option>
-          <option value="oui">Oui, j’ai respecté ma satiété</option>
-          <option value="non">Non, j’ai dépassé ma satiété</option>
-          <option value="pas de faim">Je n’ai pas mangé par faim</option>
-        </select>
+        {categorie !== 'Jeûne' && <label>Satiété respectée ?</label>}
+        {categorie !== 'Jeûne' && (
+          <select value={satiete} onChange={e => setSatiete(e.target.value)} required>
+            <option value="">Choisir…</option>
+            <option value="oui">Oui, j'ai respecté ma satiété</option>
+            <option value="non">Non, j'ai dépassé ma satiété</option>
+            <option value="pas de faim">Je n'ai pas mangé par faim</option>
+          </select>
+        )}
 
         {/* Suite logique si NON */}
         {satiete === "non" && (
@@ -788,8 +794,10 @@ function getSuggestionsFromNotes(repasList) {
         )}
 
         {/* Baromètre d'état alimentaire */}
-        <label style={{ marginTop: 16, display: "block" }}>Ressenti physique après le repas</label>
-        <div style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
+        {categorie !== 'Jeûne' && (
+          <>
+            <label style={{ marginTop: 16, display: "block" }}>Ressenti physique après le repas</label>
+            <div style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
           {etatsAlimentaires.map(etat => (
             <button
               key={etat.value}
@@ -813,10 +821,12 @@ function getSuggestionsFromNotes(repasList) {
             </button>
           ))}
         </div>
-        {ressenti && (
-          <div style={{ marginBottom: 16, color: "#1976d2" }}>
-            Ton ressenti : <b>{etatsAlimentaires.find(e => e.value === ressenti)?.label}</b>
-          </div>
+            {ressenti && (
+              <div style={{ marginBottom: 16, color: "#1976d2" }}>
+                Ton ressenti : <b>{etatsAlimentaires.find(e => e.value === ressenti)?.label}</b>
+              </div>
+            )}
+          </>
         )}
 
         {/* Affichage dynamique des feedbacks/challenges/défis */}
