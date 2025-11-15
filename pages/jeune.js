@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { genererProgrammeReprise } from "../lib/genererProgrammeReprise";
 
 // --- Données statiques pour chaque jour de jeûne (exemple jusqu'à 10 jours, à compléter si besoin) ---
 const JEUNE_DAYS_CONTENT = {
@@ -135,6 +136,7 @@ function saveState(key, val) {
 }
 
 export default function Jeune() {
+  // === HOOKS D'ÉTAT (INITIALISATION EN PREMIER) ===
   const [dureeJeune, setDureeJeune] = useState(loadState("dureeJeune", 5));
   const [jourEnCours, setJourEnCours] = useState(loadState("jourEnCours", 1));
   const [joursValides, setJoursValides] = useState(loadState("joursValides", []));
@@ -144,17 +146,64 @@ export default function Jeune() {
   const [outils, setOutils] = useState(loadState("outilsJeune", {}));
   const [outilInput, setOutilInput] = useState("");
   const [showInfo, setShowInfo] = useState(false);
+  const [dateDebutJeune, setDateDebutJeune] = useState(loadState("dateDebutJeune", null));
+  const [programmeReprise, setProgrammeReprise] = useState(null);
+  const [alerteJ3, setAlerteJ3] = useState(null);
+  const [loadingProgramme, setLoadingProgramme] = useState(false);
 
+  // === VARIABLES CALCULÉES ===
   const repasRecents = getRepasRecents();
   const analyse = analyseComportementale(repasRecents);
   const dernierRepas = getDernierRepas();
 
+  // === EFFETS (APRÈS HOOKS) ===
   useEffect(() => { saveState("dureeJeune", dureeJeune); }, [dureeJeune]);
   useEffect(() => { saveState("jourEnCours", jourEnCours); }, [jourEnCours]);
   useEffect(() => { saveState("joursValides", joursValides); }, [joursValides]);
   useEffect(() => { saveState("poidsDepart", poidsDepart); }, [poidsDepart]);
   useEffect(() => { saveState("messagePerso", messagePerso); }, [messagePerso]);
   useEffect(() => { saveState("outilsJeune", outils); }, [outils]);
+  useEffect(() => { saveState("dateDebutJeune", dateDebutJeune); }, [dateDebutJeune]);
+
+  // Initialiser date de début du jeûne si pas définie
+  useEffect(() => {
+    if (!dateDebutJeune && jourEnCours === 1) {
+      const aujourdhui = new Date().toISOString().split('T')[0];
+      setDateDebutJeune(aujourdhui);
+    }
+  }, [dateDebutJeune, jourEnCours]);
+
+  // Vérification J-3 (détection automatique)
+  useEffect(() => {
+    if (!dateDebutJeune || !dureeJeune) return;
+
+    const dateFin = new Date(dateDebutJeune);
+    dateFin.setDate(dateFin.getDate() + dureeJeune - 1);
+    const dateFinStr = dateFin.toISOString().split('T')[0];
+
+    const aujourdhui = new Date();
+    aujourdhui.setHours(0, 0, 0, 0);
+    const fin = new Date(dateFinStr);
+    fin.setHours(0, 0, 0, 0);
+    const diffTime = fin - aujourdhui;
+    const joursRestants = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    // Détection J-3, J-2, J-1
+    if (joursRestants >= 0 && joursRestants <= 3 && !programmeReprise) {
+      const urgence = joursRestants < 3;
+      setAlerteJ3({
+        joursRestants,
+        urgence,
+        message: urgence 
+          ? `⚠️ URGENT : J-${joursRestants} ! Génère ton programme de reprise MAINTENANT.`
+          : `🎯 J-${joursRestants} ! C'est le moment de préparer ta reprise alimentaire.`
+      });
+    } else {
+      setAlerteJ3(null);
+    }
+  }, [dateDebutJeune, dureeJeune, jourEnCours, programmeReprise]);
+
+  // === FONCTIONS HANDLERS (AVANT LE RENDER) ===
 
   const validerJour = () => {
     if (!joursValides.includes(jourEnCours)) {
@@ -173,6 +222,36 @@ export default function Jeune() {
     setOutilInput("");
   };
 
+  const genererProgrammeRepriseManuel = async () => {
+    if (!dateDebutJeune || !dureeJeune) {
+      alert("Données manquantes pour générer le programme");
+      return;
+    }
+
+    setLoadingProgramme(true);
+    try {
+      const dateFin = new Date(dateDebutJeune);
+      dateFin.setDate(dateFin.getDate() + dureeJeune - 1);
+      const dateFinStr = dateFin.toISOString().split('T')[0];
+
+      const programme = genererProgrammeReprise({
+        dureeJeune: dureeJeune,
+        poidsDepart: poidsDepart,
+        dateFin: dateFinStr,
+        options: { genere_manuellement: true }
+      });
+
+      setProgrammeReprise(programme);
+      saveState("programmeReprise", programme);
+      setAlerteJ3(null);
+      alert(`✅ Programme généré ! ${programme.duree_reprise_jours} jours de reprise créés.`);
+    } catch (error) {
+      alert(`Erreur : ${error.message}`);
+    } finally {
+      setLoadingProgramme(false);
+    }
+  };
+
   const resetJeune = () => {
     setDureeJeune(5);
     setJourEnCours(1);
@@ -180,7 +259,13 @@ export default function Jeune() {
     setPoidsDepart(getPoidsDepart());
     setMessagePerso("");
     setOutils({});
+    setDateDebutJeune(null);
+    setProgrammeReprise(null);
+    setAlerteJ3(null);
+    localStorage.removeItem("programmeReprise");
   };
+
+  // === VARIABLES CALCULÉES DE RENDU (APRÈS TOUS LES HOOKS) ===
 
   const isFini = joursValides.length >= dureeJeune;
   // Affiche la préparation à la reprise à partir de la moitié du jeûne ou du J4
@@ -220,6 +305,68 @@ export default function Jeune() {
           </span>
         </div>
       </div>
+
+      {/* --- Alerte J-3 (détection automatique) --- */}
+      {alerteJ3 && (
+        <div style={{
+          background: alerteJ3.urgence ? "#ffebee" : "#fff3e0",
+          border: alerteJ3.urgence ? "2px solid #f44336" : "2px solid #ff9800",
+          borderRadius: 12,
+          padding: 18,
+          marginBottom: 18,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+        }}>
+          <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 8, color: alerteJ3.urgence ? "#c62828" : "#e65100" }}>
+            {alerteJ3.message}
+          </div>
+          <div style={{ marginBottom: 12 }}>
+            {alerteJ3.urgence 
+              ? "Tu dois MAINTENANT préparer ta sortie de jeûne pour éviter le syndrome de réalimentation."
+              : "Profite de ces 3 derniers jours pour préparer mentalement et logistiquement ta reprise."}
+          </div>
+          <button
+            onClick={genererProgrammeRepriseManuel}
+            disabled={loadingProgramme || programmeReprise}
+            style={{
+              background: programmeReprise ? "#4caf50" : (alerteJ3.urgence ? "#f44336" : "#ff9800"),
+              color: "#fff",
+              border: "none",
+              borderRadius: 8,
+              padding: "12px 24px",
+              fontWeight: 700,
+              fontSize: 16,
+              cursor: programmeReprise ? "default" : "pointer",
+              opacity: loadingProgramme ? 0.6 : 1
+            }}
+          >
+            {loadingProgramme ? "Génération..." : (programmeReprise ? "✅ Programme généré" : "Générer mon programme de reprise")}
+          </button>
+          {programmeReprise && (
+            <div style={{ marginTop: 12, padding: 12, background: "#fff", borderRadius: 8 }}>
+              <strong>Programme créé :</strong><br />
+              {programmeReprise.duree_reprise_jours} jours de reprise<br />
+              Du {programmeReprise.date_debut_reprise} au {programmeReprise.date_fin_reprise}<br />
+              <button
+                onClick={() => {
+                  console.log("Programme complet:", programmeReprise);
+                  alert("Voir la console (F12) pour les détails complets du programme");
+                }}
+                style={{
+                  marginTop: 8,
+                  background: "#1976d2",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 6,
+                  padding: "6px 12px",
+                  cursor: "pointer"
+                }}
+              >
+                Voir les détails
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* --- Analyse comportementale pré-jeûne (Jour 1 uniquement) --- */}
       {jourEnCours === 1 && (
