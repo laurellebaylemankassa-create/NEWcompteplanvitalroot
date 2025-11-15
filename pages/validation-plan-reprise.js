@@ -129,26 +129,31 @@ export default function ValidationPlanReprise() {
         </p>
       </div>
 
-      {/* CARTES SYNTHÉTIQUES DES PHASES - MOBILE FIRST */}
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1.5rem',
-        marginBottom: '2rem'
-      }}>
-        <h2 style={{ margin: '0 0 1rem 0', fontSize: '1.3rem', color: '#333' }}>
-          🗓️ Les 4 phases de ta reprise (synthèse)
+      {/* PHASES EN MODE SCROLL-SNAP (REELS/SHORTS) */}
+      <div
+        style={{
+          scrollSnapType: 'y mandatory',
+          overflowY: 'auto',
+          maxHeight: '80vh',
+          minHeight: '400px',
+          marginBottom: '2rem',
+          borderRadius: '16px',
+          background: '#f8f8fc',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.07)',
+          position: 'relative',
+        }}
+      >
+        <h2 style={{ margin: '1.2rem 0 1.2rem 0', fontSize: '1.3rem', color: '#333', textAlign:'center' }}>
+          🗓️ Les 4 phases de ta reprise (scroll vertical)
         </h2>
-        {programme.phases && Object.entries(programme.phases).map(([phaseKey, phase]) => {
+        {programme.phases && Object.entries(programme.phases).map(([phaseKey, phase], idx) => {
           const phaseNum = parseInt(phaseKey.replace('phase', ''))
           const couleurs = ['#E3F2FD', '#F3E5F5', '#FFF3E0', '#E8F5E9']
           const couleursBordure = ['#2196F3', '#9C27B0', '#FF9800', '#4CAF50']
-          // Aliments principaux dynamiques (top 4, favorise cétose si possible)
           const alimentsPhase = alimentsRepriseJeune
             .filter(a => a.phase === phaseNum)
             .sort((a, b) => (b.favoriseCetose ? 1 : 0) - (a.favoriseCetose ? 1 : 0))
             .slice(0, 4)
-          // Emoji par catégorie
           const emojiCat = {
             liquide: '🥤',
             légume: '🥕',
@@ -158,37 +163,87 @@ export default function ValidationPlanReprise() {
             fruit: '🍏',
             "": '🍽️'
           }
-          // Exemple de menu strict par phase (sous forme de liste)
+          // Exemples de menus par phase (cohérent avec la phase)
           const exemplesMenu = [
             ["Bouillon de légumes clair", "Eau citronnée", "Jus de carotte dilué"],
             ["Purée de courgette", "Compote maison", "Carottes vapeur"],
             ["Œuf mollet", "Avocat écrasé", "Légumes vapeur"],
             ["Riz complet", "Patate douce", "Flocons d’avoine", "Légumes cuits"]
           ]
+          // Semaine-type par phase (rappel explicite de la phase)
+          const semainesType = [
+            [
+              "Lundi : Bouillon de légumes, eau citronnée",
+              "Mardi : Bouillon, jus de carotte dilué",
+              "Mercredi : Bouillon, compote maison",
+              "Jeudi : Bouillon, légumes vapeur",
+              "Vendredi : Bouillon, jus de légumes",
+              "Samedi : Bouillon, eau citronnée",
+              "Dimanche : Bouillon, compote maison"
+            ],
+            [
+              "Lundi : Purée de courgette, compote maison",
+              "Mardi : Légumes vapeur, riz semi-complet",
+              "Mercredi : Légumes + compote, bouillon",
+              "Jeudi : Riz + légumes, compote",
+              "Vendredi : Légumes, céréales douces, fruits cuits",
+              "Samedi : Légumes, compote",
+              "Dimanche : Riz, légumes, fruits cuits"
+            ],
+            [
+              "Lundi : Légumes + œuf mollet, compote",
+              "Mardi : Légumes vapeur, riz, œuf",
+              "Mercredi : Légumes + avocat, bouillon",
+              "Jeudi : Riz + légumes, poisson blanc vapeur",
+              "Vendredi : Légumes, céréales douces, fruits cuits",
+              "Samedi : Légumes, œuf, compote",
+              "Dimanche : Riz, légumes, fruits cuits"
+            ],
+            [
+              "Lundi : Riz complet, légumes cuits, fruits cuits",
+              "Mardi : Patate douce, légumes vapeur, compote",
+              "Mercredi : Flocons d’avoine, légumes, œuf",
+              "Jeudi : Riz + légumes, poisson blanc vapeur",
+              "Vendredi : Légumes, céréales douces, fruits cuits",
+              "Samedi : Légumes, œuf, compote",
+              "Dimanche : Riz, légumes, fruits cuits"
+            ]
+          ]
           return (
-            <div key={phaseKey} style={{
-              background: couleurs[phaseNum-1],
-              borderLeft: `6px solid ${couleursBordure[phaseNum-1]}`,
-              borderRadius: '14px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
-              padding: '1.2rem 1.2rem 1.2rem 1.5rem',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.7rem',
-              position: 'relative'
-            }}>
-              <div style={{display:'flex', alignItems:'center', gap:'0.7rem'}}>
+            <section
+              key={phaseKey}
+              style={{
+                scrollSnapAlign: 'start',
+                minHeight: 'calc(80vh - 60px)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                padding: '2.2rem 1.2rem 2.2rem 1.2rem',
+                margin: '0 auto',
+                background: couleurs[phaseNum-1],
+                borderLeft: `6px solid ${couleursBordure[phaseNum-1]}`,
+                borderRadius: '18px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+                marginBottom: '2rem',
+                maxWidth: 600,
+                width: '90%',
+                position: 'relative',
+                transition: 'box-shadow 0.2s',
+              }}
+            >
+              <div style={{display:'flex', alignItems:'center', gap:'0.7rem', marginBottom:'0.7rem'}}>
                 <div style={{
-                  width:40, height:40, borderRadius:'50%', background:couleursBordure[phaseNum-1],
-                  display:'flex', alignItems:'center', justifyContent:'center', color:'white', fontSize:'1.5rem', fontWeight:700
+                  width:48, height:48, borderRadius:'50%', background:couleursBordure[phaseNum-1],
+                  display:'flex', alignItems:'center', justifyContent:'center', color:'white', fontSize:'2rem', fontWeight:700
                 }}>{['💧','🥬','🥚','🍚'][phaseNum-1]}</div>
-                <div style={{fontWeight:700, fontSize:'1.1rem', color:'#222'}}>Phase {phaseNum} <span style={{fontWeight:400, fontSize:'0.98rem', color:'#666'}}>J{phase.debut} à J{phase.fin} ({phase.fin - phase.debut + 1} jours)</span></div>
+                <div style={{fontWeight:700, fontSize:'1.2rem', color:'#222'}}>Phase {phaseNum} <span style={{fontWeight:400, fontSize:'1rem', color:'#666'}}>J{phase.debut} à J{phase.fin} ({phase.fin - phase.debut + 1} jours)</span></div>
               </div>
-              <div style={{fontWeight:600, color:'#333', fontSize:'1.05rem', display:'flex', alignItems:'center', gap:'0.5rem'}}>
-                <span style={{fontSize:'1.2rem'}}>🎯</span> {phase.objectif}
+              <div style={{fontWeight:600, color:'#333', fontSize:'1.1rem', display:'flex', alignItems:'center', gap:'0.5rem', marginBottom:'0.5rem'}}>
+                <span style={{fontSize:'1.3rem'}}>🎯</span> {phase.objectif}
               </div>
               <div style={{margin:'0.5rem 0 0.2rem 0', fontWeight:600, color:'#444'}}>Aliments principaux :</div>
-              <div style={{display:'flex', flexWrap:'wrap', gap:'0.5rem 0.7rem'}}>
+              <div style={{display:'flex', flexWrap:'wrap', gap:'0.5rem 0.7rem', justifyContent:'center', marginBottom:'0.5rem'}}>
                 {alimentsPhase.map((a) => (
                   <span key={a.nom} style={{
                     background:'#fff',
@@ -196,7 +251,7 @@ export default function ValidationPlanReprise() {
                     borderRadius:'20px',
                     padding:'0.25rem 0.9rem',
                     fontWeight:500,
-                    fontSize:'1rem',
+                    fontSize:'1.05rem',
                     display:'flex', alignItems:'center', gap:'0.5rem',
                     boxShadow:'0 1px 4px rgba(0,0,0,0.04)',
                     cursor:'pointer',
@@ -207,36 +262,49 @@ export default function ValidationPlanReprise() {
                 ))}
               </div>
               <div style={{margin:'0.7rem 0 0.2rem 0', fontWeight:600, color:'#444'}}>Exemple de menu :</div>
-              <ul style={{margin:0, paddingLeft:'1.2rem', color:'#333', fontSize:'1rem'}}>
+              <ul style={{margin:0, paddingLeft:'1.2rem', color:'#333', fontSize:'1.05rem', textAlign:'left'}}>
                 {exemplesMenu[phaseNum-1].map((item, idx) => (
                   <li key={idx}>{item}</li>
                 ))}
               </ul>
-            </div>
+              {/* SEMAINE-TYPE PAR PHASE */}
+              <div style={{
+                background: '#F3E5F5',
+                padding: '1.1rem',
+                borderRadius: '10px',
+                margin: '1.2rem 0 0.5rem 0',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                width: '100%'
+              }}>
+                <h3 style={{margin:'0 0 0.7rem 0', fontSize:'1.1rem', color:'#7B1FA2'}}>
+                  📅 Exemple de semaine-type <span style={{fontWeight:400, fontSize:'0.98rem', color:'#333'}}>pour la phase {phaseNum}</span>
+                </h3>
+                <ul style={{margin:0, paddingLeft:'1.2rem', color:'#444', fontSize:'1rem'}}>
+                  {semainesType[phaseNum-1].map((item, idx) => (
+                    <li key={idx}>{item}</li>
+                  ))}
+                </ul>
+                <p style={{margin:'0.7rem 0 0 0', fontSize:'0.93rem', color:'#7B1FA2', fontStyle:'italic'}}>À adapter selon ton plan et tes envies, en respectant la progression !</p>
+              </div>
+              {/* Indicateur de progression */}
+              <div style={{position:'absolute', right:16, top:16, display:'flex', flexDirection:'column', gap:6}}>
+                {Object.keys(programme.phases).map((_, i) => (
+                  <span key={i} style={{
+                    width:10, height:10, borderRadius:'50%',
+                    background: i === idx ? couleursBordure[phaseNum-1] : '#bbb',
+                    opacity: i === idx ? 1 : 0.4,
+                    marginBottom:2,
+                    border: i === idx ? '2px solid #fff' : 'none',
+                    transition:'background 0.2s'
+                  }} />
+                ))}
+              </div>
+            </section>
           )
         })}
       </div>
 
-      {/* SEMAINE-TYPE */}
-      <div style={{
-        background: '#F3E5F5',
-        padding: '1.5rem',
-        borderRadius: '12px',
-        marginBottom: '2rem',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
-      }}>
-        <h2 style={{margin:'0 0 1rem 0', fontSize:'1.2rem', color:'#7B1FA2'}}>📅 Exemple de semaine-type</h2>
-        <ul style={{margin:0, paddingLeft:'1.2rem', color:'#444', fontSize:'1rem'}}>
-          <li>Lundi : Bouillon de légumes, légumes vapeur, compote maison</li>
-          <li>Mardi : Légumes vapeur, riz semi-complet, fruits cuits</li>
-          <li>Mercredi : Légumes + œuf mollet, compote, bouillon</li>
-          <li>Jeudi : Riz + légumes, poisson blanc vapeur</li>
-          <li>Vendredi : Légumes, céréales douces, fruits cuits</li>
-          <li>Samedi : Légumes, œuf, compote</li>
-          <li>Dimanche : Riz, légumes, fruits cuits</li>
-        </ul>
-        <p style={{margin:'1rem 0 0 0', fontSize:'0.95rem', color:'#7B1FA2', fontStyle:'italic'}}>À adapter selon ton plan et tes envies, en respectant la progression !</p>
-      </div>
+      {/* SEMAINE-TYPE déplacé dans chaque phase pour cohérence */}
 
       {/* LISTE DE COURSES PHASES 1-2 */}
       {Object.keys(listeCoursesGroupee).length > 0 && (
