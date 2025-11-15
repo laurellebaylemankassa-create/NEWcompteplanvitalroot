@@ -694,3 +694,274 @@ setKcal((quantiteNum * found.kcalParUnite).toFixed(0))  // ✅ Multiplie quantit
 4. ✅ Ajouter autocomplete + unité (Phase 2.3 - ~30 lignes)
 
 **Ou tu veux une autre approche ?**
+
+---
+
+═══════════════════════════════════════════════════════════════════════════════
+📋 TODO - RÉFÉRENTIEL ALIMENTAIRE & SAISIE (Mise à jour : 15 nov 2025)
+═══════════════════════════════════════════════════════════════════════════════
+
+## ✅ **PHASE 1 - ENRICHISSEMENT RÉFÉRENTIEL** [TERMINÉE - 15h30-17h30]
+
+### ✅ 1.1 Structure de base enrichie (15h30)
+- ✅ Ajout champs : `portionDefaut`, `unite`, `kcalParUnite`, `mesureRecommandee`
+- ✅ Ajout champ : `qn` (Qualité Nutritionnelle 1-5)
+- ✅ Structure testée et validée
+
+### ✅ 1.2 Enrichissement massif (15h45-17h00)
+- ✅ Féculents : 28 aliments (Riz, Pâtes, Quinoa, Pommes de terre, Pain, etc.)
+- ✅ Légumineuses : 10 aliments (Lentilles, Pois chiches, Haricots, etc.)
+- ✅ Protéines : 25 aliments (Œuf, Poulet, Poissons, Tofu, Fromages, etc.)
+- ✅ Légumes : 22 aliments (Courgettes, Carottes, Tomates, Brocoli, etc.)
+- ✅ Fruits : 19 aliments (Banane, Pomme, Raisin, Mangue, etc.)
+- ✅ Gras végétal : 12 aliments (Avocat, Huiles, Noix, Graines, etc.)
+- ✅ Extras : 48 aliments détaillés (Bonbons, Biscuits, Viennoiseries, Fast-food, etc.)
+- ✅ Mini-viennoiseries : 5 aliments (Mini croissant 150 kcal, Mini pain chocolat 180 kcal, etc.)
+- ✅ Frites maison : 3 types (Friteuse 300 kcal, Four 200 kcal, Fraîches 250 kcal)
+
+**📊 TOTAL : 187 aliments** (vs 11 initialement)
+
+### ✅ 1.3 Script automatisation QN (17h00-17h15)
+- ✅ Script `scripts/add-qn-scores.js` créé
+- ✅ Backup référentiel : `data/referentiel.js.backup`
+- ✅ Scores QN ajoutés automatiquement (177 aliments traités)
+- ✅ Distribution : QN 1=64, QN 2=22, QN 3=23, QN 4=37, QN 5=31
+
+**Commits** :
+- `c4f0a45` : Enrichissement référentiel +95 aliments
+- `efb4710` : Mini-viennoiseries + msg aide décimales
+- `b491d86` : Frites maison dans féculents
+
+---
+
+## ✅ **PHASE 2 - CALCUL AUTOMATIQUE** [TERMINÉE - 17h15-18h30]
+
+### ✅ 2.1 Correction doublon référentiel (17h15)
+- ✅ Suppression doublon local dans `RepasBloc.js` (lignes 7-14)
+- ✅ Import référentiel central : `import referentielAliments from '../data/referentiel'`
+- ✅ Référentiel unique et synchronisé
+
+### ✅ 2.2 Calcul automatique kcal (17h20-17h40)
+- ✅ useEffect lignes 251-264 : Calcul avec `kcalParUnite`
+- ✅ Formule : `quantite × kcalParUnite = kcal total`
+- ✅ Fallback pour anciens aliments sans `kcalParUnite`
+- ✅ Champ kcal en lecture seule avec "✨ Calculé automatiquement"
+
+### ✅ 2.3 Autocomplete intelligent (17h40-18h00)
+- ✅ Remplacement `<datalist>` par composant custom (bug caractères spéciaux)
+- ✅ Filtrage temps réel avec normalisation (Œ → oe)
+- ✅ Dropdown visuel avec :
+  - Nom aliment
+  - Portion par défaut (ex: "2 CS")
+  - Score QN avec couleur (🟢 5-4, 🟠 3, 🔴 2-1)
+- ✅ États : `suggestionsFiltrees`, `afficherSuggestions`
+
+### ✅ 2.4 UX améliorée (18h00-18h30)
+- ✅ Message portion recommandée sous champ aliment
+- ✅ Label quantité dynamique selon unité (CS/pièce(s)/gramme(s))
+- ✅ Message aide décimales : "⚠️ Utilisez un point (0.5 et non 0,5)"
+- ✅ Masquage conditionnel en mode Jeûne (categorie === 'Jeûne')
+  - Aliment, Quantité, Kcal, Extra, Satiété, Ressenti → masqués
+  - Seuls Type, Date, Heure, Catégorie affichés
+
+**Commits** :
+- `43dedb7` : Debug vérification référentiel
+- `a432d9c` : Fix mode Jeûne (masquer champs inutiles)
+
+---
+
+## 🟢 **PHASES 3-4 - FONCTIONNALITÉS AVANCÉES** [OPTIONNEL - Non prioritaire]
+
+**⚠️ Note importante** : Ces phases sont des **enrichissements** qui peuvent être faits **plus tard**. Elles ne bloquent PAS le fonctionnement de base du référentiel et de la saisie alimentaire.
+
+### 🟢 Phase 3 - Conscience alimentaire (2h - Optionnel)
+**Objectif** : Afficher bienfaits physiques/spirituels des aliments pendant la saisie
+
+**Actions** :
+- [ ] Créer table Supabase `aliments_conscience` avec colonnes :
+  - `aliment`, `categorie`, `bienfait_physique`, `bienfait_spirituel`
+  - `effet_perte_poids`, `effet_satiete`, `a_savoir`
+- [ ] Insérer données base "Conscience alimentaire" (Tomate, Banane, Pomme, etc.)
+- [ ] Ajouter affichage dans `RepasBloc.js` : encadré violet avec infos
+
+**Pourquoi optionnel ?** : Enrichissement culturel, pas nécessaire pour calcul kcal
+
+---
+
+### 🟢 Phase 4 - Aliments personnalisés (2h - Optionnel)
+**Objectif** : Permettre à l'utilisateur d'ajouter ses propres aliments au référentiel
+
+**Actions** :
+- [ ] Créer table Supabase `aliments_custom` avec colonnes :
+  - `user_id`, `nom`, `categorie`, `kcal`, `portion_defaut`, `unite`, `kcal_par_unite`
+- [ ] Détecter aliment non trouvé dans `RepasBloc.js`
+- [ ] Afficher bouton "➕ Ajouter cet aliment"
+- [ ] Modal formulaire pour créer aliment perso
+- [ ] Fusionner référentiel + aliments custom dans autocomplete
+
+**Pourquoi optionnel ?** : 187 aliments couvrent 90% des besoins, customisation est un plus
+
+---
+
+## ❌ **PHASE 5 - STATISTIQUES RÉELLES DANS TABLEAU DE BORD** [À FAIRE - Estimation 2h]
+
+**⚠️ IMPORTANT** : Les statistiques sont affichées dans `/pages/tableau-de-bord.js`, PAS dans `/pages/statistiques.js`
+
+**Problème actuel** : Le tableau de bord utilise des **vraies requêtes Supabase** (lignes 102-291 `handleRefresh()`), donc les stats affichent déjà les vraies données utilisateur pour :
+- ✅ Poids (graphique évolution)
+- ✅ Humeurs (répartition)
+- ✅ Satiété (taux par faim réelle)
+- ✅ Extras (quota semaine)
+
+**Ce qui manque** : Stats détaillées par **catégorie d'aliments** et **quantités standardisées**
+
+---
+
+### ❌ 5.1 Migration BDD quantités standardisées (30 min)
+**Fichier** : Migration Supabase
+
+**Actions** :
+- [ ] Ajouter colonnes dans table `repas_reels` :
+  ```sql
+  ALTER TABLE repas_reels 
+  ADD COLUMN IF NOT EXISTS quantite_nombre NUMERIC(6,2),  -- Nombre pur pour calculs
+  ADD COLUMN IF NOT EXISTS quantite_unite VARCHAR(20),    -- "CS", "piece", "g"
+  ADD COLUMN IF NOT EXISTS quantite_affichage VARCHAR(50); -- "2,5 CS" pour UI
+  ```
+- [ ] Créer indexes pour performances :
+  ```sql
+  CREATE INDEX IF NOT EXISTS idx_repas_reels_user_date ON repas_reels(user_id, date);
+  CREATE INDEX IF NOT EXISTS idx_repas_reels_categorie ON repas_reels(categorie);
+  ```
+- [ ] Tester migration en dev
+
+**Pourquoi ?** : Permet requêtes agrégées fiables (SUM, AVG) pour statistiques détaillées par catégorie
+
+---
+
+### ❌ 5.2 Adapter enregistrement RepasBloc (30 min)
+**Fichier** : `/components/RepasBloc.js` (fonction handleSubmit, lignes ~300-315)
+
+**Actions** :
+- [ ] Modifier insert Supabase pour enregistrer 3 champs :
+  ```javascript
+  quantite_nombre: parseFloat(quantite),           // 2.5
+  quantite_unite: found?.unite || 'portion',       // "CS", "piece", "g"
+  quantite_affichage: `${quantite} ${found?.unite || ''}` // "2,5 CS"
+  ```
+- [ ] Tester enregistrement : vérifier données en BDD Supabase
+- [ ] Vérifier compatibilité avec mode Jeûne (ne pas enregistrer quantité si Jeûne)
+
+**Pourquoi ?** : Standardisation pour calculs statistiques fiables
+
+---
+
+### ❌ 5.3 Ajouter stats par catégorie dans Tableau de Bord (1h)
+**Fichier** : `/pages/tableau-de-bord.js`
+
+**Actions** :
+- [ ] **Ajouter dans fonction `handleRefresh()` (après ligne 291)** :
+  ```javascript
+  // Stats par catégorie d'aliments
+  const statsCat = {};
+  ['féculent', 'protéine', 'légume', 'fruit', 'légumineuse', 'gras_vegetal', 'extra'].forEach(cat => {
+    const repasCat = repasReels.filter(r => r.categorie === cat);
+    statsCat[cat] = {
+      nbRepas: repasCat.length,
+      totalKcal: repasCat.reduce((sum, r) => sum + (r.kcal || 0), 0),
+      totalCS: repasCat
+        .filter(r => r.quantite_unite === 'CS')
+        .reduce((sum, r) => sum + (r.quantite_nombre || 0), 0)
+    };
+  });
+  ```
+- [ ] **Créer nouvel état** :
+  ```javascript
+  const [statsByCategorie, setStatsByCategorie] = useState({});
+  ```
+- [ ] **Ajouter section UI (après ligne 998)** :
+  ```jsx
+  <div style={{ background: '#fff', padding: 20, borderRadius: 8, marginTop: 20 }}>
+    <h2>📊 Détails par catégorie alimentaire</h2>
+    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <thead>
+        <tr>
+          <th>Catégorie</th>
+          <th>Nb repas</th>
+          <th>Calories</th>
+          <th>Total CS</th>
+        </tr>
+      </thead>
+      <tbody>
+        {Object.entries(statsByCategorie).map(([cat, data]) => (
+          <tr key={cat}>
+            <td>{cat === 'féculent' ? '🍚 Féculents' : '...'}</td>
+            <td>{data.nbRepas}</td>
+            <td>{data.totalKcal} kcal</td>
+            <td>{data.totalCS > 0 ? `${data.totalCS} CS` : '-'}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  ```
+
+**Pourquoi ?** : Permettre à l'utilisateur de voir :
+- Combien de féculents il a mangé cette semaine (en nb de repas ET en CS)
+- Répartition calorique par catégorie
+- Identifier déséquilibres (ex: trop de féculents, pas assez de légumes)
+
+---
+
+## 📊 **RÉCAPITULATIF PHASES**
+
+| Phase | Description | Durée | Statut | Priorité |
+|-------|-------------|-------|--------|----------|
+| Phase 1 | Enrichissement référentiel | 2-3h | ✅ FAIT (15h30-17h30) | 🔴 CRITIQUE |
+| Phase 2 | Calcul automatique + UX | 3h | ✅ FAIT (17h15-18h30) | 🔴 CRITIQUE |
+| **Phase 3** | **Conscience alimentaire** | **2h** | **🟢 OPTIONNEL** | **🟢 BONUS** |
+| **Phase 4** | **Aliments personnalisés** | **2h** | **🟢 OPTIONNEL** | **🟢 BONUS** |
+| **Phase 5** | **Stats détaillées tableau-de-bord** | **2h** | **❌ À FAIRE** | **🟡 IMPORTANT** |
+
+**Total accompli** : ✅ 6h / 11h (55%)  
+**Reste prioritaire** : ❌ 2h (Phase 5 - Stats détaillées)  
+**Optionnel** : 🟢 4h (Phases 3-4 - Peut attendre)
+
+---
+
+## 📊 **RÉCAPITULATIF PROGRESSION**
+
+| Phase | Description | Durée estimée | Statut | Horodatage |
+|-------|-------------|---------------|--------|------------|
+| Phase 1 | Enrichissement référentiel | 2-3h | ✅ FAIT | 15h30-17h30 |
+| Phase 2 | Calcul automatique + UX | 3h | ✅ FAIT | 17h15-18h30 |
+| **Phase 5** | **Statistiques réelles** | **2h** | **❌ À FAIRE** | - |
+| Phase 3 | Conscience alimentaire | 2h | 🟢 Optionnel | - |
+| Phase 4 | Aliments personnalisés | 2h | 🟢 Optionnel | - |
+
+**Total accompli** : ✅ 6h / 11h (55%)  
+**Reste prioritaire** : ❌ 2h (Phase 5 - Stats réelles)  
+**Optionnel** : 🟢 4h (Phases 3-4)
+
+---
+
+## 🎯 **PROCHAINE ACTION RECOMMANDÉE**
+
+**Priority #1** : Phase 5 - Statistiques réelles (2h)
+
+**Pourquoi prioritaire ?** :
+- Les stats actuelles affichent des données **FAUSSES** (mockées)
+- Utilisateur ne peut pas voir sa **vraie progression**
+- Calcul automatique fonctionne, mais stats ne reflètent pas les vraies calories
+- Bloque l'utilité réelle de l'app pour suivi alimentaire
+
+**Ordre d'implémentation** :
+1. Migration BDD (30 min) → fondations
+2. Adapter RepasBloc (30 min) → enregistrement correct
+3. Réécrire Statistiques (1h) → affichage réel
+
+**Alternative si pas le temps** :
+- Garder Phases 3-4 pour plus tard (nice-to-have)
+- Se concentrer sur Phase 5 pour avoir une app **fonctionnelle à 100%**
+
+═══════════════════════════════════════════════════════════════════════════════

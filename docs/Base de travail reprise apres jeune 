@@ -1,0 +1,2278 @@
+═══════════════════════════════════════════════════════════════════════════════
+📋 ANALYSE REPRISE APRÈS JEÛNE – ÉTAT DES LIEUX & PLAN D'ACTION
+═══════════════════════════════════════════════════════════════════════════════
+Date d'analyse : 15 novembre 2025
+Fichiers analysés : 
+- /docs/ANALYSE_ECART_JEUNE_VS_EXISTANT.md
+- /docs/CLARIFICATION_ARCHITECTURE_JEUNE.md
+- /docs/Complement info page jeune
+- /docs/Préparation aux jeune
+- /docs/reprise
+- /pages/jeune.js
+
+═══════════════════════════════════════════════════════════════════════════════
+🎯 OBJECTIFS DE CETTE PHASE
+═══════════════════════════════════════════════════════════════════════════════
+
+1. ✅ Prendre conscience de l'existant pour savoir où commencer
+2. ✅ Déterminer si une interface spécifique doit s'ouvrir dès qu'un jeûne se termine
+3. ✅ Créer un programme de reprise PERSONNALISÉ et PROPORTIONNEL à la durée du jeûne
+4. ✅ Figer ce programme après validation utilisateur (engagement obligatoire)
+5. ✅ Se baser sur la BDD des aliments favorables au jeûne
+6. 🟡 Intégrer l'aspect spirituel (à voir dans un 2e temps : distinct ou fusionné)
+
+───────────────────────────────────────────────────────────────────────────────
+📊 QUESTION 1 : PRENDRE CONSCIENCE DE L'EXISTANT
+───────────────────────────────────────────────────────────────────────────────
+
+✅ CE QUI EXISTE DANS L'APP ACTUELLE :
+
+1. Page `/pages/jeune.js` (fonctionnelle)
+   - Compteur jours : "Jour X/Y"
+   - Contenu par jour (J1-J5 remplis, J6-J10 incomplets)
+   - Validation quotidienne du jour
+   - Message personnel à soi-même
+   - Poids de départ (mocké : 72.4 kg statique)
+   - Analyse comportementale pré-jeûne (mockée)
+   - Simulation perte de poids (formule : 0.3-0.45 kg/jour)
+   - ✅ Bloc "Préparation à la reprise" (affiché à partir de J4 ou moitié du jeûne)
+   - ✅ Passerelle vers reprise (message + bouton quand jeûne terminé)
+
+2. Page `/pages/reprise alimentaire après jeûne.js` (VIDE)
+   - ❌ Fichier existe mais AUCUN contenu implémenté
+   - ❌ Page placeholder uniquement
+
+3. Documentation complète disponible :
+   - ✅ Règles de proportionnalité durée jeûne → durée reprise (doc "Complement info page jeune" + "reprise")
+   - ✅ Schéma détaillé de reprise par phases (J1-J3, J4-J7, J8-J12, J13-J18, J19-J28)
+   - ✅ Aliments autorisés par phase (progressivité stricte)
+
+❌ CE QUI MANQUE :
+
+1. **Connexion Supabase** :
+   - Aucune table `reprises_alimentaires` dans la BDD
+   - Aucune récupération du jeûne terminé
+   - Aucun stockage du programme de reprise
+
+2. **Interface de reprise** :
+   - Page `/reprise alimentaire après jeûne.js` complètement vide
+   - Aucun calcul automatique de la durée de reprise
+   - Aucune génération de programme personnalisé
+   - Aucun système de validation quotidienne de reprise
+
+3. **Lien entre pages** :
+   - Pas de redirection automatique jeûne → reprise
+   - Pas de transmission des données (durée jeûne, poids perdu, date fin)
+
+4. **Aliments favorables au jeûne** :
+   - Pas de catégorie spécifique dans `/data/referentiel.js`
+   - Pas de filtre "aliments post-jeûne" dans l'autocomplete
+
+───────────────────────────────────────────────────────────────────────────────
+📊 QUESTION 2 : INTERFACE SPÉCIFIQUE À L'OUVERTURE ?
+───────────────────────────────────────────────────────────────────────────────
+
+✅ RÉPONSE : OUI, UNE INTERFACE SPÉCIFIQUE DOIT S'OUVRIR DÈS QU'UN JEÛNE SE TERMINE
+
+🎯 DÉCLENCHEMENT :
+- L'utilisateur valide le dernier jour de son jeûne (ex : Jour 5/5)
+- L'app détecte `joursValides.length >= dureeJeune` (code ligne 183 de jeune.js)
+- ➡️ REDIRECTION AUTOMATIQUE vers `/reprise-alimentaire.js`
+
+🖥️ CONTENU DE CETTE INTERFACE :
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 🎉 Félicitations ! Ton jeûne de 5 jours est terminé                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│ ⚖️ Poids de départ : 72.4 kg                                                │
+│ 📉 Perte estimée : 1.5 à 2.25 kg                                            │
+│ 📅 Durée du jeûne : 5 jours (du 10 nov au 15 nov)                          │
+│                                                                              │
+│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│                                                                              │
+│ 🚨 PHASE CRITIQUE : LA REPRISE ALIMENTAIRE                                  │
+│                                                                              │
+│ Ce que tu as vécu ces 5 jours n'est PAS une fin.                           │
+│ C'est maintenant que tout se joue.                                          │
+│                                                                              │
+│ Une reprise mal gérée peut :                                                │
+│ ❌ Annuler les bienfaits du jeûne en quelques heures                        │
+│ ❌ Créer un choc métabolique (syndrome de renutrition)                      │
+│ ❌ Te faire reprendre plus de poids qu'avant                                │
+│                                                                              │
+│ Une reprise consciente va :                                                 │
+│ ✅ Ancrer les bénéfices du jeûne durablement                                │
+│ ✅ Transformer ton rapport à la nourriture                                  │
+│ ✅ Muscler ta volonté et ton pouvoir d'action                               │
+│                                                                              │
+│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│                                                                              │
+│ 📋 TON PROGRAMME DE REPRISE PERSONNALISÉ                                    │
+│                                                                              │
+│ Durée calculée : 7 à 8 jours (2× la durée de ton jeûne)                    │
+│                                                                              │
+│ 📅 Phase 1 (J1-J2) : Réveil digestif ultra doux                            │
+│    • Jus de légumes filtrés, bouillons clairs, eau citronnée               │
+│    • Objectif : Réhabituer ton système digestif en douceur                 │
+│                                                                              │
+│ 📅 Phase 2 (J3-J4) : Introduction fibres et minéraux                       │
+│    • Soupes maison sans féculents, légumes cuits vapeur                    │
+│    • Poissons blancs autorisés (colin, cabillaud)                          │
+│                                                                              │
+│ 📅 Phase 3 (J5-J6) : Protéines et graisses douces                          │
+│    • Œufs durs, avocats, huiles végétales                                  │
+│    • Yaourt nature ou fromage de chèvre                                    │
+│                                                                              │
+│ 📅 Phase 4 (J7-J8) : Féculents doux (midi uniquement)                      │
+│    • Patate douce, riz complet, flocons d'avoine                           │
+│    • Fruits peu sucrés (pomme, fruits rouges)                              │
+│                                                                              │
+│ ⚠️ Règles strictes pendant toute la reprise :                              │
+│ • ❌ Aucun sucre raffiné (gâteaux, bonbons, sodas)                         │
+│ • ❌ Aucun féculent le soir                                                 │
+│ • ❌ Aucun extra (fast-food, alcool, produits transformés)                 │
+│ • ✅ 2 litres d'eau par jour minimum                                        │
+│ • ✅ Validation quotidienne obligatoire dans l'app                         │
+│                                                                              │
+│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│                                                                              │
+│ 💬 MESSAGE À TOI-MÊME (écrit avant le jeûne) :                             │
+│ ┌────────────────────────────────────────────────────────────────────┐   │
+│ │ "Je me prépare depuis 30 jours. Mon corps est prêt. Mon esprit    │   │
+│ │ est aligné. Ce jeûne est un cadeau que je me fais..."             │   │
+│ └────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│                                                                              │
+│ 🔒 ENGAGEMENT                                                               │
+│                                                                              │
+│ En validant ce programme, je m'engage à :                                   │
+│ ✅ Suivre strictement les aliments autorisés par phase                     │
+│ ✅ Valider chaque jour de reprise dans l'app                               │
+│ ✅ Ne pas dévier du programme (sauf urgence médicale)                      │
+│ ✅ Faire ce que je dis que je vais faire (muscler ma volonté)              │
+│                                                                              │
+│ ⚠️ Ce programme sera FIGÉ après validation.                                │
+│    Tu ne pourras plus le modifier (sauf en cas d'urgence).                 │
+│                                                                              │
+│ [✅ Je m'engage et je démarre ma reprise]  [❌ Annuler]                    │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🔑 ÉLÉMENTS CLÉS DE CETTE INTERFACE :
+
+1. **Félicitations + Récapitulatif du jeûne**
+   - Poids départ/perte estimée
+   - Durée réelle du jeûne effectué
+   - Dates précises
+
+2. **Message d'alerte critique**
+   - Importance vitale de la reprise
+   - Conséquences d'une mauvaise reprise
+   - Bénéfices d'une bonne reprise
+
+3. **Programme personnalisé calculé automatiquement**
+   - Durée proportionnelle (règle des 2×)
+   - Phases détaillées avec aliments précis
+   - Règles strictes pendant toute la reprise
+
+4. **Réaffichage du message personnel**
+   - Celui écrit AVANT le jeûne
+   - Rappel de l'intention initiale
+   - Ancrage émotionnel
+
+5. **Engagement formel**
+   - Validation explicite par checkbox
+   - Notion de "figer le programme"
+   - Aspect volonté/pouvoir d'action
+
+───────────────────────────────────────────────────────────────────────────────
+📊 QUESTION 3 : PROGRAMME DE REPRISE PROPORTIONNEL & PERSONNALISÉ
+───────────────────────────────────────────────────────────────────────────────
+
+✅ RÈGLE DE PROPORTIONNALITÉ (source : docs/reprise + Complement info page jeune)
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│ Durée du jeûne │ Durée minimale de reprise alimentaire                    │
+├────────────────────────────────────────────────────────────────────────────┤
+│ 3 jours        │ 4 à 5 jours                                              │
+│ 5 jours        │ 7 à 8 jours                                              │
+│ 7 jours        │ 10 à 12 jours                                            │
+│ 10 jours       │ 14 jours                                                 │
+│ 14 à 16 jours  │ 28 jours                                                 │
+└────────────────────────────────────────────────────────────────────────────┘
+
+📐 FORMULE : `Durée reprise = 2 × Durée jeûne` (arrondi supérieur si besoin)
+
+🎯 GÉNÉRATION AUTOMATIQUE DU PROGRAMME :
+
+Fonction à implémenter dans `/pages/reprise-alimentaire.js` :
+
+```javascript
+function genererProgrammeReprise(dureeJeune) {
+  // Calcul durée reprise proportionnelle
+  let dureeReprise;
+  if (dureeJeune === 3) dureeReprise = 5;
+  else if (dureeJeune === 5) dureeReprise = 8;
+  else if (dureeJeune === 7) dureeReprise = 12;
+  else if (dureeJeune === 10) dureeReprise = 14;
+  else if (dureeJeune >= 14) dureeReprise = 28;
+  else dureeReprise = dureeJeune * 2; // Formule générique
+  
+  // Découpage en phases proportionnelles
+  const phases = [];
+  
+  // Phase 1 : Réveil digestif (environ 1/4 de la durée)
+  const dureePhase1 = Math.ceil(dureeReprise / 4);
+  phases.push({
+    nom: "Réveil digestif ultra doux",
+    joursDebut: 1,
+    joursFin: dureePhase1,
+    objectif: "Réhabituer ton système digestif en douceur",
+    alimentsAutorises: [
+      "Jus de légumes filtrés",
+      "Bouillons clairs",
+      "Eau citronnée",
+      "Infusions"
+    ],
+    interdits: [
+      "Aucun aliment solide",
+      "Aucun sucre",
+      "Aucun féculent"
+    ]
+  });
+  
+  // Phase 2 : Introduction fibres (environ 1/4 de la durée)
+  const dureePhase2 = Math.ceil(dureeReprise / 4);
+  phases.push({
+    nom: "Introduction fibres et minéraux",
+    joursDebut: dureePhase1 + 1,
+    joursFin: dureePhase1 + dureePhase2,
+    objectif: "Réintroduire les fibres progressivement",
+    alimentsAutorises: [
+      "Soupes maison sans féculents",
+      "Légumes cuits vapeur (courgettes, poireaux)",
+      "Poissons blancs vapeur (colin, cabillaud)"
+    ],
+    interdits: [
+      "Aucun féculent",
+      "Aucun sucre",
+      "Aucune graisse ajoutée"
+    ]
+  });
+  
+  // Phase 3 : Protéines et graisses douces
+  const dureePhase3 = Math.ceil(dureeReprise / 4);
+  phases.push({
+    nom: "Réintégration protéines et graisses douces",
+    joursDebut: dureePhase1 + dureePhase2 + 1,
+    joursFin: dureePhase1 + dureePhase2 + dureePhase3,
+    objectif: "Ajouter protéines complètes et bonnes graisses",
+    alimentsAutorises: [
+      "Œufs durs",
+      "Huiles végétales (olive, colza)",
+      "Avocats",
+      "Légumes vapeur",
+      "Yaourt nature ou fromage de chèvre"
+    ],
+    interdits: [
+      "Aucun féculent",
+      "Aucun sucre raffiné"
+    ]
+  });
+  
+  // Phase 4 : Féculents doux (reste de la durée)
+  const dureePhase4 = dureeReprise - (dureePhase1 + dureePhase2 + dureePhase3);
+  phases.push({
+    nom: "Féculents doux (midi uniquement)",
+    joursDebut: dureePhase1 + dureePhase2 + dureePhase3 + 1,
+    joursFin: dureeReprise,
+    objectif: "Réintroduire les féculents progressivement",
+    alimentsAutorises: [
+      "Patate douce",
+      "Riz complet",
+      "Flocons d'avoine",
+      "Fruits peu sucrés (pomme, fruits rouges)"
+    ],
+    regles: [
+      "Féculents UNIQUEMENT le midi",
+      "Jamais de féculents le soir"
+    ]
+  });
+  
+  return {
+    dureeReprise,
+    phases,
+    reglesGlobales: [
+      "❌ Aucun sucre raffiné pendant toute la reprise",
+      "❌ Aucun féculent le soir",
+      "❌ Aucun extra (fast-food, alcool, produits transformés)",
+      "✅ 2 litres d'eau par jour minimum",
+      "✅ Validation quotidienne obligatoire"
+    ]
+  };
+}
+```
+
+🎯 PERSONNALISATION PAR DURÉE :
+
+Exemple concret pour jeûne de 5 jours :
+- Durée reprise : 8 jours
+- Phase 1 (J1-J2) : Jus + bouillons uniquement
+- Phase 2 (J3-J4) : Légumes cuits + poissons blancs
+- Phase 3 (J5-J6) : Protéines complètes + graisses
+- Phase 4 (J7-J8) : Féculents midi + consolidation
+
+Exemple pour jeûne de 14 jours :
+- Durée reprise : 28 jours
+- Phase 1 (J1-J7) : Liquides puis soupes progressives
+- Phase 2 (J8-J14) : Légumes + poissons
+- Phase 3 (J15-J21) : Protéines + graisses
+- Phase 4 (J22-J28) : Féculents + stabilisation
+
+───────────────────────────────────────────────────────────────────────────────
+📊 QUESTION 4 : FIGER LE PROGRAMME APRÈS VALIDATION UTILISATEUR
+───────────────────────────────────────────────────────────────────────────────
+
+🔒 MÉCANISME D'ENGAGEMENT :
+
+1. **Validation initiale** :
+   - L'utilisateur lit le programme complet
+   - Il coche : "Je m'engage à suivre strictement ce programme"
+   - Bouton : "✅ Je m'engage et je démarre ma reprise"
+   - ➡️ Enregistrement dans Supabase :
+     ```sql
+     INSERT INTO reprises_alimentaires (
+       user_id,
+       jeune_id,
+       duree_jeune,
+       duree_reprise,
+       programme_json,
+       date_debut,
+       statut,
+       engagement_date
+     ) VALUES (...)
+     ```
+
+2. **Figement du programme** :
+   - Une fois validé, le programme ne peut plus être modifié
+   - Champ `statut = 'en_cours'` dans la BDD
+   - Seule exception : urgence médicale (bouton caché "Arrêt d'urgence")
+
+3. **Validation quotidienne obligatoire** :
+   - Chaque jour, l'utilisateur doit valider : "J'ai respecté le programme aujourd'hui"
+   - Si non-respect : compteur de déviations
+   - Enregistrement dans table `reprises_jours_valides`
+
+4. **Aspect "muscler la volonté"** :
+   - Message de progression : "Jour 3/8 validé – Tu tiens parole"
+   - Badge à la fin : "Reprise parfaite – 8/8 jours validés"
+   - Message si déviation : "Tu as dévié 1 fois. Ce n'est pas grave, mais observe ce qui s'est passé."
+
+5. **Empêcher les modifications** :
+   - Pas de bouton "Modifier le programme"
+   - Pas de possibilité de changer les phases
+   - Message si tentative : "Tu t'es engagé(e). Tenir parole = muscler ta volonté."
+
+───────────────────────────────────────────────────────────────────────────────
+📊 QUESTION 5 : SE BASER SUR LA BDD DES ALIMENTS FAVORABLES AU JEÛNE
+───────────────────────────────────────────────────────────────────────────────
+
+⚠️ RETOUR UTILISATEUR : "Ça va pas faire de mélange le fait d'ajouter ça dans referentiel.js ?"
+
+✅ TU AS RAISON ! NOUVELLE APPROCHE :
+
+🎯 OPTION A : INTERFACE DE SAISIE SPÉCIFIQUE (RECOMMANDÉE)
+
+Comme pour les défis qui ont leur page de saisie dédiée (`/pages/defis.js` avec `SaisieDefisDynamiques.js`),
+la reprise après jeûne devrait avoir SA PROPRE INTERFACE DE SAISIE.
+
+📁 STRUCTURE PROPOSÉE :
+
+```
+/pages/reprise-alimentaire.js  ← Page principale
+/components/SaisieRepriseJeune.js  ← Composant de saisie spécifique (🆕)
+/data/alimentsRepriseJeune.js  ← BDD séparée (🆕)
+```
+
+🔑 AVANTAGES DE CETTE APPROCHE :
+
+1. **Séparation des contextes** :
+   - `/data/referentiel.js` = aliments vie quotidienne (187 aliments)
+   - `/data/alimentsRepriseJeune.js` = aliments reprise post-jeûne uniquement (40-50 aliments)
+   - Pas de mélange, pas de pollution
+
+2. **Interface adaptée au programme** :
+   - L'utilisateur en reprise ne voit QUE les aliments de sa phase
+   - Pas de tentation de choisir des aliments interdits
+   - Validation stricte automatique
+
+3. **Expérience utilisateur différente** :
+   - Page `/suivi.js` avec `RepasBloc.js` = saisie normale avec tous les aliments
+   - Page `/reprise-alimentaire.js` avec `SaisieRepriseJeune.js` = saisie contrôlée
+
+4. **Plus facile à maintenir** :
+   - Pas besoin de modifier le référentiel existant
+   - Pas d'impact sur les défis ou autres fonctionnalités
+   - Code isolé et spécialisé
+
+📄 EXEMPLE DE STRUCTURE `/data/alimentsRepriseJeune.js` :
+
+```javascript
+// Fichier séparé pour les aliments de reprise post-jeûne
+const alimentsRepriseJeune = {
+  phase_1: [
+    {
+      nom: "Bouillon de légumes clair",
+      type: "liquide",
+      kcal: 20,
+      portion: "250 ml",
+      conseil: "Boire lentement, par petites gorgées"
+    },
+    {
+      nom: "Jus de carotte filtré",
+      type: "liquide",
+      kcal: 45,
+      portion: "150 ml",
+      conseil: "Filtrer soigneusement, aucune pulpe"
+    },
+    {
+      nom: "Eau citronnée tiède",
+      type: "liquide",
+      kcal: 5,
+      portion: "250 ml",
+      conseil: "1/2 citron pressé dans de l'eau tiède"
+    },
+    {
+      nom: "Infusion gingembre",
+      type: "liquide",
+      kcal: 2,
+      portion: "250 ml",
+      conseil: "Propriétés digestives douces"
+    }
+  ],
+  
+  phase_2: [
+    {
+      nom: "Soupe courgette maison",
+      type: "soupe",
+      kcal: 60,
+      portion: "200 ml",
+      conseil: "Sans crème, sans féculents, mixée finement"
+    },
+    {
+      nom: "Courgette vapeur",
+      type: "legume",
+      kcal: 35,
+      portion: "150 g",
+      conseil: "Cuisson vapeur douce, bien tendre"
+    },
+    {
+      nom: "Carotte vapeur",
+      type: "legume",
+      kcal: 50,
+      portion: "100 g",
+      conseil: "Cuisson vapeur jusqu'à tendreté complète"
+    },
+    {
+      nom: "Colin vapeur",
+      type: "poisson_blanc",
+      kcal: 90,
+      portion: "80 g",
+      conseil: "Poisson très maigre, facile à digérer"
+    },
+    {
+      nom: "Cabillaud vapeur",
+      type: "poisson_blanc",
+      kcal: 85,
+      portion: "80 g",
+      conseil: "Cuisson vapeur sans matière grasse"
+    }
+  ],
+  
+  phase_3: [
+    {
+      nom: "Œuf dur",
+      type: "proteine",
+      kcal: 70,
+      portion: "1 unité",
+      conseil: "Protéine complète, facile à digérer"
+    },
+    {
+      nom: "Avocat",
+      type: "graisse_vegetale",
+      kcal: 160,
+      portion: "1/2 avocat",
+      conseil: "Bonnes graisses, satiété durable"
+    },
+    {
+      nom: "Huile d'olive",
+      type: "graisse_vegetale",
+      kcal: 90,
+      portion: "1 CS",
+      conseil: "À ajouter sur légumes vapeur"
+    },
+    {
+      nom: "Yaourt nature",
+      type: "laitage",
+      kcal: 60,
+      portion: "125 g",
+      conseil: "Sans sucre ajouté, ferments lactiques"
+    },
+    {
+      nom: "Fromage de chèvre frais",
+      type: "laitage",
+      kcal: 80,
+      portion: "50 g",
+      conseil: "Plus digeste que fromage de vache"
+    }
+  ],
+  
+  phase_4: [
+    {
+      nom: "Patate douce vapeur",
+      type: "feculent_doux",
+      kcal: 120,
+      portion: "150 g",
+      conseil: "Indice glycémique bas, riche en fibres"
+    },
+    {
+      nom: "Riz complet",
+      type: "feculent_doux",
+      kcal: 150,
+      portion: "100 g cuit",
+      conseil: "Uniquement le midi, jamais le soir"
+    },
+    {
+      nom: "Flocons d'avoine",
+      type: "feculent_doux",
+      kcal: 140,
+      portion: "40 g",
+      conseil: "Avec eau ou lait végétal, le matin"
+    },
+    {
+      nom: "Pomme",
+      type: "fruit_doux",
+      kcal: 80,
+      portion: "1 unité",
+      conseil: "Fruit peu sucré, fibres solubles"
+    },
+    {
+      nom: "Myrtilles",
+      type: "fruit_doux",
+      kcal: 40,
+      portion: "100 g",
+      conseil: "Antioxydants, peu de sucre"
+    }
+  ]
+};
+
+export default alimentsRepriseJeune;
+```
+
+🖥️ INTERFACE DE SAISIE SPÉCIFIQUE `/components/SaisieRepriseJeune.js` :
+
+```javascript
+import alimentsRepriseJeune from '../data/alimentsRepriseJeune';
+
+export default function SaisieRepriseJeune({ phaseActuelle, jourActuel, onValidation }) {
+  const [alimentChoisi, setAlimentChoisi] = useState(null);
+  const [quantite, setQuantite] = useState(1);
+  
+  // Récupérer UNIQUEMENT les aliments de la phase actuelle
+  const alimentsAutorises = alimentsRepriseJeune[`phase_${phaseActuelle}`];
+  
+  return (
+    <div className="saisie-reprise-jeune">
+      <div className="entete-phase">
+        <h3>📅 Jour {jourActuel} de ta reprise</h3>
+        <p>Tu es en Phase {phaseActuelle} : {getNomPhase(phaseActuelle)}</p>
+      </div>
+      
+      {/* Liste des aliments AUTORISÉS uniquement */}
+      <div className="aliments-autorises">
+        <h4>🍽️ Aliments autorisés aujourd'hui :</h4>
+        {alimentsAutorises.map(aliment => (
+          <div 
+            key={aliment.nom}
+            className={`carte-aliment ${alimentChoisi?.nom === aliment.nom ? 'selectionne' : ''}`}
+            onClick={() => setAlimentChoisi(aliment)}
+          >
+            <div className="nom-aliment">{aliment.nom}</div>
+            <div className="portion">{aliment.portion} = {aliment.kcal} kcal</div>
+            <div className="conseil">💡 {aliment.conseil}</div>
+          </div>
+        ))}
+      </div>
+      
+      {/* Validation avec message d'engagement */}
+      {alimentChoisi && (
+        <div className="validation-reprise">
+          <label>Quantité consommée :</label>
+          <input 
+            type="number" 
+            value={quantite} 
+            onChange={(e) => setQuantite(e.target.value)}
+            step="0.5"
+            min="0.5"
+          />
+          
+          <button onClick={() => onValidation(alimentChoisi, quantite)}>
+            ✅ Valider ce repas de reprise
+          </button>
+          
+          <div className="message-engagement">
+            🔒 Tu respectes ton programme. Tu tiens parole.
+          </div>
+        </div>
+      )}
+      
+      {/* Aliments INTERDITS aujourd'hui (pour rappel) */}
+      <details className="aliments-interdits">
+        <summary>⚠️ Aliments INTERDITS en Phase {phaseActuelle}</summary>
+        <ul>
+          {getAlimentsInterdits(phaseActuelle).map(aliment => (
+            <li key={aliment}>❌ {aliment}</li>
+          ))}
+        </ul>
+      </details>
+    </div>
+  );
+}
+```
+
+🎯 AVANTAGES DE CETTE INTERFACE :
+
+1. **Aucune tentation** : L'utilisateur ne voit QUE ce qu'il peut manger
+2. **Validation automatique** : Impossible de choisir un aliment interdit
+3. **Messages d'engagement** : Renforce le "faire ce qu'on dit qu'on va faire"
+4. **Conseils contextuels** : Chaque aliment a son conseil spécifique
+
+🔄 COMPARAISON AVEC LES DÉFIS :
+
+| Fonctionnalité | Défis | Reprise après jeûne |
+|----------------|-------|---------------------|
+| **Page dédiée** | `/pages/defis.js` | `/pages/reprise-alimentaire.js` |
+| **Composant saisie** | `SaisieDefisDynamiques.js` | `SaisieRepriseJeune.js` ✅ |
+| **BDD spécifique** | `defisReferentiel.js` | `alimentsRepriseJeune.js` ✅ |
+| **Filtrage strict** | Par catégorie de défi | Par phase de reprise ✅ |
+| **Validation** | Quotidienne | Quotidienne ✅ |
+
+➡️ **CONCLUSION : Même architecture que les défis, mais pour la reprise**
+
+📝 NOTE À AJOUTER DANS `/docs/a faire` :
+
+```
+🔴 PRIORITÉ HAUTE : Analyser l'impact des changements référentiel sur les défis
+
+Contexte : 
+- Le référentiel alimentaire a été enrichi de 11 à 187 aliments
+- Les défis utilisent `defisReferentiel.js` avec des catégories spécifiques
+- Risque de désynchronisation entre les deux systèmes
+
+Actions à vérifier :
+1. Est-ce que les nouveaux aliments du référentiel sont couverts dans les défis ?
+2. Est-ce que les catégories ont changé (féculent, protéine, etc.) ?
+3. Est-ce que les défis de type "alimentation" filtrent correctement ?
+4. Est-ce que les validations de défis fonctionnent avec les nouveaux aliments ?
+
+Pages concernées :
+- `/pages/defis.js`
+- `/components/SaisieDefisDynamiques.js`
+- `/lib/defisReferentiel.js`
+- `/lib/defisUtils.js`
+
+Estimation effort : 2-3h de vérification + corrections potentielles
+```
+
+───────────────────────────────────────────────────────────────────────────────
+📊 QUESTION 6 : ASPECT SPIRITUEL (à voir dans un 2e temps)
+───────────────────────────────────────────────────────────────────────────────
+
+⚠️ RETOUR UTILISATEUR : "J'ai pas compris concrètement comment tu fais la fusion ?"
+
+✅ VOICI COMMENT FUSIONNER L'ASPECT SPIRITUEL AVEC L'ALIMENTAIRE :
+
+🎯 OPTION B (FUSIONNÉ) : EXPLICATION CONCRÈTE
+
+Au lieu d'avoir 2 pages séparées (une pour l'alimentation, une pour le spirituel),
+on INTÈGRE des messages spirituels directement dans chaque jour de reprise alimentaire.
+
+📱 EXEMPLE CONCRET JOUR 1 DE REPRISE :
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 🌅 Jour 1/8 de ta reprise alimentaire                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│ 📅 Phase 1 : Réveil digestif ultra doux                                    │
+│                                                                              │
+│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│                                                                              │
+│ 🧠 CE QUI SE PASSE EN TOI AUJOURD'HUI                                       │
+│                                                                              │
+│ **Sur le plan physique** :                                                  │
+│ Ton système digestif est en sommeil depuis X jours. Il ne faut pas le      │
+│ brusquer. Les premiers liquides vont réveiller doucement ta flore           │
+│ intestinale. Ton foie et tes reins continuent leur travail d'élimination.   │
+│                                                                              │
+│ **Sur le plan mental** :                                                    │
+│ Tu peux ressentir une forme d'appréhension : "Et si je perdais les          │
+│ bénéfices du jeûne ?" C'est normal. Cette étape est aussi importante que    │
+│ le jeûne lui-même.                                                          │
+│                                                                              │
+│ **Sur le plan spirituel** : 🙏                                              │
+│ Ce bouillon n'est pas qu'un liquide. C'est une reconnexion à la vie.       │
+│ Pendant X jours, tu as laissé ton corps se reposer. Maintenant, tu         │
+│ l'honores en lui donnant exactement ce dont il a besoin. Ni trop, ni trop   │
+│ peu. Tu es en train de réécrire ton rapport à la nourriture.                │
+│                                                                              │
+│ 💬 Prends un instant avant de boire ton premier bouillon :                 │
+│    "Merci à mon corps d'avoir tenu. Merci à cet aliment de me nourrir      │
+│     avec douceur. Je choisis de nourrir avec conscience."                   │
+│                                                                              │
+│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│                                                                              │
+│ 🍽️ ALIMENTS AUTORISÉS AUJOURD'HUI                                          │
+│                                                                              │
+│ [Bouillon de légumes clair] [Jus de carotte filtré] [Eau citronnée]        │
+│                                                                              │
+│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│                                                                              │
+│ 📖 PAROLE INSPIRANTE DU JOUR                                                │
+│                                                                              │
+│ "Ton corps est un temple. Tu viens de le nettoyer.                         │
+│  Maintenant, tu le nourris avec respect et intention.                       │
+│  Chaque aliment que tu choisis est un acte sacré."                          │
+│                                                                              │
+│ 🕊️ Bible : "Que votre corps soit un temple du Saint-Esprit" (1 Cor 6:19)  │
+│ 🌙 Islam : "Mangez et buvez, mais sans excès" (Coran 7:31)                 │
+│ ✨ Conversations avec Dieu : "La nourriture est une célébration,           │
+│    pas une compensation"                                                    │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🔑 ÉLÉMENTS DE FUSION PRÉSENTS :
+
+1. **Section "Sur le plan spirituel"** intégrée avec le physique et le mental
+2. **Moment de gratitude avant de manger** (pause spirituelle concrète)
+3. **Parole inspirante du jour** en bas de page (comme dans jeune.js)
+4. **Citations spirituelles** de différentes traditions
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📱 EXEMPLE CONCRET JOUR 5 DE REPRISE :
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 🌱 Jour 5/8 de ta reprise alimentaire                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│ 📅 Phase 3 : Réintégration protéines et graisses douces                    │
+│                                                                              │
+│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│                                                                              │
+│ 🧠 CE QUI SE PASSE EN TOI AUJOURD'HUI                                       │
+│                                                                              │
+│ **Sur le plan physique** :                                                  │
+│ Ton système digestif se réveille pleinement. Tu réintroduis des protéines  │
+│ complètes (œuf) et des graisses végétales (avocat, huile d'olive).         │
+│ Ton corps retrouve sa capacité à métaboliser des nutriments plus complexes. │
+│                                                                              │
+│ **Sur le plan mental** :                                                    │
+│ Tu peux ressentir une envie de "vrais repas". C'est normal, tu es à        │
+│ mi-chemin. Observe cette envie sans y céder. Tu es sur le bon chemin.      │
+│                                                                              │
+│ **Sur le plan spirituel** : 🙏                                              │
+│ Tu n'as pas mangé par automatisme depuis X+5 jours. Chaque aliment que     │
+│ tu as choisi était conscient, intentionnel. Tu es en train de muscler      │
+│ une force intérieure : celle de FAIRE CE QUE TU DIS QUE TU VAS FAIRE.      │
+│                                                                              │
+│ Cet œuf, cet avocat, ce n'est pas juste de la nourriture. C'est la         │
+│ preuve que tu tiens parole envers toi-même. C'est ça, la vraie             │
+│ transformation : tenir son cap malgré les tentations.                       │
+│                                                                              │
+│ 💬 Avant de manger ton repas :                                              │
+│    "Je suis reconnaissant(e) d'avoir la volonté de tenir mes engagements.  │
+│     Chaque jour où je respecte mon programme, je renforce ma maîtrise       │
+│     intérieure. Je ne suis plus ballotté(e) par mes envies."                │
+│                                                                              │
+│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│                                                                              │
+│ 🍽️ ALIMENTS AUTORISÉS AUJOURD'HUI                                          │
+│                                                                              │
+│ [Œuf dur] [Avocat] [Huile d'olive] [Yaourt nature] [Fromage de chèvre]     │
+│                                                                              │
+│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│                                                                              │
+│ 📖 PAROLE INSPIRANTE DU JOUR                                                │
+│                                                                              │
+│ "La vraie volonté, ce n'est pas de résister à une tentation.               │
+│  C'est de ne plus la voir comme une tentation.                              │
+│  C'est de savoir ce qui est bon pour toi, et de l'honorer."                 │
+│                                                                              │
+│ 🕊️ Bible : "L'homme ne vivra pas de pain seulement, mais de toute          │
+│    parole qui sort de la bouche de Dieu" (Matthieu 4:4)                    │
+│    → Le sens que tu donnes à ce que tu manges compte autant que la         │
+│      nourriture elle-même                                                   │
+│                                                                              │
+│ 🌙 Islam : "Le jeûne n'est pas seulement s'abstenir de manger, c'est       │
+│    purifier son cœur et son âme"                                            │
+│    → La reprise après jeûne, c'est prolonger cette purification            │
+│                                                                              │
+│ ✨ Conversations avec Dieu : "Ce que tu fais avec intention devient         │
+│    sacré. Même manger."                                                     │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 STRUCTURE TECHNIQUE DE LA FUSION :
+
+Dans `/pages/reprise-alimentaire.js`, chaque jour de reprise aura :
+
+```javascript
+const CONTENU_JOURS_REPRISE = {
+  1: {
+    phase: 1,
+    titre: "Réveil digestif ultra doux",
+    
+    // PARTIE PHYSIQUE
+    physique: "Ton système digestif est en sommeil depuis X jours...",
+    
+    // PARTIE MENTALE
+    mental: "Tu peux ressentir une forme d'appréhension...",
+    
+    // PARTIE SPIRITUELLE (🆕 FUSION ICI)
+    spirituel: "Ce bouillon n'est pas qu'un liquide. C'est une reconnexion à la vie...",
+    
+    // MOMENT DE GRATITUDE (🆕 FUSION ICI)
+    gratitude: "Merci à mon corps d'avoir tenu. Merci à cet aliment de me nourrir avec douceur...",
+    
+    // ALIMENTS AUTORISÉS (PARTIE ALIMENTAIRE)
+    alimentsAutorises: ["Bouillon de légumes clair", "Jus de carotte filtré", ...],
+    
+    // PAROLE INSPIRANTE (🆕 FUSION ICI)
+    parole: "Ton corps est un temple. Tu viens de le nettoyer...",
+    
+    // CITATIONS SPIRITUELLES (🆕 FUSION ICI)
+    citations: [
+      { source: "Bible", texte: "Que votre corps soit un temple...", reference: "1 Cor 6:19" },
+      { source: "Islam", texte: "Mangez et buvez, mais sans excès", reference: "Coran 7:31" },
+      { source: "Conversations avec Dieu", texte: "La nourriture est une célébration..." }
+    ]
+  },
+  
+  2: {
+    phase: 1,
+    titre: "Réveil digestif (jour 2)",
+    physique: "...",
+    mental: "...",
+    spirituel: "Tu continues le chemin. Chaque liquide que tu bois est un acte de soin...",
+    gratitude: "Je remercie mon corps pour sa capacité de régénération...",
+    alimentsAutorises: [...],
+    parole: "...",
+    citations: [...]
+  },
+  
+  // ... jusqu'au jour 8 (ou durée calculée)
+};
+```
+
+🔑 DIFFÉRENCE ENTRE FUSION VS SÉPARATION :
+
+**❌ OPTION A (SÉPARATION) - Ce qu'on NE fait PAS** :
+```
+Page 1 : /reprise-alimentaire.js
+→ Liste des aliments
+→ Validation repas
+→ Bouton "Voir aussi : Reprise spirituelle" ⬅️ L'utilisateur doit cliquer
+
+Page 2 : /reprise-spirituelle.js
+→ Prières du jour
+→ Méditations
+→ Réflexions
+```
+Problème : L'utilisateur peut zapper la partie spirituelle. C'est facultatif.
+
+**✅ OPTION B (FUSION) - Ce qu'on FAIT** :
+```
+Page unique : /reprise-alimentaire.js
+│
+├─ 🧠 Partie physique/mentale/spirituelle (TOUT ENSEMBLE)
+├─ 💬 Moment de gratitude avant de manger
+├─ 🍽️ Aliments autorisés
+├─ 📖 Parole inspirante du jour
+└─ 🙏 Citations spirituelles
+```
+Avantage : L'utilisateur VOIT FORCÉMENT la dimension spirituelle. C'est intégré.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 POURQUOI CETTE FUSION RENFORCE L'ENGAGEMENT ?
+
+1. **Cohérence** : Le physique, le mental et le spirituel forment UN TOUT
+2. **Pas de zapping** : L'utilisateur ne peut pas ignorer la dimension spirituelle
+3. **Ancrage émotionnel** : Les messages spirituels renforcent la motivation
+4. **Rituel quotidien** : Chaque jour = lecture complète (corps + esprit + âme)
+5. **Muscler la volonté** : "Faire ce qu'on dit" devient un acte spirituel, pas juste alimentaire
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ CONCLUSION : La fusion = tout afficher sur la même page, dans le même flux
+➡️ L'utilisateur lit le spirituel EN MÊME TEMPS que l'alimentaire
+➡️ Pas de page séparée, pas de bouton "voir aussi"
+➡️ C'est une EXPÉRIENCE COMPLÈTE à chaque jour de reprise
+
+───────────────────────────────────────────────────────────────────────────────
+✅ SYNTHÈSE : OÙ COMMENCER LE DÉVELOPPEMENT ?
+───────────────────────────────────────────────────────────────────────────────
+
+🎯 PRIORITÉ 1 : CRÉER L'INTERFACE DE REPRISE (2-3h)
+- Créer `/pages/reprise-alimentaire.js` (actuellement vide)
+- Implémenter l'interface de félicitations + engagement
+- Récupérer les données du jeûne terminé (durée, poids, dates)
+- Générer le programme proportionnel automatiquement
+- Afficher les phases détaillées
+- Bouton d'engagement avec validation
+
+🎯 PRIORITÉ 2 : BDD SUPABASE (1h)
+- Créer table `reprises_alimentaires` :
+  ```sql
+  CREATE TABLE reprises_alimentaires (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES auth.users(id),
+    jeune_id UUID REFERENCES jeunes(id),
+    duree_jeune INTEGER NOT NULL,
+    duree_reprise INTEGER NOT NULL,
+    programme_json JSONB NOT NULL,
+    date_debut TIMESTAMP NOT NULL,
+    date_fin_prevue TIMESTAMP NOT NULL,
+    statut VARCHAR(20) DEFAULT 'en_cours',
+    engagement_date TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW()
+  );
+  ```
+- Créer table `reprises_jours_valides` :
+  ```sql
+  CREATE TABLE reprises_jours_valides (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    reprise_id UUID REFERENCES reprises_alimentaires(id),
+    jour_numero INTEGER NOT NULL,
+    date_validation TIMESTAMP NOT NULL,
+    respect_programme BOOLEAN DEFAULT true,
+    note_utilisateur TEXT
+  );
+  ```
+
+🎯 PRIORITÉ 3 : ENRICHIR LE RÉFÉRENTIEL (1-2h)
+- Ajouter champs `favorableJeune` et `phase_reprise` à tous les aliments pertinents
+- Catégoriser les 30-40 aliments de reprise
+- Tester le filtre dans l'autocomplete
+
+🎯 PRIORITÉ 4 : LIER JEUNE → REPRISE (30 min)
+- Modifier `/pages/jeune.js` ligne 183 :
+  ```javascript
+  if (isFini) {
+    // Au lieu d'afficher juste un message :
+    router.push({
+      pathname: '/reprise-alimentaire',
+      query: {
+        dureeJeune,
+        poidsDepart,
+        joursFin: new Date().toISOString()
+      }
+    });
+  }
+  ```
+
+🎯 PRIORITÉ 5 : VALIDATION QUOTIDIENNE REPRISE (1h)
+- Créer composant de validation jour (similaire à jeune.js)
+- Afficher aliments autorisés du jour
+- Bouton "Valider ce jour de reprise"
+- Compteur de progression
+
+═══════════════════════════════════════════════════════════════════════════════
+🎯 ESTIMATION TOTALE : 6-8 HEURES DE DÉVELOPPEMENT
+═══════════════════════════════════════════════════════════════════════════════
+
+📌 PROCHAINE ÉTAPE : Valider ce plan d'action et commencer par la PRIORITÉ 1
+
+═══════════════════════════════════════════════════════════════════════════════
+🏗️ ARCHITECTURE INSPIRÉE DES IDÉAUX POUR LA REPRISE APRÈS JEÛNE
+═══════════════════════════════════════════════════════════════════════════════
+Date : 15 novembre 2025
+Inspiration : `/pages/ideaux.js` + `/lib/generateAnchoringPlan.js`
+
+🎯 OBJECTIF : Créer un système similaire aux idéaux mais adapté au jeûne réalisé qui génère automatiquement :
+1. Le programme de reprise alimentaire (proportionnel au jeûne)
+2. Puis la phase de consolidation 45 jours (ancrage des acquis)
+
+───────────────────────────────────────────────────────────────────────────────
+📊 COMPARAISON : IDÉAUX vs REPRISE APRÈS JEÛNE
+───────────────────────────────────────────────────────────────────────────────
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ CONCEPT              │ IDÉAUX                │ REPRISE APRÈS JEÛNE        │
+├───────────────────────────────────────────────────────────────────────────┤
+│ **Déclencheur**      │ Utilisateur crée      │ Utilisateur termine un     │
+│                      │ un idéal manuellement │ jeûne (valide dernier jour)│
+├───────────────────────────────────────────────────────────────────────────┤
+│ **Input principal**  │ Date cible            │ Durée du jeûne effectué    │
+│                      │ Indicateur mesurable  │ (3, 5, 7, 10, 14 jours)    │
+│                      │ (ex: 70kg)            │                            │
+├───────────────────────────────────────────────────────────────────────────┤
+│ **Calcul auto**      │ Nombre de semaines    │ Durée reprise = 2× jeûne   │
+│                      │ jusqu'à date cible    │ (ex: 5j jeûne → 8j reprise)│
+├───────────────────────────────────────────────────────────────────────────┤
+│ **Génération plan**  │ generateAnchoringPlan │ genererProgrammeReprise    │
+│                      │ (paliers progressifs) │ (phases alimentaires)      │
+├───────────────────────────────────────────────────────────────────────────┤
+│ **Structure plan**   │ Mois → Semaines →     │ Phases → Jours →           │
+│                      │ Séances               │ Repas autorisés            │
+├───────────────────────────────────────────────────────────────────────────┤
+│ **Personnalisation** │ Fréquence (3x/sem)    │ Vitesse transition         │
+│  avant validation    │ Durée (15min)         │ (stricte/souple)           │
+│                      │ Intensité (7,6 km/h)  │ Exceptions médicales       │
+│                      │ Jours (lun/mer/sam)   │                            │
+├───────────────────────────────────────────────────────────────────────────┤
+│ **Validation**       │ "Valider le plan      │ "Je m'engage et je démarre │
+│                      │ du Palier 1"          │ ma reprise"                │
+│                      │ → Séances dans BDD    │ → Programme figé dans BDD  │
+├───────────────────────────────────────────────────────────────────────────┤
+│ **Après validation** │ Plan FIGÉ             │ Programme FIGÉ             │
+│                      │ Paramètres stockés:   │ Paramètres stockés:        │
+│                      │ plan_params_valides   │ reprise_params_valides     │
+├───────────────────────────────────────────────────────────────────────────┤
+│ **Suivi quotidien**  │ Cocher séances faites │ Valider respect programme  │
+│                      │ (checkbox + durée)    │ + Saisir repas autorisés   │
+├───────────────────────────────────────────────────────────────────────────┤
+│ **Séances bonus**    │ Oui (séances en +)    │ Non (programme strict)     │
+├───────────────────────────────────────────────────────────────────────────┤
+│ **Paliers/Phases**   │ Palier 1, puis 2, 3   │ Phase 1-4 de reprise       │
+│                      │ (progression intensité│ puis Phase consolidation   │
+│                      │ / durée)              │ 45 jours                   │
+├───────────────────────────────────────────────────────────────────────────┤
+│ **Stockage BDD**     │ Table: ideaux         │ Table: reprises_alimentaires│
+│                      │ Table: seances_reelles│ Table: reprises_jours_valides│
+└───────────────────────────────────────────────────────────────────────────┘
+
+───────────────────────────────────────────────────────────────────────────────
+🏗️ ARCHITECTURE TECHNIQUE REPRISE APRÈS JEÛNE
+───────────────────────────────────────────────────────────────────────────────
+
+📂 FICHIERS À CRÉER (inspirés de ideaux.js)
+
+1. **`/pages/reprise-alimentaire.js`** (équivalent de ideaux.js)
+   - Page principale de gestion de reprise
+   - Affichage félicitations + récap jeûne
+   - Génération programme proportionnel
+   - Validation engagement
+   - Suivi quotidien
+
+2. **`/lib/genererProgrammeReprise.js`** (équivalent de generateAnchoringPlan.js)
+   - Fonction de génération automatique du programme
+   - Input: `{ dureeJeune, poidsDepart, dateFin, options }`
+   - Output: Objet structuré avec phases + jours + aliments
+
+3. **`/data/alimentsRepriseJeune.js`** (BDD séparée)
+   - Aliments par phase (phase_1 à phase_4)
+   - Propriétés: nom, kcal, portion, conseil, favoriseCetose
+
+4. **`/components/SaisieRepriseJeune.js`** (composant dédié)
+   - Interface de saisie spécifique reprise
+   - Affiche UNIQUEMENT aliments autorisés de la phase
+   - Validation quotidienne
+
+───────────────────────────────────────────────────────────────────────────────
+📋 FONCTION genererProgrammeReprise() - SPÉCIFICATIONS
+───────────────────────────────────────────────────────────────────────────────
+
+```javascript
+/**
+ * Génère un programme de reprise alimentaire proportionnel au jeûne effectué
+ * Inspiré de generateAnchoringPlan() mais adapté au contexte post-jeûne
+ * 
+ * @param {Object} params - Paramètres du jeûne terminé
+ * @param {number} params.dureeJeune - Durée du jeûne en jours (3, 5, 7, 10, 14)
+ * @param {number} params.poidsDepart - Poids au début du jeûne (kg)
+ * @param {string} params.dateFin - Date de fin du jeûne (ISO string)
+ * @param {Object} params.options - Options personnalisables (avant validation)
+ * @param {string} params.options.vitesseTransition - 'stricte' | 'souple' (défaut: stricte)
+ * @param {boolean} params.options.maintienCetose - Priorité cétose (défaut: true)
+ * 
+ * @returns {Object} Programme structuré
+ */
+function genererProgrammeReprise(params) {
+  const { dureeJeune, poidsDepart, dateFin, options = {} } = params;
+  
+  // 1. CALCUL DURÉE REPRISE (règle proportionnelle)
+  const dureeReprise = calculerDureeReprise(dureeJeune);
+  // Ex: 5 jours jeûne → 8 jours reprise
+  
+  // 2. DÉCOUPAGE EN PHASES (progressif)
+  // ⚠️ IMPORTANT : Le découpage en 4 phases vient du cahier des charges médical
+  // Source : /docs/Complement info page jeune lignes 183-209
+  // Exemple jeûne 14 jours : J1-J3 (liquides), J4-J7 (fibres), J8-J12 (protéines), J13-J18 (féculents)
+  // Cette progression en 4 étapes est SCIENTIFIQUEMENT validée pour éviter le choc métabolique
+  const phases = decouper EnPhases(dureeReprise);
+  // Ex: 8 jours reprise → Phase1(J1-J2), Phase2(J3-J4), Phase3(J5-J6), Phase4(J7-J8)
+  
+  // 3. GÉNÉRATION JOURS AVEC ALIMENTS AUTORISÉS
+  const jours = [];
+  let dateActuelle = new Date(dateFin);
+  dateActuelle.setDate(dateActuelle.getDate() + 1); // J+1 après fin jeûne
+  
+  phases.forEach(phase => {
+    for (let j = phase.joursDebut; j <= phase.joursFin; j++) {
+      jours.push({
+        numero: j,
+        date: dateActuelle.toISOString().slice(0, 10),
+        phase: phase.nom,
+        phaseNumero: phase.numero,
+        objectif: phase.objectif,
+        
+        // Aliments autorisés ce jour (filtrés par phase)
+        alimentsAutorises: getAlimentsPhase(phase.numero, options.maintienCetose),
+        
+        // Règles strictes du jour
+        interdits: phase.interdits,
+        
+        // Messages spirituels + physiques
+        messagePhysique: phase.messagePhysique,
+        messageSpirituel: phase.messageSpirituel,
+        messageMotivation: phase.messageMotivation,
+        
+        // Parole inspirante
+        paroleJour: phase.paroleJour,
+        citations: phase.citations,
+        
+        // État validation
+        valide: false,
+        dateValidation: null
+      });
+      
+      dateActuelle.setDate(dateActuelle.getDate() + 1);
+    }
+  });
+  
+  // 4. STRUCTURE FINALE (similaire à ideaux.js)
+  return {
+    // Métadonnées
+    jeune: {
+      duree: dureeJeune,
+      poidsDepart,
+      dateFin,
+      poidsFin: null // À renseigner au début reprise
+    },
+    
+    // Programme de reprise
+    reprise: {
+      dureeJours: dureeReprise,
+      dateDebut: jours[0].date,
+      dateFin: jours[jours.length - 1].date,
+      options: {
+        vitesseTransition: options.vitesseTransition || 'stricte',
+        maintienCetose: options.maintienCetose !== false
+      }
+    },
+    
+    // Phases structurées
+    phases: phases.map(p => ({
+      numero: p.numero,
+      nom: p.nom,
+      joursDebut: p.joursDebut,
+      joursFin: p.joursFin,
+      objectif: p.objectif,
+      alimentsTypes: p.alimentsTypes,
+      interdits: p.interdits
+    })),
+    
+    // Jours détaillés (équivalent des semaines dans ideaux)
+    jours: jours,
+    
+    // Règles globales
+    reglesGlobales: [
+      "❌ Aucun sucre raffiné pendant toute la reprise",
+      "❌ Aucun féculent le soir",
+      "❌ Aucun extra (fast-food, alcool, produits transformés)",
+      "✅ 2 litres d'eau par jour minimum",
+      "✅ Validation quotidienne obligatoire"
+    ],
+    
+    // Statistiques
+    stats: {
+      nbJoursTotal: jours.length,
+      nbJoursValides: 0,
+      nbPhases: phases.length,
+      progressionPct: 0
+    }
+  };
+}
+
+// === FONCTIONS HELPERS ===
+
+function calculerDureeReprise(dureeJeune) {
+  const mapping = {
+    3: 5,
+    5: 8,
+    7: 12,
+    10: 14,
+    14: 28,
+    16: 28
+  };
+  return mapping[dureeJeune] || Math.ceil(dureeJeune * 2);
+}
+
+function decouper EnPhases(dureeReprise) {
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 🔬 POURQUOI 4 PHASES ? EXPLICATION SCIENTIFIQUE ET MÉDICALE
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  // Source : "Complement info page jeune" lignes 183-209 + recommandations médicales
+  
+  // PHASE 1 : RÉVEIL DIGESTIF (liquides uniquement)
+  // Pourquoi ? Après un jeûne, le système digestif est en "mode veille".
+  // Les enzymes digestives sont réduites, la flore intestinale est modifiée.
+  // ➡️ Commencer par des LIQUIDES évite le choc métabolique et réveille doucement l'intestin.
+  // Risque si on saute cette phase : Syndrome de renutrition (dangereux, voire mortel)
+  
+  // PHASE 2 : INTRODUCTION FIBRES (légumes cuits + soupes)
+  // Pourquoi ? Une fois le système digestif réveillé, on réintroduit des fibres DOUCES.
+  // Les légumes cuits vapeur sont faciles à digérer et réactivent le transit.
+  // ➡️ On évite encore les fibres CRUES (trop agressives) et les féculents (trop lourds).
+  
+  // PHASE 3 : PROTÉINES & GRAISSES (œufs, avocats, huiles)
+  // Pourquoi ? Le corps a besoin de reconstruire (autophagie = recyclage cellulaire).
+  // Les protéines complètes + bonnes graisses fournissent les "briques" sans casser la cétose.
+  // ➡️ On maintient encore les bénéfices métaboliques du jeûne (brûlage graisses).
+  
+  // PHASE 4 : FÉCULENTS DOUX (riz complet, patate douce)
+  // Pourquoi ? C'est la transition finale vers une alimentation "normale".
+  // Les féculents à IG bas réintroduisent les glucides PROGRESSIVEMENT.
+  // ➡️ On sort de la cétose en douceur, sans pic insulinique brutal.
+  
+  // 🎯 INTÉRÊT DU DÉCOUPAGE EN 4 PHASES :
+  // 1. Éviter le syndrome de renutrition (risque vital)
+  // 2. Préserver les bénéfices du jeûne le plus longtemps possible
+  // 3. Réhabituer le corps progressivement (pas de choc digestif)
+  // 4. Ancrer les nouveaux comportements alimentaires
+  // 5. Maintenir la cétose partielle durant Phase 1-3 (brûlage graisses continu)
+  
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  // Découpage proportionnel en 4 phases (selon durée reprise)
+  const dureePhase1 = Math.ceil(dureeReprise / 4);      // ~25% (liquides)
+  const dureePhase2 = Math.ceil(dureeReprise / 4);      // ~25% (fibres douces)
+  const dureePhase3 = Math.ceil(dureeReprise / 4);      // ~25% (protéines + graisses)
+  const dureePhase4 = dureeReprise - (dureePhase1 + dureePhase2 + dureePhase3); // Reste (féculents)
+  
+  return [
+    {
+      numero: 1,
+      nom: "Réveil digestif ultra doux",
+      joursDebut: 1,
+      joursFin: dureePhase1,
+      objectif: "Réhabituer ton système digestif en douceur",
+      alimentsTypes: ["Liquides", "Jus filtrés", "Bouillons clairs"],
+      interdits: ["Aucun aliment solide", "Aucun sucre", "Aucun féculent"],
+      messagePhysique: "Ton système digestif est en sommeil depuis X jours...",
+      messageSpirituel: "Ce bouillon n'est pas qu'un liquide. C'est une reconnexion à la vie...",
+      messageMotivation: "Le plus dur est fait. Tu entres maintenant dans la phase d'ancrage.",
+      paroleJour: "Ton corps te remercie pour ce repos. Honore-le avec douceur.",
+      citations: [
+        { source: "Bible", texte: "Que votre corps soit un temple...", ref: "1 Cor 6:19" }
+      ]
+    },
+    {
+      numero: 2,
+      nom: "Introduction fibres et minéraux",
+      joursDebut: dureePhase1 + 1,
+      joursFin: dureePhase1 + dureePhase2,
+      objectif: "Réintroduire les fibres progressivement",
+      alimentsTypes: ["Soupes", "Légumes cuits", "Poissons blancs"],
+      interdits: ["Aucun féculent", "Aucun sucre", "Aucune graisse ajoutée"],
+      messagePhysique: "Ton intestin se réveille. Les fibres douces relancent le transit...",
+      messageSpirituel: "Chaque légume que tu manges est un acte de soin...",
+      messageMotivation: "Tu progresses. Ton corps intègre la nourriture avec sagesse.",
+      paroleJour: "La simplicité est une force. Ce repas te suffit.",
+      citations: [
+        { source: "Islam", texte: "Mangez et buvez, mais sans excès", ref: "Coran 7:31" }
+      ]
+    },
+    {
+      numero: 3,
+      nom: "Réintégration protéines et graisses douces",
+      joursDebut: dureePhase1 + dureePhase2 + 1,
+      joursFin: dureePhase1 + dureePhase2 + dureePhase3,
+      objectif: "Ajouter protéines complètes et bonnes graisses",
+      alimentsTypes: ["Œufs", "Avocats", "Huiles végétales", "Yaourts"],
+      interdits: ["Aucun féculent", "Aucun sucre raffiné"],
+      messagePhysique: "Ton corps retrouve sa capacité à métaboliser des nutriments complexes...",
+      messageSpirituel: "Tu tiens parole envers toi-même. Cette maîtrise, c'est ta force...",
+      messageMotivation: "Tu es à mi-chemin. Observe ta stabilité émotionnelle.",
+      paroleJour: "Faire ce qu'on dit qu'on va faire, c'est muscler sa volonté.",
+      citations: [
+        { source: "Conversations avec Dieu", texte: "Ce que tu fais avec intention devient sacré" }
+      ]
+    },
+    {
+      numero: 4,
+      nom: "Féculents doux (midi uniquement)",
+      joursDebut: dureePhase1 + dureePhase2 + dureePhase3 + 1,
+      joursFin: dureeReprise,
+      objectif: "Réintroduire les féculents progressivement",
+      alimentsTypes: ["Patate douce", "Riz complet", "Flocons d'avoine", "Fruits doux"],
+      interdits: ["Féculents le soir", "Sucres raffinés"],
+      messagePhysique: "Tu stabilises ton métabolisme. La cétose diminue, c'est prévu...",
+      messageSpirituel: "Tu as tenu X jours. Tu as prouvé que tu es maître de tes choix...",
+      messageMotivation: "Dernière ligne droite. Chaque jour compte pour l'ancrage.",
+      paroleJour: "Ce que tu as accompli n'est pas temporaire. C'est une transformation.",
+      citations: [
+        { source: "Bible", texte: "L'homme ne vivra pas de pain seulement...", ref: "Mt 4:4" }
+      ]
+    }
+  ];
+}
+
+function getAlimentsPhase(phaseNumero, maintienCetose) {
+  // Importer depuis /data/alimentsRepriseJeune.js
+  const alimentsRepriseJeune = require('../data/alimentsRepriseJeune');
+  
+  let aliments = alimentsRepriseJeune[`phase_${phaseNumero}`] || [];
+  
+  // Si option maintienCetose activée, filtrer aliments qui favorisent cétose
+  if (maintienCetose && phaseNumero <= 3) {
+    aliments = aliments.filter(a => a.favoriseCetose !== false);
+  }
+  
+  return aliments;
+}
+```
+
+───────────────────────────────────────────────────────────────────────────────
+📊 STRUCTURE BDD SUPABASE (inspirée de ideaux + seances_reelles)
+───────────────────────────────────────────────────────────────────────────────
+
+```sql
+-- Table principale : reprises_alimentaires (équivalent de "ideaux")
+CREATE TABLE reprises_alimentaires (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) NOT NULL,
+  jeune_id UUID REFERENCES jeunes(id), -- Lien vers le jeûne qui a déclenché cette reprise
+  
+  -- Données du jeûne terminé
+  duree_jeune INTEGER NOT NULL, -- 3, 5, 7, 10, 14 jours
+  poids_depart NUMERIC(5,2),
+  poids_fin NUMERIC(5,2),
+  date_fin_jeune DATE NOT NULL,
+  
+  -- Programme de reprise généré
+  duree_reprise INTEGER NOT NULL, -- Calculé: 2× duree_jeune
+  date_debut_reprise DATE NOT NULL,
+  date_fin_prevue DATE NOT NULL,
+  programme_json JSONB NOT NULL, -- Sortie de genererProgrammeReprise()
+  
+  -- Paramètres personnalisables (AVANT validation)
+  vitesse_transition VARCHAR(20) DEFAULT 'stricte', -- 'stricte' | 'souple'
+  maintien_cetose BOOLEAN DEFAULT true,
+  
+  -- État de validation
+  statut VARCHAR(20) DEFAULT 'brouillon', -- 'brouillon' | 'en_cours' | 'termine' | 'abandonne'
+  engagement_date TIMESTAMP, -- Date de validation du programme (figement)
+  date_fin_reelle DATE, -- Date réelle de fin (peut différer de date_fin_prevue)
+  
+  -- Paramètres figés après validation (équivalent de plan_params_valides dans ideaux)
+  reprise_params_valides JSONB, -- {dureeJeune, dureeReprise, vitesseTransition, maintienCetose, dateDebut}
+  
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Index pour performance
+CREATE INDEX idx_reprises_user ON reprises_alimentaires(user_id);
+CREATE INDEX idx_reprises_statut ON reprises_alimentaires(statut);
+CREATE INDEX idx_reprises_jeune ON reprises_alimentaires(jeune_id);
+
+-- Table de suivi quotidien : reprises_jours_valides (équivalent de "seances_reelles")
+CREATE TABLE reprises_jours_valides (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  reprise_id UUID REFERENCES reprises_alimentaires(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES auth.users(id) NOT NULL,
+  
+  -- Identification du jour
+  jour_numero INTEGER NOT NULL, -- 1 à N (durée reprise)
+  date_prevue DATE NOT NULL,
+  date_validation TIMESTAMP, -- Quand l'utilisateur a validé ce jour
+  phase_numero INTEGER NOT NULL, -- 1, 2, 3, 4
+  phase_nom VARCHAR(100),
+  
+  -- État de validation
+  respect_programme BOOLEAN DEFAULT true, -- true = respect strict, false = déviation
+  note_deviation TEXT, -- Si respect_programme = false, expliquer pourquoi
+  
+  -- Ressenti (optionnel, feature future)
+  legerete_digestive BOOLEAN,
+  energie_stable BOOLEAN,
+  satiete_durable BOOLEAN,
+  clarte_mentale BOOLEAN,
+  sensation_maitrise BOOLEAN,
+  note_personnelle TEXT,
+  
+  -- Niveau cétose estimé ce jour (optionnel)
+  niveau_cetose_estime INTEGER, -- 0-100%
+  
+  created_at TIMESTAMP DEFAULT NOW(),
+  
+  -- Contrainte unicité : un seul enregistrement par jour
+  UNIQUE(reprise_id, date_prevue)
+);
+
+-- Index pour performance
+CREATE INDEX idx_reprises_jours_reprise ON reprises_jours_valides(reprise_id);
+CREATE INDEX idx_reprises_jours_user ON reprises_jours_valides(user_id);
+CREATE INDEX idx_reprises_jours_date ON reprises_jours_valides(date_prevue);
+
+-- Table des repas consommés pendant la reprise (optionnel, pour détail)
+CREATE TABLE reprises_repas_consommes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  reprise_jour_id UUID REFERENCES reprises_jours_valides(id) ON DELETE CASCADE NOT NULL,
+  
+  -- Aliment consommé
+  aliment_nom VARCHAR(100) NOT NULL,
+  quantite NUMERIC(6,2),
+  unite VARCHAR(20),
+  kcal INTEGER,
+  
+  -- Respect programme
+  aliment_autorise BOOLEAN DEFAULT true, -- false si aliment hors programme
+  phase_numero INTEGER, -- Phase dans laquelle cet aliment est autorisé
+  favorise_cetose BOOLEAN,
+  
+  created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+───────────────────────────────────────────────────────────────────────────────
+🎯 WORKFLOW UTILISATEUR (inspiré de ideaux.js)
+───────────────────────────────────────────────────────────────────────────────
+
+**ÉTAPE 1 : FIN DU JEÛNE**
+```
+Utilisateur valide le dernier jour de jeûne dans /pages/jeune.js
+→ Redirection automatique vers /pages/reprise-alimentaire.js
+→ Passage des params: { dureeJeune, poidsDepart, dateFin }
+```
+
+**ÉTAPE 2 : GÉNÉRATION AUTOMATIQUE DU PROGRAMME**
+```javascript
+// Dans /pages/reprise-alimentaire.js
+useEffect(() => {
+  if (router.query.dureeJeune) {
+    const params = {
+      dureeJeune: parseInt(router.query.dureeJeune),
+      poidsDepart: parseFloat(router.query.poidsDepart),
+      dateFin: router.query.dateFin,
+      options: {
+        vitesseTransition: 'stricte', // Valeur par défaut personnalisable
+        maintienCetose: true
+      }
+    };
+    
+    const programme = genererProgrammeReprise(params);
+    setProgrammeGenere(programme);
+    setShowInterfaceValidation(true);
+  }
+}, [router.query]);
+```
+
+**ÉTAPE 3 : INTERFACE DE FÉLICITATIONS + PERSONNALISATION**
+```
+Affichage :
+- 🎉 Félicitations ! Ton jeûne de X jours est terminé
+- ⚖️ Récapitulatif (poids, durée, dates)
+- 📋 Programme personnalisé (durée reprise calculée)
+- ⚙️ Options personnalisables (AVANT validation) :
+  * Vitesse transition: [Stricte] [Souple]
+  * Maintien cétose prioritaire: [Oui] [Non]
+- 💬 Message personnel (écrit avant jeûne)
+- 🔒 Engagement formel
+```
+
+**ÉTAPE 4 : VALIDATION & FIGEMENT DU PROGRAMME**
+```javascript
+async function handleValiderProgrammeReprise() {
+  if (!programmeGenere) return;
+  
+  setMessage('⏳ Validation du programme en cours...');
+  
+  try {
+    // 1. Enregistrer dans Supabase
+    const { data: repriseData, error: repriseError } = await supabase
+      .from('reprises_alimentaires')
+      .insert({
+        user_id: userId,
+        jeune_id: jeuneId,
+        duree_jeune: programmeGenere.jeune.duree,
+        poids_depart: programmeGenere.jeune.poidsDepart,
+        date_fin_jeune: programmeGenere.jeune.dateFin,
+        duree_reprise: programmeGenere.reprise.dureeJours,
+        date_debut_reprise: programmeGenere.reprise.dateDebut,
+        date_fin_prevue: programmeGenere.reprise.dateFin,
+        programme_json: programmeGenere,
+        vitesse_transition: programmeGenere.reprise.options.vitesseTransition,
+        maintien_cetose: programmeGenere.reprise.options.maintienCetose,
+        statut: 'en_cours',
+        engagement_date: new Date().toISOString(),
+        // Paramètres figés (comme plan_params_valides dans ideaux)
+        reprise_params_valides: {
+          dureeJeune: programmeGenere.jeune.duree,
+          dureeReprise: programmeGenere.reprise.dureeJours,
+          vitesseTransition: programmeGenere.reprise.options.vitesseTransition,
+          maintienCetose: programmeGenere.reprise.options.maintienCetose,
+          dateDebut: programmeGenere.reprise.dateDebut
+        }
+      })
+      .select()
+      .single();
+    
+    if (repriseError) throw repriseError;
+    
+    // 2. Créer les jours prévus (comme seances_reelles dans ideaux)
+    const joursInserts = programmeGenere.jours.map(jour => ({
+      reprise_id: repriseData.id,
+      user_id: userId,
+      jour_numero: jour.numero,
+      date_prevue: jour.date,
+      phase_numero: jour.phaseNumero,
+      phase_nom: jour.phase,
+      respect_programme: null, // Sera renseigné quotidiennement
+      note_deviation: null
+    }));
+    
+    const { error: joursError } = await supabase
+      .from('reprises_jours_valides')
+      .insert(joursInserts);
+    
+    if (joursError) throw joursError;
+    
+    setMessage('✅ Programme validé ! Tu as pris ton engagement.');
+    setProgrammeValide(true);
+    setRepriseId(repriseData.id);
+    
+    // 3. Afficher le suivi quotidien (ZONE 2)
+    setShowSuiviQuotidien(true);
+    
+  } catch (err) {
+    console.error('Erreur validation programme:', err);
+    setMessage('❌ Erreur lors de la validation: ' + err.message);
+  }
+}
+```
+
+**ÉTAPE 5 : SUIVI QUOTIDIEN (similaire à seances_reelles)**
+```
+Affichage jour par jour (comme navigation semaine par semaine dans ideaux) :
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ 📅 Jour 3/8 de ta reprise                                              │
+│ Phase 2 : Introduction fibres et minéraux                              │
+├─────────────────────────────────────────────────────────────────────────┤
+│ 🧠 Ce qui se passe en toi aujourd'hui                                  │
+│ [Message physique + spirituel du jour]                                 │
+│                                                                         │
+│ 🍽️ Aliments autorisés aujourd'hui :                                   │
+│ [Soupes] [Courgette vapeur] [Carotte vapeur] [Poisson blanc]          │
+│                                                                         │
+│ [Interface SaisieRepriseJeune.js]                                      │
+│                                                                         │
+│ ✅ Valider ce jour de reprise                                          │
+│ [ ] J'ai respecté strictement le programme                             │
+│ [ ] J'ai dévié (expliquer) : __________                                │
+│                                                                         │
+│ 💬 Ressenti (optionnel) :                                              │
+│ [ ] Légèreté digestive  [ ] Énergie stable  [ ] Clarté mentale        │
+│                                                                         │
+│ [Enregistrer]                                                           │
+└─────────────────────────────────────────────────────────────────────────┘
+
+Navigation jours :
+[Jour 1] [Jour 2] [🔥 Jour 3] [Jour 4] ... [Jour 8]
+  ✅      ✅       (actuel)    (futur)      (futur)
+```
+
+**ÉTAPE 6 : TRANSITION VERS PHASE CONSOLIDATION 45 JOURS**
+```
+Quand jour 8/8 validé :
+→ Message de félicitations
+→ Proposition : "Passer à la phase de consolidation 45 jours"
+→ Génération automatique programme consolidation (à développer plus tard)
+```
+
+───────────────────────────────────────────────────────────────────────────────
+🎯 PHASE APRÈS LA REPRISE : CONSERVATION DES BIENFAITS DU JEÛNE
+───────────────────────────────────────────────────────────────────────────────
+
+**NOM RETENU** : 🌟 **"Cristallisation du jeûne"** (45 jours)
+
+**NOMS ALTERNATIFS** :
+- "Conservation des bienfaits" (45 jours) - simple, clair
+- 🔥 "Sanctuarisation des acquis" (45 jours) - fort, spirituel
+- ✨ "Préservation de la métamorphose" (45 jours) - poétique
+- 🛡️ "Blindage des bénéfices" (45 jours) - protecteur
+- 💎 "Ancrage de ta transformation" (45 jours) - profond
+
+---
+
+## 🔍 POURQUOI 45 JOURS ? SOURCE SCIENTIFIQUE
+
+**📘 Source** : `/docs/Complement info page jeune` (ligne 1)
+> "CAHIER DES CHARGES – ROUTINE ALIMENTAIRE STRUCTURÉE SUR 45 JOURS"
+
+**Durée = 6 semaines × 7 jours = 42-45 jours**
+
+**Base scientifique** :
+- **21 jours** = temps minimum pour créer une nouvelle habitude (études comportementales classiques)
+- **45 jours (6 semaines)** = temps nécessaire pour **ANCRER DURABLEMENT** un comportement et le rendre **AUTOMATIQUE**
+- Après 45 jours d'application stricte : le nouveau comportement devient **réflexe inconscient** (plus besoin d'effort conscient)
+
+**Objectif de la phase** :
+- Transformer les "règles à suivre" en "automatismes intégrés"
+- Faire du jeûne hebdomadaire un **rituel naturel** (pas une contrainte)
+- Ancrer la conscience alimentaire (satiété, extras, féculents) dans le quotidien
+- Passer de "je dois faire attention" à "je fais naturellement les bons choix"
+
+**Après les 45 jours** : L'utilisateur n'a plus besoin d'un "programme strict". Les comportements sont devenus partie intégrante de sa vie. Il passe en **"mode normal avec acquis intégrés"** → Les Portes de Constance valident que les comportements sont ancrés, puis retour à l'utilisation classique de l'app MAIS avec les nouvelles habitudes devenues automatiques.
+
+---
+
+## 📅 CHRONOLOGIE COMPLÈTE DU CYCLE JEÛNE (Vue d'ensemble)
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    🌟 CYCLE COMPLET DU JEÛNE                            │
+│              De la préparation au retour à la vie normale               │
+└─────────────────────────────────────────────────────────────────────────┘
+
+📍 ÉTAPE 0 : VIE NORMALE (AVANT JEÛNE)
+│ 
+│ ├─ Utilisation classique de l'app Mon Plan Vital
+│ ├─ Suivi repas, extras, satiété, défis
+│ ├─ Comportements alimentaires = ceux d'avant (avec suivi)
+│ │
+│ └─ 💡 DÉCISION : "Je veux faire un jeûne"
+│      └─ Clic sur `/pages/jeune.js` → PRÉPARATION
+│
+├──────────────────────────────────────────────────────────────────────────
+│
+📍 ÉTAPE 1 : PRÉPARATION AU JEÛNE (Durée PROPORTIONNELLE)
+│ Page : `/pages/jeune.js` (mode préparation)
+│ Durée : PROPORTIONNELLE à la durée du jeûne choisi
+│        Formule : duree_preparation = duree_jeune × 4
+│        Exemples : 3j jeûne → 12j prépa (J-12 à J-0)
+│                   5j jeûne → 20j prépa (J-20 à J-0)
+│                   7j jeûne → 28j prépa (J-28 à J-0)
+│                   14j jeûne → 56j prépa (J-56 à J-0)
+│ 📘 Source : `/docs/Préparation aux jeune` lignes 1-150 (adapté)
+│ 
+│ ├─ Choix de la durée du jeûne (3, 5, 7, 10, 14 jours)
+│ ├─ Validation de la date de début (dans X jours selon formule)
+│ │
+│ ├─ PHASE 1 : FONDATIONS (J-30 à J-18)
+│ │   ├─ J-30 : Respect strict des quantités (portions contrôlées)
+│ │   ├─ J-17 : Supprimer féculents le soir + action après repas (marche)
+│ │   └─ J-14 : Éliminer produits transformés + sucreries
+│ │
+│ ├─ PHASE 2 : INTENSIFICATION (J-12 à J-1)
+│ │   ├─ J-12 : 2 jours de jeûne plein (préparation métabolique)
+│ │   ├─ J-7 : 2L eau/jour + pas de repas après 19h + plage 45min
+│ │   └─ J-1 : Dernier jour de préparation
+│ │
+│ ├─ Préparation mentale (tout au long des 30 jours) :
+│ │   └─ Rédaction message à soi-même (pourquoi je jeûne)
+│ │   └─ Visualisation de la réussite
+│ │   └─ Poids de départ enregistré
+│ │
+│ └─ ✅ VALIDATION J-0 : "Je suis prêt·e, je commence demain"
+│      └─ Passage automatique en mode "JEÛNE EN COURS"
+│
+├──────────────────────────────────────────────────────────────────────────
+│
+📍 ÉTAPE 2 : JEÛNE EN COURS (J1 à Jfinal)
+│ Page : `/pages/jeune.js` (mode en cours)
+│ Durée : Variable selon choix (3, 5, 7, 10 ou 14 jours)
+│ 
+│ ├─ Validation quotidienne : "J'ai jeûné aujourd'hui"
+│ ├─ Évolution poids (saisie quotidienne ou tous les 2 jours)
+│ ├─ Messages spirituels contextuels :
+│ │   └─ J1-J2 : Encouragement début (métabolique, glucides)
+│ │   └─ J3-J5 : Transition cétose (difficulté, clarté mentale)
+│ │   └─ J6-J8 : Cétose établie (énergie stable, lucidité)
+│ │   └─ J9+ : Approfondissement (nettoyage profond, régénération)
+│ ├─ Suivi hydratation (2L/jour minimum)
+│ ├─ Replay message personnel (écrit en préparation)
+│ │
+│ └─ ⚠️ J-3 AVANT FIN JEÛNE : GÉNÉRATION AUTOMATIQUE DU PLAN DE REPRISE
+│      ├─ Notification : "Ton jeûne se termine dans 3 jours"
+│      ├─ Génération automatique du programme reprise (4 phases)
+│      ├─ Présentation du plan alimentaire pour validation
+│      ├─ Liste de courses suggérée (aliments Phase 1-2)
+│      └─ Message : "Prépare-toi mentalement et organise tes courses"
+│
+│ └─ ✅ VALIDATION DERNIER JOUR : "J'ai terminé mon jeûne"
+│      └─ Redirection AUTOMATIQUE vers REPRISE ALIMENTAIRE (plan déjà validé)
+│
+├──────────────────────────────────────────────────────────────────────────
+│
+📍 ÉTAPE 3 : ⚠️ J-3 AVANT FIN JEÛNE : PRÉPARATION MENTALE & LOGISTIQUE
+│ Page : `/pages/jeune.js` (mode en cours, jour J-3 avant fin)
+│ Timing : 3 JOURS AVANT la fin du jeûne prévu
+│ Durée : Instant de validation (mais crucial pour organisation)
+│ 
+│ 🎯 OBJECTIF : L'utilisateur était en jeûne, ne pensait pas nourriture,
+│               ne faisait pas de courses. Il DOIT maintenant se préparer
+│               mentalement ET matériellement pour la reprise.
+│
+│ ├─ DÉTECTION AUTOMATIQUE (système backend)
+│ │   └─ Si aujourd'hui = date_fin_jeune - 3 jours
+│ │       → Déclencher génération programme reprise
+│ │
+│ ├─ NOTIFICATION VISIBLE (bannière orange)
+│ │   ┌────────────────────────────────────────────────────────────┐
+│ │   │ ⏰ TON JEÛNE SE TERMINE DANS 3 JOURS                       │
+│ │   │ Il est temps de préparer ta reprise alimentaire.          │
+│ │   │ [Voir mon plan de reprise] 🔔                             │
+│ │   └────────────────────────────────────────────────────────────┘
+│ │
+│ ├─ GÉNÉRATION AUTOMATIQUE DU PROGRAMME (backend)
+│ │   └─ Fonction : `genererProgrammeReprise()`
+│ │   └─ Input : durée jeûne réel, poids départ, date fin
+│ │   └─ Output : Programme 4 phases proportionnel + liste courses
+│ │
+│ ├─ ÉCRAN DE VALIDATION DU PLAN (modal ou page dédiée)
+│ │   ┌────────────────────────────────────────────────────────────┐
+│ │   │ 🌟 Ton plan de reprise est prêt !                         │
+│ │   │                                                            │
+│ │   │ Tu as jeûné 7 jours → Reprise sur 14 jours               │
+│ │   │                                                            │
+│ │   │ 📋 PROGRAMME GÉNÉRÉ POUR TOI :                            │
+│ │   │                                                            │
+│ │   │ Phase 1 : J1-J2 (Liquides uniquement)                    │
+│ │   │   🥤 Bouillons, jus filtrés, eau citronnée               │
+│ │   │                                                            │
+│ │   │ Phase 2 : J3-J5 (Fibres douces)                          │
+│ │   │   🥗 Légumes cuits, poissons blancs                       │
+│ │   │                                                            │
+│ │   │ Phase 3 : J6-J9 (Protéines & graisses)                   │
+│ │   │   🥚 Œufs, avocats, huiles végétales                      │
+│ │   │                                                            │
+│ │   │ Phase 4 : J10-J14 (Féculents doux midi)                  │
+│ │   │   🍠 Patate douce, riz complet                            │
+│ │   │                                                            │
+│ │   │ ──────────────────────────────────────────────────────────│
+│ │   │                                                            │
+│ │   │ 🛒 LISTE DE COURSES (Phase 1-2 prioritaires) :           │
+│ │   │ ☐ Légumes : courgettes, carottes, poireaux               │
+│ │   │ ☐ Poisson blanc : cabillaud ou sole (200g)               │
+│ │   │ ☐ Citrons (3-4)                                           │
+│ │   │ ☐ Bouillon de légumes bio (ou ingrédients)               │
+│ │   │ ☐ Infusions (camomille, verveine)                        │
+│ │   │                                                            │
+│ │   │ 💡 Tu as 3 jours pour :                                   │
+│ │   │    ✅ Te préparer mentalement à remanger                  │
+│ │   │    ✅ Faire tes courses (pas de stress dernier moment)   │
+│ │   │    ✅ Visualiser ta reprise sereine                       │
+│ │   │                                                            │
+│ │   │ ☐ J'ai lu et compris mon plan de reprise                 │
+│ │   │ ☐ Je m'engage à suivre ce programme                      │
+│ │   │                                                            │
+│ │   │ [Valider mon plan de reprise] [Modifier les options]     │
+│ │   └────────────────────────────────────────────────────────────┘
+│ │
+│ └─ ✅ VALIDATION DU PLAN (J-3)
+│      ├─ Plan enregistré en base (verrouillé)
+│      ├─ Table : `reprises_alimentaires` (statut: plan_valide)
+│      ├─ Jours pré-générés dans `reprises_jours_valides`
+│      └─ Message : "Ton plan est prêt. Profite de tes 3 derniers jours de jeûne."
+│
+├──────────────────────────────────────────────────────────────────────────
+│
+📍 ÉTAPE 4 : REPRISE ALIMENTAIRE APRÈS JEÛNE (Durée = 2× jeûne)
+│ Page : `/pages/reprise-alimentaire.js` ⚠️ À CRÉER
+│ Durée : PROPORTIONNELLE au jeûne (2× durée)
+│        Exemples : 3j jeûne → 5j reprise
+│                   5j jeûne → 8j reprise
+│                   7j jeûne → 12j reprise
+│                   14j jeûne → 28j reprise
+│
+│ ├─ ARRIVÉE : Programme généré AUTOMATIQUEMENT
+│ │   ├─ Récap jeûne : durée, poids perdu, dates
+│ │   ├─ Replay message personnel écrit avant jeûne
+│ │   ├─ Programme reprise : 4 phases, X jours, aliments autorisés
+│ │   └─ Options personnalisation (vitesse transition, priorité cétose)
+│ │
+│ ├─ VALIDATION DU PROGRAMME (avant de commencer)
+│ │   ├─ Case à cocher : "Je m'engage à suivre ce programme"
+│ │   ├─ Confirmation engagement solennel
+│ │   └─ ✅ Validation → Programme VERROUILLÉ (comme plan_params_valides)
+│ │
+│ ├─ SUIVI QUOTIDIEN (jour par jour) - Phases PROPORTIONNELLES
+│ │   📘 Source : `/docs/Complement info page jeune` lignes 183-209
+│ │   
+│ │   ⚠️ DURÉE DES PHASES = PROPORTIONNELLE À LA DURÉE DU JEÛNE
+│ │   Exemple jeûne 14 jours → 28 jours reprise découpés ainsi :
+│ │
+│ │   ├─ PHASE 1 : RÉVEIL DIGESTIF ULTRA DOUX (~25% durée reprise)
+│ │   │   Exemple 14j jeûne : J1 à J3 (3 jours = ~11%)
+│ │   │   └─ Aliments : Jus légumes filtrés, bouillons clairs, eau citronnée, infusions
+│ │   │   └─ Message : "Réveille ton système digestif en ultra douceur"
+│ │   │   └─ Validation : Checkbox par liquide consommé
+│ │   │   └─ ⚠️ VITAL : Prévenir syndrome de renutrition (mortel si ignoré)
+│ │   │
+│ │   ├─ PHASE 2 : INTRODUCTION FIBRES & MINÉRAUX (~25% durée)
+│ │   │   Exemple 14j jeûne : J4 à J7 (4 jours = ~14%)
+│ │   │   └─ Aliments : Soupes sans féculents, légumes cuits (courgettes, poireaux),
+│ │   │                  poissons blancs vapeur
+│ │   │   └─ Message : "Tes intestins se réveillent progressivement"
+│ │   │   └─ Validation : Checkbox par repas léger
+│ │   │
+│ │   ├─ PHASE 3 : PROTÉINES & GRAISSES DOUCES (~25% durée)
+│ │   │   Exemple 14j jeûne : J8 à J12 (5 jours = ~18%)
+│ │   │   └─ Aliments : Œufs durs, huiles végétales (olive, colza), avocats,
+│ │   │                  légumes vapeur, yaourt nature/chèvre
+│ │   │   └─ Message : "Tu maintiens les bénéfices du jeûne (cétose partielle)"
+│ │   │   └─ Validation : Checkbox par repas complet
+│ │   │
+│ │   └─ PHASE 4 : FÉCULENTS DOUX MIDI UNIQUEMENT (~25% durée)
+│ │       Exemple 14j jeûne : J13 à J18 (6 jours = ~21%)
+│ │       └─ Aliments : Patate douce, riz complet, flocons d'avoine,
+│ │                      fruits peu sucrés (pomme, fruits rouges)
+│ │       └─ Message : "Tu réintroduis les glucides intelligemment"
+│ │       └─ Validation : Checkbox + respect "féculents midi uniquement"
+│ │
+│ │   💡 ASTUCE JOUR 15+ (si reprise >14j) :
+│ │      → Planning alimentaire "classique" autorisé À CONDITION :
+│ │         ✅ 1 jour jeûne intermittent/semaine
+│ │         ✅ Interdiction féculents le soir maintenue
+│ │         ✅ 1-2 jours sans sucres/semaine (ancrage comportemental)
+│ │
+│ ├─ NAVIGATION : ◀️ Jour précédent | ▶️ Jour suivant
+│ │   └─ Barre progression : "Jour 5/12 de la reprise"
+│ │
+│ └─ ✅ VALIDATION DERNIER JOUR : "J'ai terminé ma reprise"
+│      └─ Message : "Bravo ! Ton corps est réhabitué. Passons à l'ancrage."
+│      └─ Bouton : "Commencer ma Cristallisation du jeûne (45 jours)"
+│      └─ Redirection vers CRISTALLISATION
+│
+├──────────────────────────────────────────────────────────────────────────
+│
+📍 ÉTAPE 4 : 🌟 CRISTALLISATION DU JEÛNE (45 jours = 6 semaines)
+│ Page : `/pages/cristallisation-45j.js` ⚠️ À CRÉER
+│ Durée : FIXE = 45 jours (6 semaines)
+│ Objectif : ANCRER les nouveaux comportements (automatiser)
+│
+│ ├─ STRUCTURE : Routine hebdomadaire RÉPÉTÉE 6 fois
+│ │   ├─ Semaine 1 : Jeûne intermittent 16h
+│ │   ├─ Semaine 2 : Jeûne 24h (lundi)
+│ │   ├─ Semaine 3-4 : Jeûne 24-48h (lundi-mardi)
+│ │   ├─ Semaine 5-6 : Maintien jeûne hebdomadaire
+│ │   │
+│ │   └─ Chaque semaine :
+│ │       ├─ LUNDI : Jeûne (type progressif selon semaine)
+│ │       ├─ MARDI : Reprise légère (légumes + protéines)
+│ │       ├─ MERCREDI : Journée verte (légumes à volonté)
+│ │       ├─ JEUDI : Double repas structuré
+│ │       ├─ VENDREDI : Jeûne partiel (1 repas)
+│ │       ├─ SAMEDI : Repas plaisir structuré (1 extra autorisé)
+│ │       └─ DIMANCHE : Repas apaisés (préparation lundi)
+│ │
+│ ├─ RÈGLES ALIMENTAIRES (à suivre 45 jours)
+│ │   ├─ Féculents : Midi uniquement du lundi au vendredi
+│ │   ├─ Extras : 1 seul par semaine (samedi)
+│ │   ├─ Satiété : Respect strict (arrêt à 80% faim)
+│ │   ├─ Sucre : Évité au maximum (sauf extra structuré)
+│ │   └─ Hydratation : 2L/jour
+│ │
+│ ├─ SUIVI QUOTIDIEN
+│ │   ├─ Validation type jeûne (selon jour semaine)
+│ │   ├─ Respect règles féculents (détection automatique)
+│ │   ├─ Compteur extras (quota hebdomadaire)
+│ │   ├─ Défis comportementaux (liste à piocher)
+│ │   └─ Évolution poids (stabilisation)
+│ │
+│ ├─ PROGRESSION VISIBLE
+│ │   ├─ Barre : "Jour 23/45 de la Cristallisation"
+│ │   ├─ Taux conformité : "92% de respect des règles"
+│ │   ├─ Semaine actuelle : "Semaine 4/6"
+│ │   └─ Badge progression : "Tu ancres tes nouveaux réflexes"
+│ │
+│ └─ ✅ VALIDATION JOUR 45 : "J'ai terminé ma Cristallisation"
+│      └─ Message : "Félicitations ! Tes comportements sont ancrés."
+│      └─ Calcul automatique des critères PORTES DE CONSTANCE :
+│          ├─ 7 jours sans excès ? ✅ ou ❌
+│          ├─ 3 jours sans sucre ni grignotage ? ✅ ou ❌
+│          └─ Jeûne sans compensation ? ✅ ou ❌
+│      └─ Si TOUS ✅ → ACTIVATION DES PORTES
+│      └─ Sinon → Message d'encouragement + proposition prolongation
+│
+├──────────────────────────────────────────────────────────────────────────
+│
+📍 ÉTAPE 5 : PORTES DE CONSTANCE (Validation symbolique)
+│ Page : `/pages/portes-constance.js` ⚠️ À CRÉER
+│ Durée : INSTANTANÉ (cérémonie de validation)
+│ Timing : Activé UNIQUEMENT si critères validés après 45 jours
+│ 📘 Source : `/docs/Complement info page jeune` lignes 116-128
+│
+│ ├─ AFFICHAGE DES 3 PORTES (animation progressive)
+│ │   ├─ 🚪 Porte 1 : "Stabilité intérieure"
+│ │   │   └─ Critère : 7 jours sans excès
+│ │   │   └─ Message : "Tu montres à ton corps que la sécurité vient de toi."
+│ │   │
+│ │   ├─ 🚪 Porte 2 : "Clarté des besoins"
+│ │   │   └─ Critère : 3 jours sans sucre ni grignotage
+│ │   │   └─ Message : "Tu entends ta faim vraie. Tu sais lui répondre."
+│ │   │
+│ │   └─ 🚪 Porte 3 : "Mouvement juste"
+│ │       └─ Critère : Jeûne sans compensation
+│ │       └─ Message : "Tu n'as rien à prouver à ton estomac. Ton geste est aligné."
+│ │
+│ ├─ MESSAGE FINAL (après les 3 portes)
+│ │   └─ 🌟 "Tu mènes ton bateau. Tu n'es plus ballottée par les vagues."
+│ │
+│ └─ ✅ BOUTON : "Retour à ma vie normale (avec mes acquis intégrés)"
+│      └─ Redirection vers VIE NORMALE AVEC ACQUIS
+│
+├──────────────────────────────────────────────────────────────────────────
+│
+📍 ÉTAPE 6 : VIE NORMALE AVEC ACQUIS INTÉGRÉS (Mode permanent)
+│ Pages : Toutes les pages classiques (repas, suivi, extras, défis...)
+│ Durée : PERMANENT (nouveau mode de vie)
+│ 
+│ ├─ L'APP FONCTIONNE NORMALEMENT
+│ │   ├─ Suivi repas classique (comme avant)
+│ │   ├─ Saisie extras (mais quota respecté naturellement)
+│ │   ├─ Défis alimentaires (mais comportements ancrés)
+│ │   └─ Statistiques, historiques, tableau de bord...
+│ │
+│ ├─ 🆕 MAIS AVEC ACQUIS PERMANENTS INTÉGRÉS
+│ │   ├─ Jeûne du lundi AUTOMATIQUE dans planning
+│ │   │   └─ Planifié chaque semaine (rappel lundi matin)
+│ │   │   └─ Validation simple : "J'ai jeûné aujourd'hui"
+│ │   │   └─ Si oublié → Message doux (pas culpabilisant)
+│ │   │
+│ │   ├─ Badge "Portes validées" visible
+│ │   │   └─ Affiché dans profil
+│ │   │   └─ Rappel symbolique : "Tu as ancré tes comportements"
+│ │   │
+│ │   ├─ Détection automatique dérive (système d'alerte)
+│ │   │   └─ Si 3 jours consécutifs avec excès non structurés
+│ │   │   └─ Si oubli 3 lundis consécutifs
+│ │   │   └─ Si poids remonte de +2kg
+│ │   │   └─ → Message : "Tu t'éloignes de tes acquis. Veux-tu refaire une Cristallisation ?"
+│ │   │
+│ │   └─ Possibilité REFAIRE un cycle complet
+│ │       └─ Lien toujours accessible : "Préparer un nouveau jeûne"
+│ │       └─ Retour en ÉTAPE 1 (préparation)
+│ │
+│ └─ 🔄 JEÛNES PONCTUELS RÉCURRENTS (intégrés dans routine)
+│     📘 Source : `/docs/Complement info page jeune` lignes 57-69
+│     ├─ Jeûne court 1 jour : Chaque lundi (automatique)
+│     ├─ Jeûne court 3-5 jours : Tous les 45-60 jours (suggestion auto)
+│  │     └─ Jeûne long 7-10-14 jours : 1×/trimestre max = 4×/an (suggestion auto)
+│
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### 🎯 RÉSUMÉ DES DURÉES PAR ÉTAPE
+
+| Étape | Durée | Type | Source |
+|-------|-------|------|--------|
+| **Préparation** | 30 jours (J-30 à J-0) | Fixe | `/docs/Préparation aux jeune` lignes 1-150 |
+| **Jeûne** | 3 à 14 jours | Variable (choix utilisateur) | Fréquences validées (lignes 57-69) |
+| **Reprise** | 2× durée jeûne | Proportionnelle | Protocole médical (lignes 183-209) |
+| **Cristallisation** | 45 jours (6 sem) | Fixe | Ancrage habitudes (ligne 1) |
+| **Portes** | Instantané | Cérémonie | Validation symbolique (lignes 116-128) |
+| **Vie normale** | Permanent | Continu | Nouveau mode de vie |
+
+**TOTAL CYCLE COMPLET (exemple jeûne 7 jours)** :
+- 30j préparation + 7j jeûne + 14j reprise + 45j cristallisation = **96 jours (~3 mois)**
+- Ensuite : Acquis intégrés à vie ✅
+
+**EXEMPLES SELON DURÉE DU JEÛNE** :
+
+| Jeûne | Préparation | Jeûne | Reprise | Cristallisation | TOTAL |
+|-------|-------------|-------|---------|-----------------|-------|
+| 3j | 30j | 3j | 6j | 45j | **84j (~3 mois)** |
+| 5j | 30j | 5j | 10j | 45j | **90j (~3 mois)** |
+| 7j | 30j | 7j | 14j | 45j | **96j (~3 mois)** |
+| 10j | 30j | 10j | 20j | 45j | **105j (~3,5 mois)** |
+| 14j | 30j | 14j | 28j | 45j | **117j (~4 mois)** |
+
+---
+
+## 🔧 COMMENT PLANIFIER LES 4 PHASES ? (Réponse question 2)
+
+### 📐 LOGIQUE DE DÉCOUPAGE PROPORTIONNEL
+
+Les 4 phases ne sont PAS fixes en nombre de jours. Elles sont **PROPORTIONNELLES** à la durée du jeûne.
+
+**Règle de base** :
+- Durée reprise = `duree_jeune × 2` (arrondi supérieur)
+- Chaque phase = ~25% de la durée totale de reprise
+
+**Fonction de calcul** (dans `/lib/genererProgrammeReprise.js`) :
+
+```javascript
+function decouper EnPhases(dureeJeune) {
+  const dureeReprise = Math.ceil(dureeJeune * 2);
+  
+  // POURQUOI 4 PHASES ? EXPLICATION SCIENTIFIQUE ET MÉDICALE
+  // Source : `/docs/Complement info page jeune` lignes 183-209
+  
+  // Phase 1 : LIQUIDES (~11% début)
+  // Objectif : Réveiller le système digestif en ULTRA douceur
+  // Après un jeûne, le système digestif est en "mode veille"
+  // Risque si on saute cette phase : Syndrome de renutrition (dangereux, voire mortel)
+  const phase1Fin = Math.ceil(dureeReprise * 0.11); // ~11% pour jeûne 14j (J1-J3)
+  
+  // Phase 2 : FIBRES DOUCES (~14%)
+  // Objectif : Réintroduire fibres CUITES (pas crues)
+  // Les légumes cuits vapeur sont faciles à digérer
+  // On évite encore les fibres CRUES (trop agressives)
+  const phase2Fin = Math.ceil(dureeReprise * 0.25); // ~14% pour jeûne 14j (J4-J7)
+  
+  // Phase 3 : PROTÉINES & GRAISSES (~18%)
+  // Objectif : Reconstruire sans casser la cétose
+  // Les protéines complètes + bonnes graisses nourrissent les tissus
+  // On maintient encore les bénéfices métaboliques du jeûne
+  const phase3Fin = Math.ceil(dureeReprise * 0.43); // ~18% pour jeûne 14j (J8-J12)
+  
+  // Phase 4 : FÉCULENTS DOUX (~57% fin)
+  // Objectif : Réintroduire glucides PROGRESSIVEMENT
+  // Les féculents à IG bas réintroduisent les glucides PROGRESSIVEMENT
+  // Sans pic d'insuline brutal (évite rechute métabolique)
+  const phase4Fin = dureeReprise; // Jusqu'à la fin (J13-J28 pour jeûne 14j)
+  
+  // BÉNÉFICES DE CE DÉCOUPAGE EN 4 PHASES :
+  // 1. Éviter syndrome de renutrition (risque vital)
+  // 2. Préserver bénéfices du jeûne le plus longtemps possible
+  // 3. Réhabituer le corps progressivement (pas de choc digestif)
+  // 4. Ancrer les nouveaux comportements alimentaires
+  // 5. Maintenir la cétose partielle pendant Phase 1-2-3
+  
+  return {
+    phase1: { debut: 1, fin: phase1Fin },
+    phase2: { debut: phase1Fin + 1, fin: phase2Fin },
+    phase3: { debut: phase2Fin + 1, fin: phase3Fin },
+    phase4: { debut: phase3Fin + 1, fin: phase4Fin }
+  };
+}
+```
+
+### 📊 EXEMPLES CONCRETS DE DÉCOUPAGE
+
+**Jeûne 3 jours → Reprise 6 jours** :
+- Phase 1 (liquides) : J1 seul (1j = 17%)
+- Phase 2 (fibres) : J2 seul (1j = 17%)
+- Phase 3 (protéines) : J3-J4 (2j = 33%)
+- Phase 4 (féculents) : J5-J6 (2j = 33%)
+
+**Jeûne 5 jours → Reprise 10 jours** :
+- Phase 1 (liquides) : J1-J2 (2j = 20%)
+- Phase 2 (fibres) : J3-J4 (2j = 20%)
+- Phase 3 (protéines) : J5-J7 (3j = 30%)
+- Phase 4 (féculents) : J8-J10 (3j = 30%)
+
+**Jeûne 7 jours → Reprise 14 jours** :
+- Phase 1 (liquides) : J1-J2 (2j = 14%)
+- Phase 2 (fibres) : J3-J5 (3j = 21%)
+- Phase 3 (protéines) : J6-J9 (4j = 29%)
+- Phase 4 (féculents) : J10-J14 (5j = 36%)
+
+**Jeûne 14 jours → Reprise 28 jours** (EXEMPLE DU CAHIER DES CHARGES) :
+- Phase 1 (liquides) : J1-J3 (3j = 11%) ✅ Correspond au doc
+- Phase 2 (fibres) : J4-J7 (4j = 14%) ✅ Correspond au doc
+- Phase 3 (protéines) : J8-J12 (5j = 18%) ✅ Correspond au doc
+- Phase 4 (féculents) : J13-J18 (6j = 21%) + Transition J19-J28 (10j) ✅
+
+### 🎯 INTERFACE UTILISATEUR : COMMENT AFFICHER ?
+
+**Option 1 : Vue par PHASE (recommandée)** :
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ 🌟 Ma reprise après jeûne de 7 jours                           │
+│ Programme généré : 14 jours (du 16 au 29 décembre)             │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│ ▶️ PHASE 1 : RÉVEIL DIGESTIF (J1-J2)                           │
+│   🥤 Uniquement liquides                                        │
+│   ├─ Jour 1 (16 déc) : ☐ Validé                               │
+│   └─ Jour 2 (17 déc) : 🔒 À venir                             │
+│   Aliments : Bouillons, jus filtrés, eau citronnée            │
+│   [Voir les aliments autorisés]                                │
+│                                                                 │
+│ 🔒 PHASE 2 : FIBRES DOUCES (J3-J5)                            │
+│   🥗 Légumes cuits + poissons blancs                           │
+│   Débloquage : 18 décembre                                     │
+│                                                                 │
+│ 🔒 PHASE 3 : PROTÉINES & GRAISSES (J6-J9)                     │
+│   🥚 Œufs, avocats, huiles                                     │
+│   Débloquage : 21 décembre                                     │
+│                                                                 │
+│ 🔒 PHASE 4 : FÉCULENTS DOUX (J10-J14)                         │
+│   🍠 Patate douce, riz complet (midi uniquement)              │
+│   Débloquage : 25 décembre                                     │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Option 2 : Vue par JOUR (alternative)** :
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ 📆 Jour 1/14 de ma reprise — 16 décembre                       │
+│ Phase actuelle : RÉVEIL DIGESTIF (Liquides uniquement)         │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│ 🎯 Objectif du jour :                                          │
+│ Réveiller ton système digestif en ultra douceur.              │
+│ Ton estomac est en "mode veille" depuis 7 jours.              │
+│                                                                 │
+│ ✅ Aliments autorisés aujourd'hui :                            │
+│ ├─ 🥤 Bouillon de légumes clair (sans morceaux)               │
+│ ├─ 🍋 Eau citronnée tiède                                     │
+│ ├─ 🧃 Jus de légumes filtré (carotte, céleri)                 │
+│ └─ ☕ Infusions (camomille, verveine)                          │
+│                                                                 │
+│ ⚠️ Aliments INTERDITS aujourd'hui :                            │
+│ ❌ Légumes solides (même cuits)                                │
+│ ❌ Protéines (poisson, œufs, viande)                           │
+│ ❌ Féculents (pain, riz, pâtes)                                │
+│ ❌ Fruits (trop sucrés pour l'instant)                         │
+│                                                                 │
+│ [Valider mon jour] [Voir phase suivante]                       │
+│                                                                 │
+│ ◀️ Hier  |  Progression : ▓░░░░░░░░░░░░░  1/14  |  Demain ▶️ │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 🔧 IMPLÉMENTATION TECHNIQUE
+
+**Fonction principale** (`genererProgrammeReprise`) :
+
+```javascript
+export function genererProgrammeReprise({ dureeJeune, poidsDepart, dateFin, options = {} }) {
+  const dureeReprise = calculerDureeReprise(dureeJeune);
+  const phases = decouper EnPhases(dureeJeune);
+  
+  // Générer les jours avec phases assignées
+  const jours = [];
+  for (let i = 1; i <= dureeReprise; i++) {
+    let phaseActuelle;
+    if (i <= phases.phase1.fin) phaseActuelle = 'phase1';
+    else if (i <= phases.phase2.fin) phaseActuelle = 'phase2';
+    else if (i <= phases.phase3.fin) phaseActuelle = 'phase3';
+    else phaseActuelle = 'phase4';
+    
+    jours.push({
+      numero: i,
+      date: addDays(new Date(dateFin), i),
+      phase: phaseActuelle,
+      alimentsAutorises: getAlimentsPhase(phaseActuelle),
+      messageContextuel: getMessagePhase(phaseActuelle, i),
+      valide: false
+    });
+  }
+  
+  return {
+    duree_jeune_jours: dureeJeune,
+    duree_reprise_jours: dureeReprise,
+    date_debut: addDays(new Date(dateFin), 1),
+    date_fin: addDays(new Date(dateFin), dureeReprise),
+    phases: phases,
+    jours: jours,
+    poids_depart: poidsDepart,
+    options: options
+  };
+}
+```
+
+**Fonction helper** (`getAlimentsPhase`) :
+
+```javascript
+function getAlimentsPhase(phase) {
+  const alimentsParPhase = {
+    phase1: [
+      { nom: 'Bouillon de légumes clair', icone: '🥤', conseil: 'Sans morceaux, filtré' },
+      { nom: 'Eau citronnée tiède', icone: '🍋', conseil: '1/2 citron dans eau chaude' },
+      { nom: 'Jus légumes filtré', icone: '🧃', conseil: 'Carotte, céleri (pas de fruits)' },
+      { nom: 'Infusions', icone: '☕', conseil: 'Camomille, verveine, thym' }
+    ],
+    phase2: [
+      { nom: 'Soupe légumes sans féculents', icone: '🍲', conseil: 'Courgette, poireau, carotte' },
+      { nom: 'Légumes cuits vapeur', icone: '🥦', conseil: 'Brocoli, haricots verts' },
+      { nom: 'Poisson blanc vapeur', icone: '🐟', conseil: 'Cabillaud, sole (100g max)' }
+    ],
+    phase3: [
+      { nom: 'Œufs durs', icone: '🥚', conseil: '1-2 par repas' },
+      { nom: 'Avocat', icone: '🥑', conseil: '1/2 avocat par jour' },
+      { nom: 'Huiles végétales', icone: '🫒', conseil: 'Olive, colza (1 CS)' },
+      { nom: 'Yaourt nature', icone: '🥛', conseil: 'Sans sucre, brebis/chèvre' }
+    ],
+    phase4: [
+      { nom: 'Patate douce', icone: '🍠', conseil: 'Midi uniquement, 100g' },
+      { nom: 'Riz complet', icone: '🍚', conseil: 'Midi uniquement, 3 CS' },
+      { nom: 'Flocons d\'avoine', icone: '🥣', conseil: 'Petit-déj, 50g' },
+      { nom: 'Fruits peu sucrés', icone: '🍎', conseil: 'Pomme, fruits rouges' }
+    ]
+  };
+  
+  return alimentsParPhase[phase] || [];
+}
+```
+
+---
+
+📋 DOCUMENTS DE RÉFÉRENCE :
+- `/docs/CLARIFICATION_ARCHITECTURE_JEUNE.md` lignes 141-186
+- `/docs/Complement info page jeune` lignes 1-110
+- `/docs/reprise` lignes 1-110
+
+**OBJECTIF** : Solidifier les gains obtenus via le jeûne et installer les nouveaux comportements durablement
+
+**STRUCTURE** : Routine alimentaire hebdomadaire répétée 6 fois (6 semaines)
+- Lundi : Jeûne intermittent ou jeûne léger (récurrent, progressif)
+- Mardi-Dimanche : Règles strictes (pas de féculents le soir, quantités contrôlées)
+
+**GÉNÉRATION** : Fonction `genererProgrammeConsolidation45j()` (à créer)
+- Input: Programme reprise terminé + objectifs utilisateur
+- Output: Planning 45 jours avec règles jour par jour
+
+**IMPLÉMENTATION** : À développer après reprise alimentaire fonctionnelle
+
+═══════════════════════════════════════════════════════════════════════════════
+📌 PLAN D'ACTION DÉVELOPPEMENT (priorisation)
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ **Phase A : Reprise alimentaire (6-8h)** [PRIORITAIRE]
+1. Créer `/lib/genererProgrammeReprise.js` (2h)
+2. Créer `/pages/reprise-alimentaire.js` (2h)
+3. Créer `/data/alimentsRepriseJeune.js` (1h)
+4. Créer `/components/SaisieRepriseJeune.js` (1h)
+5. Créer tables Supabase (30min)
+6. Lier `/pages/jeune.js` → `/pages/reprise-alimentaire.js` (30min)
+7. Tests + ajustements (1h)
+
+🟡 **Phase B : Consolidation 45 jours (4-5h)** [SECONDAIRE]
+1. Créer `/lib/genererProgrammeConsolidation45j.js` (1h30)
+2. Créer `/pages/consolidation-45-jours.js` (1h30)
+3. Lier reprise → consolidation (30min)
+4. Tests (1h)
+
+🔵 **Phase C : Statistiques & insights (2-3h)** [OPTIONNEL]
+1. Dashboard progression reprise (1h)
+2. Analyse impact aliments (Q4 du REFERENTIEL_ALIMENTAIRE_COMPLET.md) (1h)
+3. Suggestions personnalisées (1h) 
