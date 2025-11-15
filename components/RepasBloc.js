@@ -1,16 +1,8 @@
 import { getFastFoodRewards } from '../lib/fastFoodRewards';
 import { useState, useEffect } from 'react'
 import FlipNumbers from 'react-flip-numbers'
+import referentielAliments from '../data/referentiel';
 // import FlipNumbers from 'react-flip-numbers'
-
-// Référentiel d'aliments de base
-const referentielAliments = [
-  { nom: "Poulet", categorie: "protéine", kcal: 120 },
-  { nom: "Haricots verts", categorie: "légume", kcal: 30 },
-  { nom: "Riz", categorie: "féculent", kcal: 110 },
-  { nom: "Banane", categorie: "fruit", kcal: 90 },
-  { nom: "Chocolat", categorie: "extra", kcal: 150 }
-]
 
 // Règles de feedback
 const rules = [
@@ -253,7 +245,12 @@ function getSuggestionsFromNotes(repasList) {
     const found = referentielAliments.find(a => a.nom.toLowerCase() === aliment.toLowerCase())
     if (found && quantite) {
       const quantiteNum = parseFloat(quantite)
-      setKcal((quantiteNum * found.kcal).toFixed(0))
+      if (found.kcalParUnite) {
+        setKcal((quantiteNum * found.kcalParUnite).toFixed(0))
+      } else {
+        // Fallback pour anciens aliments sans kcalParUnite
+        setKcal((quantiteNum * found.kcal).toFixed(0))
+      }
     } else if (!found) {
       setKcal('')
     }
@@ -557,10 +554,23 @@ function getSuggestionsFromNotes(repasList) {
           value={aliment}
           onChange={e => setAliment(e.target.value)}
           placeholder="Saisissez un aliment"
-          autoComplete="off"
+          list="aliments-suggestions"
           required={categorie !== 'Jeûne'}
           style={{ marginBottom: 0 }}
         />
+        <datalist id="aliments-suggestions">
+          {referentielAliments.map((a, idx) => (
+            <option key={idx} value={a.nom} />
+          ))}
+        </datalist>
+        {(() => {
+          const found = referentielAliments.find(a => a.nom.toLowerCase() === aliment.toLowerCase());
+          return found && found.portionDefaut ? (
+            <div style={{ fontSize: 12, color: '#666', marginTop: 4, marginBottom: 8 }}>
+              📏 Portion recommandée : {found.portionDefaut}
+            </div>
+          ) : null;
+        })()}
         {/* ...existing code... */}
 
         <label>Catégorie</label>
@@ -586,11 +596,48 @@ function getSuggestionsFromNotes(repasList) {
           <option value="Jeûne" />
         </datalist>
 
-        <label>Quantité</label>
+        <label>Quantité{(() => {
+          const found = referentielAliments.find(a => a.nom.toLowerCase() === aliment.toLowerCase());
+          if (found && found.unite) {
+            const uniteLabel = {
+              'CS': 'cuillère(s) à soupe',
+              'piece': 'pièce(s)',
+              'g': 'gramme(s)',
+              'tranche': 'tranche(s)',
+              'pot': 'pot(s)',
+              'portion': 'portion(s)',
+              'boule': 'boule(s)',
+              'carre': 'carré(s)',
+              'verre': 'verre(s)',
+              'combo': 'menu(s)'
+            }[found.unite] || found.unite;
+            return ` (${uniteLabel})`;
+          }
+          return '';
+        })()}</label>
         <input value={quantite} onChange={e => setQuantite(e.target.value)} required={categorie !== 'Jeûne'} />
 
         <label>Kcal {loadingKcal && "(recherche...)"}</label>
-  <input value={kcal} onChange={e => setKcal(e.target.value)} />
+        <input 
+          value={kcal} 
+          onChange={e => setKcal(e.target.value)}
+          readOnly={(() => {
+            const found = referentielAliments.find(a => a.nom.toLowerCase() === aliment.toLowerCase());
+            return found && found.kcalParUnite && quantite;
+          })()}
+          style={(() => {
+            const found = referentielAliments.find(a => a.nom.toLowerCase() === aliment.toLowerCase());
+            return (found && found.kcalParUnite && quantite) ? { background: '#f0f0f0' } : {};
+          })()}
+        />
+        {(() => {
+          const found = referentielAliments.find(a => a.nom.toLowerCase() === aliment.toLowerCase());
+          return (found && found.kcalParUnite && quantite) ? (
+            <div style={{ fontSize: 12, color: '#4caf50', marginTop: 4 }}>
+              ✨ Calculé automatiquement
+            </div>
+          ) : null;
+        })()}
 
         {/* Message d'aide si kcal non trouvées automatiquement */}
         {aliment && quantite && !kcal && (
