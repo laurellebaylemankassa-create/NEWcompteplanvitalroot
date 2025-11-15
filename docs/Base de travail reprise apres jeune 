@@ -260,6 +260,12 @@ Fichiers analysés :
 
 Fonction à implémenter dans `/pages/reprise-alimentaire.js` :
 
+maitenon fau actualisation la page reprise alemntaire qui doit s ouvrir automatiquement quan le jeune est valider comme explicté dans la base de travail regarde bien de la ligne 123 A 245 TU AS COMPRIS CE QUE TU DOIS FAIRE ?
+
+Oui, j’ai compris ce que tu demandes :
+
+Dès que le plan de reprise est validé (sur la page de validation), il faut :
+
 ```javascript
 function genererProgrammeReprise(dureeJeune) {
   // Calcul durée reprise proportionnelle
@@ -3193,3 +3199,73 @@ Sur cette page, le plan généré lui est proposé.
 Il peut alors lire le détail, cocher les cases d’engagement, et valider définitivement le plan.
 Le flux est donc :
 Bouton « Générer » → génération automatique du plan → affichage du plan sur la page de validation → validation par l’utilisateur.
+
+═══════════════════════════════════════════════════════════════════════════════
+ANALYSE DE CONFORMITÉ (15/11/2025)
+═══════════════════════════════════════════════════════════════════════════════
+
+1️⃣ ÉTAT DE L’EXISTANT (CODE)
+-----------------------------------
+- Pages présentes :
+  - /pages/jeune.js : workflow du jeûne, validation quotidienne, génération/visualisation du plan de reprise, redirection manuelle ou semi-automatique.
+  - /pages/validation-plan-reprise.js : page de validation du plan généré, engagement utilisateur, verrouillage du plan après validation.
+  - /pages/reprise-alimentaire-apres-jeune.js : page de visualisation du plan validé, lecture seule, navigation possible.
+- Logique métier :
+  - Génération automatique du plan à J-3 avant la fin du jeûne (bouton actif, modal de validation).
+  - Calcul proportionnel de la durée de reprise (reprise = jeûne × 2).
+  - Affichage des phases, aliments autorisés, règles strictes, engagement utilisateur.
+  - Verrouillage du plan après validation (plus de modification possible).
+  - Stockage localStorage (mode local-first).
+  - Redirection manuelle ou semi-automatique vers la page de reprise après validation.
+
+2️⃣ CONFORMITÉ AVEC LA BASE DE TRAVAIL
+-----------------------------------
+- Génération automatique du plan à J-3 : OK (phases, calcul, engagement, verrouillage)
+- Validation du plan : OK (case à cocher, bouton, verrouillage)
+- Structure des phases : OK (4 phases, durée proportionnelle, aliments, messages, validation quotidienne, navigation, progression)
+- Redirection vers la page de reprise : OK (accès dès J1 après jeûne, plan validé, interface hybride attendue)
+
+3️⃣ MANQUEMENTS, INCOHÉRENCES, POINTS À COMPLÉTER
+-----------------------------------
+- Page /pages/reprise-alimentaire-apres-jeune.js :
+  - Interface HYBRIDE incomplète (vue principale jour, aperçu latéral phases futures, progression, navigation, checkboxes concrètes, verrouillage, anticipation, messages pédagogiques, alertes sécurité, bouton cristallisation en fin de reprise)
+  - Découpage des phases à affiner selon la proportionnalité exacte (cf. exemples et pourcentages)
+- Page /pages/validation-plan-reprise.js :
+  - Récapitulatif complet du jeûne à afficher (durée, poids, dates, message personnel)
+  - Personnalisation du plan avant validation à clarifier (vitesse, cétose)
+  - Liste de courses à afficher
+  - Message d’engagement solennel à renforcer
+  - Message de confirmation après validation à améliorer
+- Workflow général :
+  - Redirection automatique stricte à la fin du jeûne
+  - Navigation jour par jour à sécuriser (pas d’accès anticipé)
+  - Respect strict des wording, messages, alertes, règles de proportionnalité
+  - Suppression des doublons éventuels (handlers, modals, checkboxes…)
+
+═══════════════════════════════════════════════════════════════════════════════
+PLAN D’ACTION « ACTUALISATION » (par étape)
+═══════════════════════════════════════════════════════════════════════════════
+
+1. PAGE /pages/reprise-alimentaire-apres-jeune.js
+   - Implémenter l’interface HYBRIDE : vue principale jour, aperçu latéral phases futures, progression, navigation, checkboxes concrètes, verrouillage, anticipation, messages pédagogiques, alertes sécurité, bouton cristallisation en fin de reprise.
+   - Affiner le découpage des phases selon la proportionnalité exacte (cf. exemples et pourcentages de la base de travail).
+
+2. PAGE /pages/validation-plan-reprise.js
+   - Afficher le récapitulatif complet du jeûne (durée, poids, dates, message personnel écrit avant le jeûne).
+   - Permettre la personnalisation du plan avant validation (vitesse, cétose) si besoin.
+   - Afficher la liste de courses pour les phases 1-2.
+   - Renforcer le message d’engagement solennel (wording exact).
+   - Améliorer le message de confirmation après validation.
+
+3. WORKFLOW GÉNÉRAL
+   - Mettre en place la redirection automatique stricte vers la page de reprise à la fin du jeûne.
+   - Sécuriser la navigation jour par jour (pas d’accès anticipé aux jours futurs).
+   - Vérifier et corriger tous les wording, messages, alertes, règles de proportionnalité.
+   - Supprimer les doublons éventuels (handlers, modals, checkboxes…).
+
+4. CONTRÔLE QUALITÉ
+   - Vérifier la robustesse du localStorage et l’absence de boucle infinie.
+   - Tester l’expérience utilisateur sur mobile et desktop.
+   - Valider chaque étape avec le porteur de projet avant toute mise en production.
+
+═══════════════════════════════════════════════════════════════════════════════

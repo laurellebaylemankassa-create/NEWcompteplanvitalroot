@@ -726,7 +726,7 @@ export default function Jeune() {
               boxShadow: '0 2px 8px rgba(67,206,162,0.08)'
             }}
             onClick={() => {
-              window.location.href = '/reprise alimentaire après jeûne';
+              window.location.href = '/reprise-alimentaire-apres-jeune';
             }}
           >
             👀 Visualiser mon plan validé
@@ -757,7 +757,7 @@ export default function Jeune() {
                 }}
                 onClick={() => {
                   setShowValidationModal(false);
-                  window.location.href = '/reprise alimentaire après jeûne';
+                  window.location.href = '/reprise-alimentaire-apres-jeune';
                 }}
               >
                 👀 Visualiser mon plan validé
