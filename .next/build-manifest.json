@@ -32,6 +32,11 @@
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/ideaux.js"
+    ],
+    "/plan-action": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/plan-action.js"
     ]
   },
   "ampFirstPages": []
