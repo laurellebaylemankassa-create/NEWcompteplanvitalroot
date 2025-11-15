@@ -137,19 +137,21 @@ function saveState(key, val) {
 
 export default function Jeune() {
   // === HOOKS D'ÉTAT (INITIALISATION EN PREMIER) ===
-  const [dureeJeune, setDureeJeune] = useState(loadState("dureeJeune", 5));
-  const [jourEnCours, setJourEnCours] = useState(loadState("jourEnCours", 1));
-  const [joursValides, setJoursValides] = useState(loadState("joursValides", []));
-  const [poidsDepart, setPoidsDepart] = useState(loadState("poidsDepart", getPoidsDepart()));
-  const [messagePerso, setMessagePerso] = useState(loadState("messagePerso", ""));
+  // Initialisation avec valeurs par défaut (pas localStorage pour éviter hydration error)
+  const [dureeJeune, setDureeJeune] = useState(5);
+  const [jourEnCours, setJourEnCours] = useState(1);
+  const [joursValides, setJoursValides] = useState([]);
+  const [poidsDepart, setPoidsDepart] = useState(0);
+  const [messagePerso, setMessagePerso] = useState("");
   const [showMessagePerso, setShowMessagePerso] = useState(false);
-  const [outils, setOutils] = useState(loadState("outilsJeune", {}));
+  const [outils, setOutils] = useState({});
   const [outilInput, setOutilInput] = useState("");
   const [showInfo, setShowInfo] = useState(false);
-  const [dateDebutJeune, setDateDebutJeune] = useState(loadState("dateDebutJeune", null));
+  const [dateDebutJeune, setDateDebutJeune] = useState(null);
   const [programmeReprise, setProgrammeReprise] = useState(null);
   const [alerteJ3, setAlerteJ3] = useState(null);
   const [loadingProgramme, setLoadingProgramme] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   // === VARIABLES CALCULÉES ===
   const repasRecents = getRepasRecents();
@@ -157,16 +159,32 @@ export default function Jeune() {
   const dernierRepas = getDernierRepas();
 
   // === EFFETS (APRÈS HOOKS) ===
-  useEffect(() => { saveState("dureeJeune", dureeJeune); }, [dureeJeune]);
-  useEffect(() => { saveState("jourEnCours", jourEnCours); }, [jourEnCours]);
-  useEffect(() => { saveState("joursValides", joursValides); }, [joursValides]);
-  useEffect(() => { saveState("poidsDepart", poidsDepart); }, [poidsDepart]);
-  useEffect(() => { saveState("messagePerso", messagePerso); }, [messagePerso]);
-  useEffect(() => { saveState("outilsJeune", outils); }, [outils]);
-  useEffect(() => { saveState("dateDebutJeune", dateDebutJeune); }, [dateDebutJeune]);
+  // Charger depuis localStorage au montage client (évite hydration error)
+  useEffect(() => {
+    setIsClient(true);
+    setDureeJeune(loadState("dureeJeune", 5));
+    setJourEnCours(loadState("jourEnCours", 1));
+    setJoursValides(loadState("joursValides", []));
+    setPoidsDepart(loadState("poidsDepart", getPoidsDepart()));
+    setMessagePerso(loadState("messagePerso", ""));
+    setOutils(loadState("outilsJeune", {}));
+    setDateDebutJeune(loadState("dateDebutJeune", null));
+    const savedProgramme = loadState("programmeReprise", null);
+    if (savedProgramme) setProgrammeReprise(savedProgramme);
+  }, []);
+
+  // Sauvegarder dans localStorage quand les valeurs changent
+  useEffect(() => { if (isClient) saveState("dureeJeune", dureeJeune); }, [dureeJeune, isClient]);
+  useEffect(() => { if (isClient) saveState("jourEnCours", jourEnCours); }, [jourEnCours, isClient]);
+  useEffect(() => { if (isClient) saveState("joursValides", joursValides); }, [joursValides, isClient]);
+  useEffect(() => { if (isClient) saveState("poidsDepart", poidsDepart); }, [poidsDepart, isClient]);
+  useEffect(() => { if (isClient) saveState("messagePerso", messagePerso); }, [messagePerso, isClient]);
+  useEffect(() => { if (isClient) saveState("outilsJeune", outils); }, [outils, isClient]);
+  useEffect(() => { if (isClient) saveState("dateDebutJeune", dateDebutJeune); }, [dateDebutJeune, isClient]);
 
   // Initialiser date de début du jeûne si pas définie
   useEffect(() => {
+    if (typeof window === 'undefined') return; // SSR guard
     if (!dateDebutJeune && jourEnCours === 1) {
       const aujourdhui = new Date().toISOString().split('T')[0];
       setDateDebutJeune(aujourdhui);
@@ -175,6 +193,7 @@ export default function Jeune() {
 
   // Vérification J-3 (détection automatique)
   useEffect(() => {
+    if (typeof window === 'undefined') return; // SSR guard
     if (!dateDebutJeune || !dureeJeune) return;
 
     const dateFin = new Date(dateDebutJeune);
@@ -541,7 +560,7 @@ export default function Jeune() {
                 marginTop: 8, background: "#1976d2", color: "#fff", border: "none", borderRadius: 8,
                 padding: "6px 16px", fontWeight: 600, cursor: "pointer"
               }}
-              onClick={() => window.location.href = "/reprise"}
+              onClick={() => window.location.href = "/validation-plan-reprise"}
             >
               Visualiser mon plan de reprise
             </button>
