@@ -1,3 +1,54 @@
+---
+## TODO actualisée au 15/11/2025, 20h48
+
+### ✅ État de l’existant
+- Génération automatique du plan de reprise : OK (stocké dans localStorage, structure par phases, dates, liste de courses…)
+- ⚠️ Problème : la page `/validation-plan-reprise.js` n’est PAS visible actuellement (cf. image 1). À corriger en priorité.
+- Page `/validation-plan-reprise.js` :
+  - Affiche le plan généré, les phases, la liste de courses, les dates.
+  - Cases à cocher : « lu et compris », « je m’engage ».
+  - Validation locale, redirection, message d’info.
+- Pages du flow jeûne :
+  - Suivi du jeûne, validation quotidienne, passage à la reprise.
+- Page `/reprise alimentaire après jeûne.js` :
+  - Placeholder, à enrichir pour afficher le plan validé et permettre l’adaptation/validation.
+
+---
+### 🟡 TODO à date (15/11/2025)
+
+1. **Vérifier la cohérence avec la TODO « Base de travail » (lignes 30348 et 3099-3144)**
+  - S’assurer que la logique métier (phases, durée, aliments, validation) respecte strictement les règles des docs.
+  - Mettre à jour la documentation si besoin.
+
+2. **Fluidifier le workflow entre fin de jeûne et validation du plan**
+  - Vérifier la redirection automatique vers `/validation-plan-reprise` à la fin du jeûne.
+  - S’assurer que le plan généré est bien transmis/localisé pour validation.
+
+3. **Corriger l’anomalie de connexion**
+  - Problème rencontré : demande de connexion user id alors que la validation doit être possible en local (cf. fonctionnement de la page « ideaux »).
+  - Identifier et corriger tout code qui exige une connexion pour valider le plan de reprise.
+
+4. **Améliorer le message de validation**
+  - Remplacer le message d’info par une phrase plus engageante, inspirée du ton des docs :
+    _Exemple : « ✅ Programme généré ! À toi de jouer »_
+
+5. **Ajouter un bouton “Voir le plan généré”**
+  - Permettre à l’utilisateur d’afficher le plan généré avant validation.
+  - Permettre l’adaptation du plan avant validation (ex : choix version classique/douce, ajustement des dates si besoin, options à définir avec l’utilisateur).
+  - ⚠️ À clarifier : quelles options d’adaptation sont réellement utiles côté utilisateur ? (Donner des exemples concrets, workflow attendu, etc.)
+
+6. **Rendre la validation visible et engageante**
+  - Afficher un écran de confirmation après validation, avec un message fort d’engagement.
+  - S’assurer que l’utilisateur comprend qu’il ne pourra plus modifier le plan après validation.
+
+7. **Respecter la méthodologie stricte**
+  - Ne rien coder sans validation explicite de la part du porteur de projet.
+  - Lire, synthétiser, proposer, puis seulement agir après accord.
+
+---
+**Remarques**
+- Les points sur l’adaptation du plan (version classique/douce, ajustement des dates, etc.) doivent être clarifiés : donner des exemples concrets côté utilisateur pour valider l’intérêt et le workflow.
+- Priorité : rendre la page de validation visible et fonctionnelle en local, sans exiger de connexion.
 ═══════════════════════════════════════════════════════════════════════════════
 📋 ANALYSE REPRISE APRÈS JEÛNE – ÉTAT DES LIEUX & PLAN D'ACTION
 ═══════════════════════════════════════════════════════════════════════════════
