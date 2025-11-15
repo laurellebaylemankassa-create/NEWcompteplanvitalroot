@@ -4,6 +4,14 @@ import FlipNumbers from 'react-flip-numbers'
 import referentielAliments from '../data/referentiel';
 // import FlipNumbers from 'react-flip-numbers'
 
+// 🐛 DEBUG: Vérifier le référentiel chargé
+console.log('🔍 DEBUG RepasBloc - Référentiel chargé:', {
+  nombreAliments: referentielAliments.length,
+  premiersAliments: referentielAliments.slice(0, 5).map(a => a.nom),
+  contientOeuf: referentielAliments.some(a => a.nom.toLowerCase().includes('oeuf') || a.nom.toLowerCase().includes('œuf')),
+  alimentsAvecOeuf: referentielAliments.filter(a => a.nom.toLowerCase().includes('oeuf') || a.nom.toLowerCase().includes('œuf')).map(a => a.nom)
+});
+
 // Règles de feedback
 const rules = [
   {
@@ -559,10 +567,27 @@ function getSuggestionsFromNotes(repasList) {
           style={{ marginBottom: 0 }}
         />
         <datalist id="aliments-suggestions">
-          {referentielAliments.map((a, idx) => (
-            <option key={idx} value={a.nom} />
-          ))}
+          {referentielAliments.map((a, idx) => {
+            // 🐛 DEBUG: Logger chaque aliment
+            if (idx === 0) console.log('🔍 DEBUG Premier aliment du datalist:', a);
+            if (a.nom.toLowerCase().includes('oeuf') || a.nom.toLowerCase().includes('œuf')) {
+              console.log('🥚 DEBUG Aliment avec œuf trouvé:', a);
+            }
+            return <option key={idx} value={a.nom} />;
+          })}
         </datalist>
+        {/* 🐛 DEBUG VISUEL: Afficher info référentiel */}
+        <div style={{ fontSize: 11, color: '#999', marginTop: 4, marginBottom: 8, border: '1px dashed #ccc', padding: 8 }}>
+          🐛 DEBUG: {referentielAliments.length} aliments chargés | 
+          Contient Œuf: {referentielAliments.some(a => a.nom.toLowerCase().includes('oeuf') || a.nom.toLowerCase().includes('œuf')) ? '✅' : '❌'} |
+          <button 
+            type="button" 
+            onClick={() => console.log('📋 Liste complète:', referentielAliments.map(a => a.nom))}
+            style={{ marginLeft: 8, fontSize: 10 }}
+          >
+            Afficher liste console
+          </button>
+        </div>
         {(() => {
           const found = referentielAliments.find(a => a.nom.toLowerCase() === aliment.toLowerCase());
           return found && found.portionDefaut ? (
