@@ -1,8 +1,0 @@
-{
-  "/_app": "pages/_app.js",
-  "/_error": "pages/_error.js",
-  "/_document": "pages/_document.js",
-  "/profil": "pages/profil.js",
-  "/suivi-poids": "pages/suivi-poids.js",
-  "/suivi": "pages/suivi.js"
-}
