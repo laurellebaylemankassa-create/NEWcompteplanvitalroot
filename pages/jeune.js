@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
+import { supabase } from "../lib/supabaseClient";
 import { genererProgrammeReprise } from "../lib/genererProgrammeReprise";
+import { genererEtSauvegarderProgramme } from "../lib/jeuneUtils";
 
 // --- Données statiques pour chaque jour de jeûne (exemple jusqu'à 10 jours, à compléter si besoin) ---
 const JEUNE_DAYS_CONTENT = {
@@ -249,23 +251,38 @@ export default function Jeune() {
 
     setLoadingProgramme(true);
     try {
+      // Récupérer l'utilisateur connecté
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        alert("❌ Tu dois être connecté pour générer un programme");
+        setLoadingProgramme(false);
+        return;
+      }
+
       const dateFin = new Date(dateDebutJeune);
       dateFin.setDate(dateFin.getDate() + dureeJeune - 1);
       const dateFinStr = dateFin.toISOString().split('T')[0];
 
-      const programme = genererProgrammeReprise({
-        dureeJeune: dureeJeune,
-        poidsDepart: poidsDepart,
-        dateFin: dateFinStr,
-        options: { genere_manuellement: true }
+      // Sauvegarder en base avec statut 'proposition'
+      const programmeSauvegarde = await genererEtSauvegarderProgramme(user.id, {
+        id: null, // Pas de jeûne enregistré dans la table 'jeunes'
+        duree_jours: dureeJeune,
+        date_fin: dateFinStr,
+        poids_depart: poidsDepart
       });
 
-      setProgrammeReprise(programme);
-      saveState("programmeReprise", programme);
-      setAlerteJ3(null);
-      alert(`✅ Programme généré ! ${programme.duree_reprise_jours} jours de reprise créés.`);
+      if (programmeSauvegarde) {
+        setProgrammeReprise(programmeSauvegarde);
+        saveState("programmeReprise", programmeSauvegarde);
+        setAlerteJ3(null);
+        alert(`✅ Programme généré et sauvegardé ! ${programmeSauvegarde.duree_reprise_jours} jours de reprise créés.`);
+      } else {
+        throw new Error("Échec de la sauvegarde du programme");
+      }
     } catch (error) {
-      alert(`Erreur : ${error.message}`);
+      console.error("Erreur génération:", error);
+      alert(`❌ Erreur : ${error.message}`);
     } finally {
       setLoadingProgramme(false);
     }
@@ -297,6 +314,18 @@ export default function Jeune() {
   };
 
   const perteEstimee = pertePoidsEstimee(poidsDepart, dureeJeune);
+
+  // Guard SSR: afficher loader jusqu'au montage client (évite hydration error)
+  if (!isClient) {
+    return (
+      <div style={{ maxWidth: 700, margin: "0 auto", padding: 24, fontFamily: "system-ui, Arial, sans-serif", textAlign: "center" }}>
+        <h1 style={{ marginBottom: 12 }}>🌙 Mon jeûne en cours</h1>
+        <div style={{ padding: "3rem", color: "#666" }}>
+          ⏳ Chargement...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ maxWidth: 700, margin: "0 auto", padding: 24, fontFamily: "system-ui, Arial, sans-serif" }}>
@@ -547,6 +576,8 @@ export default function Jeune() {
 
       {/* --- Préparation à la reprise (à partir de J4 ou moitié du jeûne) --- */}
       {showReprise && (
+      {/* Section "Préparation à la reprise" : affichée seulement si programme existe */}
+      {showReprise && programmeReprise && (
         <div style={{
           background: "#fffde7", border: "1px solid #ffe082", borderRadius: 12, padding: 16, marginBottom: 18
         }}>
@@ -554,7 +585,7 @@ export default function Jeune() {
             Préparation à la reprise alimentaire
           </div>
           <div>
-            Dans {dureeJeune - jourEnCours + 1} jours, tu sortiras de ce jeûne. Ce n’est pas une fin, c’est une entrée vers une alimentation consciente.<br />
+            Dans {dureeJeune - jourEnCours + 1} jours, tu sortiras de ce jeûne. Ce n'est pas une fin, c'est une entrée vers une alimentation consciente.<br />
             <button
               style={{
                 marginTop: 8, background: "#1976d2", color: "#fff", border: "none", borderRadius: 8,
@@ -566,6 +597,7 @@ export default function Jeune() {
             </button>
           </div>
         </div>
+      )}
       )}
 
       {/* --- Passerelle automatique vers la reprise --- */}

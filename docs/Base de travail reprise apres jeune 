@@ -3021,7 +3021,7 @@ function getAlimentsPhase(phase) {
 **IMPLÉMENTATION** : À développer après reprise alimentaire fonctionnelle
 
 ═══════════════════════════════════════════════════════════════════════════════
-📌 PLAN D'ACTION DÉVELOPPEMENT (priorisation)
+📌 PLAN D'ACTION DÉVELOPPEMENT (priorisation
 ═══════════════════════════════════════════════════════════════════════════════
 
 ✅ **Phase A : Reprise alimentaire (6-8h)** [PRIORITAIRE]
@@ -3043,3 +3043,87 @@ function getAlimentsPhase(phase) {
 1. Dashboard progression reprise (1h)
 2. Analyse impact aliments (Q4 du REFERENTIEL_ALIMENTAIRE_COMPLET.md) (1h)
 3. Suggestions personnalisées (1h) 
+
+
+a 17H30 ETAT DE LA TOTO AU 15/11/25
+
+Résumé de l’historique de la conversation
+
+Je vais afficher la todo complète avec l'état actuel de chaque tâche :
+
+Optimizing tool selection...
+
+Liste de tâches à faire mise à jour
+
+📋 État de la TODO complète
+✅ PHASE A - Système de reprise (6/12 terminées)
+Terminées (Tasks #1-6) :
+
+✅ Architecture & Planification - 6 étapes, formules, 4 phases médicales
+✅ Tables Supabase + RLS - 3 tables, pattern FOR ALL corrigé
+✅ alimentsRepriseJeune.js - 50 aliments, 4 phases
+✅ genererProgrammeReprise.js - 6 fonctions backend
+✅ jeuneUtils.js - 7 fonctions lifecycle
+✅ Integration jeune.js - J-3 detection, alert, génération manuelle
+➡️ PROCHAINE (Task #7) :
+
+validation-plan-reprise.js - FIX 404 sur bouton "Visualiser mon plan de reprise"
+Affichage programme, 2 checkboxes, validation → statut 'plan_valide'
+Temps : 1h30
+À faire (Tasks #8-12) :
+8. ⏳ reprise-alimentaire.js (UI) - Interface hybride jour-par-jour - 2h30
+9. ⏳ reprise-alimentaire.js (Logique) - Backend tracking quotidien - 1h
+10. ⏳ ModalePhaseFuture.js - Preview phases verrouillées 🔒 - 1h
+11. ⏳ Linking jeune→reprise - Passerelle automatique - 30min
+12. ⏳ Tests end-to-end - 3 scénarios (3j, 7j, 14j) - temps variable
+
+Temps restant Phase A : ~6h
+
+⚠️ PHASE B - Cristallisation (0/1)
+⏳ Cristallisation 45 jours - Validation hebdomadaire, tables, interface - 4-5h
+SECONDAIRE - À faire APRÈS Phase A complète
+💡 PHASE C - Optionnel (0/2)
+⏳ Portes de Constance - 5 achievements symboliques (J+30 à J+730) - 2-3h
+⏳ Badges généralisés - Extension système rewards - 1-2h
+OPTIONNEL - Peut être différé indéfiniment
+🎯 Récapitulatif
+Total tâches : 15
+Terminées : 6 (40%)
+En cours : 0
+Restantes prioritaires : 6 (Phase A)
+Secondaires : 1 (Phase B)
+Optionnelles : 2 (Phase C)
+Tu veux que je crée la page validation-plan-reprise.js (Tâche #7) maintenant ? Elle fixera le 404 que tu as rencontré.
+
+══════════════════════════════════════════════════════════════════════════
+📋 MISE À JOUR TODO - 15/11/25 à 17H56
+══════════════════════════════════════════════════════════════════════════
+
+✅ TÂCHE #7 TERMINÉE: /pages/validation-plan-reprise.js
+
+Créé avec succès:
+- Affichage résumé 4 phases (dates, objectifs, icônes colorées)
+- Liste courses Phase 1-2 groupée par catégorie
+- 2 checkboxes obligatoires ("J'ai lu", "Je m'engage")
+- Validation → statut 'proposition' → 'plan_valide'
+- Redirect /jeune?validation=success
+- Fetch Supabase + fallback localStorage
+- FIX 404 bouton "Visualiser mon plan de reprise" ✅
+
+BUGS CORRIGÉS AUJOURD'HUI:
+1. ✅ Hydration error Next.js 15 (localStorage pendant useState)
+   → Solution: Guard SSR avec isClient, chargement dans useEffect
+2. ✅ Syntaxe JS: apostrophe dans variable (aujourd'hui)
+   → Solution: Renommé en aujourdhui
+3. ✅ 404 sur bouton validation
+   → Solution: Page créée + lien corrigé
+4. ✅ Programme non sauvegardé en base
+   → Solution: genererProgrammeRepriseManuel() appelle genererEtSauvegarderProgramme()
+5. ✅ Export manquant dans jeuneUtils.js
+   → Solution: export named au lieu de default
+
+PROGRESSION PHASE A:
+✅ Terminées: 7/12 (58%)
+⏳ Restantes: 5 tâches (~5h30)
+
+PROCHAINE ÉTAPE: Task #8 - /pages/reprise-alimentaire.js (UI) - 2h30
