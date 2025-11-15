@@ -2900,7 +2900,7 @@ async function verifierFinJeuneProche(userId) {
     
     console.log(`✅ Plan de reprise généré pour user ${userId} (jeûne J-3)`);
   }
-}
+
 
 // Fonction helper : générer liste de courses
 function genererListeCourses(premiers Jours) {
@@ -3130,11 +3130,8 @@ PROCHAINE ÉTAPE: Task #8 - /pages/reprise-alimentaire.js (UI) - 2h30
 
 
 
-
 beug identifié
-
 Oui, c’est exactement ça :
-
 Quand l’utilisateur clique sur le bouton « Générer mon plan de reprise » (mis en évidence en vert sur ta capture dans jeune.js) :
 
 Une fonction (généralement genererProgrammeRepriseManuel) est appelée.

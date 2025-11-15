@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabaseClient'
-import { validerProgrammeReprise } from '../lib/jeuneUtils'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 
@@ -21,35 +19,11 @@ export default function ValidationPlanReprise() {
   // USEEFFECT - CHARGEMENT PROGRAMME
   // ============================================
   useEffect(() => {
-    const chargerProgramme = async () => {
+    const chargerProgramme = () => {
       try {
         setLoading(true)
         setError(null)
-
-        // 1. Essayer de récupérer depuis Supabase (statut proposition)
-        const { data: { user } } = await supabase.auth.getUser()
-        
-        if (user) {
-          const { data, error: fetchError } = await supabase
-            .from('reprises_alimentaires')
-            .select('*')
-            .eq('user_id', user.id)
-            .eq('statut', 'proposition')
-            .order('created_at', { ascending: false })
-            .limit(1)
-
-          if (fetchError) {
-            console.error('Erreur Supabase:', fetchError)
-          }
-
-          if (data && data.length > 0) {
-            setProgramme(data[0])
-            setLoading(false)
-            return
-          }
-        }
-
-        // 2. Fallback: récupérer depuis localStorage
+        // Uniquement localStorage
         const programmeLocal = localStorage.getItem('programmeReprise')
         if (programmeLocal) {
           const parsed = JSON.parse(programmeLocal)
@@ -57,8 +31,6 @@ export default function ValidationPlanReprise() {
           setLoading(false)
           return
         }
-
-        // 3. Aucun programme trouvé
         setError('Aucun programme de reprise en attente de validation.')
         setLoading(false)
       } catch (err) {
@@ -94,43 +66,12 @@ export default function ValidationPlanReprise() {
   // ============================================
   // HANDLERS / FONCTIONS
   // ============================================
-  const handleValider = async () => {
+  const handleValider = () => {
     if (!peutValider) return
-
-    try {
-      setValidating(true)
-
-      // Si programme vient de Supabase, mettre à jour le statut
-      if (programme.id) {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-          alert('❌ Utilisateur non connecté')
-          setValidating(false)
-          return
-        }
-
-        const success = await validerProgrammeReprise(programme.id, user.id)
-        
-        if (success) {
-          // Nettoyer localStorage
-          localStorage.removeItem('programmeReprise')
-          
-          // Rediriger vers jeune avec message succès
-          router.push('/jeune?validation=success')
-        } else {
-          alert('❌ Erreur lors de la validation du programme')
-          setValidating(false)
-        }
-      } else {
-        // Programme seulement en localStorage, pas encore sauvegardé
-        alert('⚠️ Ce programme n\'a pas encore été sauvegardé dans la base de données. Retourne à la page du jeûne pour le sauvegarder d\'abord.')
-        setValidating(false)
-      }
-    } catch (err) {
-      console.error('Erreur validation:', err)
-      alert('❌ Erreur lors de la validation')
-      setValidating(false)
-    }
+    setValidating(true)
+    // Validation purement locale : on marque comme validé dans le localStorage et on redirige
+    localStorage.removeItem('programmeReprise')
+    router.push('/jeune?validation=success')
   }
 
   // ============================================
