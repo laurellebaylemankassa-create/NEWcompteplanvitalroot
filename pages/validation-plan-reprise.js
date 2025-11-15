@@ -15,6 +15,7 @@ export default function ValidationPlanReprise() {
   const [checkboxLu, setCheckboxLu] = useState(false)
   const [checkboxEngage, setCheckboxEngage] = useState(false)
   const [validating, setValidating] = useState(false)
+  const [message, setMessage] = useState('')
 
   // ============================================
   // USEEFFECT - CHARGEMENT PROGRAMME
@@ -68,11 +69,41 @@ export default function ValidationPlanReprise() {
   // HANDLERS / FONCTIONS
   // ============================================
   const handleValider = () => {
-    if (!peutValider) return
-    setValidating(true)
-    // Validation purement locale : on marque comme validé dans le localStorage et on redirige
-    localStorage.removeItem('programmeReprise')
-    router.push('/jeune?validation=success')
+    if (!peutValider) return;
+    setValidating(true);
+    // Log visuel et alerte pour debug
+    console.log('[DEBUG] Bouton validation cliqué');
+    alert('Validation du plan : handler appelé');
+    // Vérifier que le plan existe bien
+    if (!programme) {
+      setError("Aucun plan à valider. Merci de régénérer le plan.");
+      setValidating(false);
+      return;
+    }
+    // DEBUG: log avant validation
+    console.debug('[DEBUG] Validation plan - programme:', programme);
+    try {
+      localStorage.setItem('programmeRepriseValide', JSON.stringify(programme));
+      const check = localStorage.getItem('programmeRepriseValide');
+      console.debug('[DEBUG] programmeRepriseValide enregistré:', check);
+      localStorage.removeItem('programmeReprise');
+      // Afficher un message de confirmation fort
+      setMessage('✅ Programme validé ! Tu t’es engagé à suivre ce plan pour fortifier ton pouvoir de volonté. Redirection en cours...');
+      // Attendre 2 secondes avant de rediriger
+      setTimeout(() => {
+        // Vérifier que la sauvegarde a bien fonctionné avant de rediriger
+        const verif = localStorage.getItem('programmeRepriseValide');
+        if (verif) {
+          router.push('/jeune?validation=success');
+        } else {
+          setError("Erreur lors de la sauvegarde du plan. Merci de réessayer.");
+          setValidating(false);
+        }
+      }, 2000);
+    } catch (e) {
+      setError("Erreur lors de la sauvegarde du plan. Merci de réessayer.");
+      setValidating(false);
+    }
   }
 
   // ============================================
@@ -451,23 +482,45 @@ export default function ValidationPlanReprise() {
       </div>
 
       {/* MESSAGE D'INFO */}
-      <div style={{ 
-        background: '#E3F2FD',
-        padding: '1rem',
-        borderRadius: '8px',
-        fontSize: '1.05rem',
-        color: '#1565C0',
-        textAlign: 'center',
-        fontWeight: 600
-      }}>
-        ✅ Programme généré ! À toi de jouer : chaque jour compte pour ancrer durablement les bienfaits de ton jeûne.<br/>
-        <span style={{fontWeight:400, fontSize:'0.95rem'}}>Tu pourras retrouver ton plan validé dans l’onglet « Reprise alimentaire ».</span>
-      </div>
+      {(message || error) && (
+        <div style={{ 
+          background: error ? '#ffebee' : '#E3F2FD',
+          padding: '1rem',
+          borderRadius: '8px',
+          fontSize: '1.05rem',
+          color: error ? '#c62828' : '#1565C0',
+          textAlign: 'center',
+          fontWeight: 600,
+          marginBottom: '1rem',
+          whiteSpace: 'pre-line'
+        }}>
+          {error ? `❌ ${error}` : message}
+        </div>
+      )}
+      {!message && !error && (
+        <div style={{ 
+          background: '#E3F2FD',
+          padding: '1rem',
+          borderRadius: '8px',
+          fontSize: '1.05rem',
+          color: '#1565C0',
+          textAlign: 'center',
+          fontWeight: 600
+        }}>
+          ✅ Programme généré ! À toi de jouer : chaque jour compte pour ancrer durablement les bienfaits de ton jeûne.<br/>
+          <span style={{fontWeight:400, fontSize:'0.95rem'}}>Tu pourras retrouver ton plan validé dans l’onglet « Reprise alimentaire ».</span>
+        </div>
+      )}
 
-      {/* BOUTON VOIR LE PLAN GÉNÉRÉ */}
+      {/* BOUTON VOIR LE PLAN VALIDÉ */}
       <div style={{textAlign:'center', margin:'2rem 0'}}>
         <button
-          onClick={() => window.scrollTo({top:0, behavior:'smooth'})}
+          onClick={() => {
+            if (programme) {
+              localStorage.setItem('programmeRepriseValide', JSON.stringify(programme));
+            }
+            window.location.href = '/reprise alimentaire après jeûne';
+          }}
           style={{
             padding:'0.75rem 2rem',
             background:'linear-gradient(135deg, #43cea2 0%, #185a9d 100%)',
@@ -480,7 +533,7 @@ export default function ValidationPlanReprise() {
             boxShadow:'0 2px 8px rgba(67,206,162,0.08)'
           }}
         >
-          👀 Voir le plan généré
+          👀 Visualiser le plan validé
         </button>
       </div>
     </div>

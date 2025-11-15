@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import { supabase } from "../lib/supabaseClient";
 import { genererProgrammeReprise } from "../lib/genererProgrammeReprise";
 import { genererEtSauvegarderProgramme } from "../lib/jeuneUtils";
@@ -138,6 +139,8 @@ function saveState(key, val) {
 }
 
 export default function Jeune() {
+  // Méthodologie : hooks d'état en premier
+  const router = useRouter();
   // === HOOKS D'ÉTAT (INITIALISATION EN PREMIER) ===
   // Initialisation avec valeurs par défaut (pas localStorage pour éviter hydration error)
   const [dureeJeune, setDureeJeune] = useState(5);
@@ -154,6 +157,9 @@ export default function Jeune() {
   const [alerteJ3, setAlerteJ3] = useState(null);
   const [loadingProgramme, setLoadingProgramme] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [planRepriseValide, setPlanRepriseValide] = useState(null);
+  const [planValideCoherent, setPlanValideCoherent] = useState(false);
+  const [showValidationModal, setShowValidationModal] = useState(false);
 
   // === VARIABLES CALCULÉES ===
   const repasRecents = getRepasRecents();
@@ -173,7 +179,42 @@ export default function Jeune() {
     setDateDebutJeune(loadState("dateDebutJeune", null));
     const savedProgramme = loadState("programmeReprise", null);
     if (savedProgramme) setProgrammeReprise(savedProgramme);
+    // Lire le plan validé si présent et vérifier la cohérence
+    try {
+      const planValide = localStorage.getItem("programmeRepriseValide");
+      if (planValide) {
+        const parsed = JSON.parse(planValide);
+        setPlanRepriseValide(parsed);
+        // Vérification stricte de cohérence (dates et durée)
+        const jeuneDuree = loadState("dureeJeune", 5);
+        const jeuneDebut = loadState("dateDebutJeune", null);
+        if (
+          parsed &&
+          parsed.duree_jeune_jours === jeuneDuree &&
+          parsed.date_debut_jeune === jeuneDebut
+        ) {
+          setPlanValideCoherent(true);
+        } else {
+          // Purge si incohérent
+          localStorage.removeItem("programmeRepriseValide");
+          setPlanRepriseValide(null);
+          setPlanValideCoherent(false);
+        }
+      } else {
+        setPlanValideCoherent(false);
+      }
+    } catch {
+      setPlanValideCoherent(false);
+    }
   }, []);
+
+  // Afficher le modal de validation si retour de validation
+  useEffect(() => {
+    if (!router.isReady) return;
+    if (router.query.validation === "success") {
+      setShowValidationModal(true);
+    }
+  }, [router.isReady, router.query.validation]);
 
   // Sauvegarder dans localStorage quand les valeurs changent
   useEffect(() => { if (isClient) saveState("dureeJeune", dureeJeune); }, [dureeJeune, isClient]);
@@ -322,6 +363,16 @@ export default function Jeune() {
   // === VARIABLES CALCULÉES DE RENDU (APRÈS TOUS LES HOOKS) ===
 
   const isFini = joursValides.length >= dureeJeune;
+
+  // Redirection automatique vers la page de reprise alimentaire après jeûne quand le jeûne est fini
+  useEffect(() => {
+    if (isFini && programmeReprise) {
+      // Sauvegarder le plan validé dans localStorage (clé dédiée)
+      localStorage.setItem('programmeRepriseValide', JSON.stringify(programmeReprise));
+      // Rediriger automatiquement
+      window.location.href = '/reprise alimentaire après jeûne';
+    }
+  }, [isFini, programmeReprise]);
   // Affiche la préparation à la reprise à partir de la moitié du jeûne ou du J4
   const showReprise = !isFini && (jourEnCours >= Math.max(4, Math.ceil(dureeJeune / 2)));
 
@@ -414,8 +465,9 @@ export default function Jeune() {
               Du {programmeReprise.date_debut_reprise} au {programmeReprise.date_fin_reprise}<br />
               <button
                 onClick={() => {
-                  console.log("Programme complet:", programmeReprise);
-                  alert("Voir la console (F12) pour les détails complets du programme");
+                  // Sauvegarder le plan validé dans localStorage (clé dédiée)
+                  localStorage.setItem('programmeRepriseValide', JSON.stringify(programmeReprise));
+                  window.location.href = '/reprise alimentaire après jeûne';
                 }}
                 style={{
                   marginTop: 8,
@@ -427,7 +479,7 @@ export default function Jeune() {
                   cursor: "pointer"
                 }}
               >
-                Voir les détails
+                👀 Visualiser le plan validé
               </button>
             </div>
           )}
@@ -607,15 +659,14 @@ export default function Jeune() {
                 marginTop: 8, background: loadingProgramme ? "#90caf9" : "#1976d2", color: "#fff", border: "none", borderRadius: 8,
                 padding: "6px 16px", fontWeight: 600, cursor: loadingProgramme ? "not-allowed" : "pointer", opacity: loadingProgramme ? 0.7 : 1
               }}
-              disabled={loadingProgramme}
+              disabled={loadingProgramme || planValideCoherent}
               onClick={async () => {
                 setLoadingProgramme(true);
                 try {
                   const dateFin = new Date(dateDebutJeune);
                   dateFin.setDate(dateFin.getDate() + dureeJeune - 1);
                   const dateFinStr = dateFin.toISOString().split('T')[0];
-                  // Tenter de récupérer l'utilisateur, mais ne pas bloquer si absent
-                  // Validation 100% locale, comme la page "ideaux" :
+                  // Validation 100% locale
                   const programme = genererProgrammeReprise({
                     dureeJeune,
                     poidsDepart,
@@ -629,7 +680,9 @@ export default function Jeune() {
                     ...programme,
                     id: null,
                     statut: 'proposition',
-                    plan_genere_le: new Date().toISOString()
+                    plan_genere_le: new Date().toISOString(),
+                    date_debut_jeune: dateDebutJeune,
+                    duree_jeune_jours: dureeJeune
                   };
                   setProgrammeReprise(programmeSauvegarde);
                   saveState("programmeReprise", programmeSauvegarde);
@@ -643,8 +696,81 @@ export default function Jeune() {
                 }
               }}
             >
-              {loadingProgramme ? "Génération du plan en cours..." : "Générer mon plan de reprise"}
+              {planValideCoherent ? "Plan de reprise déjà validé" : (loadingProgramme ? "Génération du plan en cours..." : "Générer mon plan de reprise")}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* --- Accès au plan validé (en bas de page) --- */}
+      {planValideCoherent && planRepriseValide && (
+        <div style={{
+          background: '#e8f5e9', border: '2px solid #43cea2', borderRadius: 12, padding: 18, margin: '32px auto 0 auto', textAlign: 'center', maxWidth: 500
+        }}>
+          <div style={{ fontWeight: 700, fontSize: 18, color: '#388e3c', marginBottom: 8 }}>
+            🎉 Plan de reprise validé pour ce jeûne
+          </div>
+          <div style={{ marginBottom: 12 }}>
+            Tu peux le consulter à tout moment.
+          </div>
+          <button
+            style={{
+              background: 'linear-gradient(135deg, #43cea2 0%, #185a9d 100%)',
+              color: 'white',
+              border: 'none',
+              borderRadius: 8,
+              padding: '0.75rem 2rem',
+              fontWeight: 600,
+              fontSize: '1rem',
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(67,206,162,0.08)'
+            }}
+            onClick={() => {
+              window.location.href = '/reprise alimentaire après jeûne';
+            }}
+          >
+            👀 Visualiser mon plan validé
+          </button>
+        </div>
+      )}
+
+      {/* --- Modal/encart de validation après validation --- */}
+      {showValidationModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.25)', zIndex: 1000,
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <div style={{
+            background: '#fff', borderRadius: 16, padding: 32, boxShadow: '0 4px 32px #0002', minWidth: 320, maxWidth: 400, textAlign: 'center'
+          }}>
+            <div style={{ fontWeight: 700, fontSize: 20, color: '#388e3c', marginBottom: 16 }}>
+              ✅ Plan de reprise validé !
+            </div>
+            <div style={{ marginBottom: 24, color: '#333', fontSize: 16 }}>
+              Tu peux maintenant consulter ton plan validé ou revenir à ton suivi de jeûne.
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <button
+                style={{
+                  background: 'linear-gradient(135deg, #43cea2 0%, #185a9d 100%)',
+                  color: 'white', border: 'none', borderRadius: 8, padding: '0.75rem 2rem', fontWeight: 600, fontSize: '1rem', cursor: 'pointer'
+                }}
+                onClick={() => {
+                  setShowValidationModal(false);
+                  window.location.href = '/reprise alimentaire après jeûne';
+                }}
+              >
+                👀 Visualiser mon plan validé
+              </button>
+              <button
+                style={{
+                  background: '#e0e0e0', color: '#333', border: 'none', borderRadius: 8, padding: '0.75rem 2rem', fontWeight: 600, fontSize: '1rem', cursor: 'pointer'
+                }}
+                onClick={() => setShowValidationModal(false)}
+              >
+                ← Retour au jeûne
+              </button>
+            </div>
           </div>
         </div>
       )}

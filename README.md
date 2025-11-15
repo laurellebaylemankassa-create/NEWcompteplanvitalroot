@@ -103,12 +103,11 @@ Consigne = lors de chaque modification  suivre scrupuleusement " Méthode de tra
 - [ ] La nouvelle logique est insérée après l’initialisation des variables nécessaires
 - [ ] Contrôle des erreurs effectué (compilation, runtime, rendu)
 - [ ] Test du rendu dans les différents cas d’usage
-- [ ] Validation finale : la checklist est respectée
 
 - [ ] Vérification de la portée et de l’ordre d’exécution des hooks et variables (tout doit être dans le composant, dans l’ordre logique)
 - [ ] Relecture du code pour repérer toute utilisation avant déclaration ou hors contexte React
 
-- [ ] Toute amélioration ou ajout s’intègre dans l’univers du code existant : aucune suppression ou modification ne doit générer la perte d’une fonction, d’une logique ou d’un fonctionnement. Aucun conflit, aucune anomalie ne doit être créée. Si un risque est détecté, il doit être signalé et une alternative sans risque doit être proposée.
-
+ [ ] Toute amélioration ou ajout s’intègre dans l’univers du code existant : aucune suppression ou modification ne doit générer la perte d’une fonction, d’une logique ou d’un fonctionnement. Aucun conflit, aucune anomalie ne doit être créée. Si un risque est détecté, il doit être signalé et une alternative sans risque doit être proposée.
+- [ ] Validation finale : la checklist est respectée
 ---
 
