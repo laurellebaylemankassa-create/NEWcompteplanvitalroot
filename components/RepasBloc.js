@@ -72,10 +72,12 @@ export default function RepasBloc({
   kcalPrevu
 }) {
   // Déclaration des hooks d’état PRINCIPAUX tout en haut du composant (checklist React)
-  // Ajout d’un état pour afficher l’erreur Supabase (doit être tout en haut)
+  // Ajout d'un état pour afficher l'erreur Supabase (doit être tout en haut)
   const [supabaseError, setSupabaseError] = useState(null);
   const [repasConforme, setRepasConforme] = useState(false);
   const [aliment, setAliment] = useState('');
+  const [suggestionsFiltrees, setSuggestionsFiltrees] = useState([]);
+  const [afficherSuggestions, setAfficherSuggestions] = useState(false);
     // Champ heure de prise du repas (non obligatoire, pré-rempli à l'heure actuelle)
     const getDefaultHeure = () => {
       const now = new Date();
@@ -558,35 +560,96 @@ function getSuggestionsFromNotes(repasList) {
         )}
         <h3>{type} du {date}</h3>
         <label>Aliment mangé</label>
-        <input
-          value={aliment}
-          onChange={e => setAliment(e.target.value)}
-          placeholder="Saisissez un aliment"
-          list="aliments-suggestions"
-          required={categorie !== 'Jeûne'}
-          style={{ marginBottom: 0 }}
-        />
-        <datalist id="aliments-suggestions">
-          {referentielAliments.map((a, idx) => {
-            // 🐛 DEBUG: Logger chaque aliment
-            if (idx === 0) console.log('🔍 DEBUG Premier aliment du datalist:', a);
-            if (a.nom.toLowerCase().includes('oeuf') || a.nom.toLowerCase().includes('œuf')) {
-              console.log('🥚 DEBUG Aliment avec œuf trouvé:', a);
-            }
-            return <option key={idx} value={a.nom} />;
-          })}
-        </datalist>
-        {/* 🐛 DEBUG VISUEL: Afficher info référentiel */}
-        <div style={{ fontSize: 11, color: '#999', marginTop: 4, marginBottom: 8, border: '1px dashed #ccc', padding: 8 }}>
-          🐛 DEBUG: {referentielAliments.length} aliments chargés | 
-          Contient Œuf: {referentielAliments.some(a => a.nom.toLowerCase().includes('oeuf') || a.nom.toLowerCase().includes('œuf')) ? '✅' : '❌'} |
-          <button 
-            type="button" 
-            onClick={() => console.log('📋 Liste complète:', referentielAliments.map(a => a.nom))}
-            style={{ marginLeft: 8, fontSize: 10 }}
-          >
-            Afficher liste console
-          </button>
+        <div style={{ position: 'relative' }}>
+          <input
+            value={aliment}
+            onChange={e => {
+              const val = e.target.value;
+              setAliment(val);
+              
+              // Filtrer les suggestions
+              if (val.length >= 1) {
+                const normaliser = (str) => str.toLowerCase()
+                  .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                  .replace(/œ/g, 'oe');
+                
+                const valNormalisee = normaliser(val);
+                const filtrees = referentielAliments.filter(a => 
+                  normaliser(a.nom).includes(valNormalisee)
+                ).slice(0, 10); // Max 10 suggestions
+                
+                setSuggestionsFiltrees(filtrees);
+                setAfficherSuggestions(true);
+              } else {
+                setSuggestionsFiltrees([]);
+                setAfficherSuggestions(false);
+              }
+            }}
+            onFocus={() => {
+              if (aliment.length >= 1 && suggestionsFiltrees.length > 0) {
+                setAfficherSuggestions(true);
+              }
+            }}
+            onBlur={() => {
+              // Délai pour permettre le clic sur une suggestion
+              setTimeout(() => setAfficherSuggestions(false), 200);
+            }}
+            placeholder="Saisissez un aliment (ex: oeuf, riz, poulet...)"
+            required={categorie !== 'Jeûne'}
+            style={{ marginBottom: 0, width: '100%' }}
+          />
+          
+          {afficherSuggestions && suggestionsFiltrees.length > 0 && (
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              right: 0,
+              backgroundColor: 'white',
+              border: '1px solid #ccc',
+              borderTop: 'none',
+              maxHeight: '300px',
+              overflowY: 'auto',
+              zIndex: 1000,
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+            }}>
+              {suggestionsFiltrees.map((a, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => {
+                    setAliment(a.nom);
+                    setAfficherSuggestions(false);
+                  }}
+                  style={{
+                    padding: '10px 12px',
+                    cursor: 'pointer',
+                    borderBottom: idx < suggestionsFiltrees.length - 1 ? '1px solid #eee' : 'none',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                >
+                  <div>
+                    <strong>{a.nom}</strong>
+                    {a.portionDefaut && (
+                      <span style={{ fontSize: 12, color: '#666', marginLeft: 8 }}>
+                        ({a.portionDefaut})
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ 
+                    fontSize: 13, 
+                    fontWeight: 'bold',
+                    color: a.cs >= 3 ? '#22c55e' : a.cs >= 2 ? '#f59e0b' : '#ef4444'
+                  }}>
+                    CS: {a.cs || '?'}/5
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         {(() => {
           const found = referentielAliments.find(a => a.nom.toLowerCase() === aliment.toLowerCase());
