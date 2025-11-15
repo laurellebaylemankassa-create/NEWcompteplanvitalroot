@@ -91,6 +91,7 @@ Les contributions sont les bienvenues ! N'hésitez pas à soumettre des demandes
 ## License
 Ce projet est sous licence MIT.
 
+Consigne = lors de chaque modification  suivre scrupuleusement " Méthode de travail pour toute modification du code" et respecter en suivant dans l ordre la Checklist à valider pour chaque modification.
 ## Méthode de travail pour toute modification du code
 
 ### Bonnes pratiques

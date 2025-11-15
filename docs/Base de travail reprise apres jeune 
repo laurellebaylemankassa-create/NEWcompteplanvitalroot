@@ -1984,30 +1984,414 @@ Quand jour 8/8 validé :
 
 ---
 
-### 🎯 RÉSUMÉ DES DURÉES PAR ÉTAPE
+### 🎯 RÉSUMÉ DES DURÉES PAR ÉTAPE (MISE À JOUR)
 
-| Étape | Durée | Type | Source |
-|-------|-------|------|--------|
-| **Préparation** | 30 jours (J-30 à J-0) | Fixe | `/docs/Préparation aux jeune` lignes 1-150 |
-| **Jeûne** | 3 à 14 jours | Variable (choix utilisateur) | Fréquences validées (lignes 57-69) |
-| **Reprise** | 2× durée jeûne | Proportionnelle | Protocole médical (lignes 183-209) |
-| **Cristallisation** | 45 jours (6 sem) | Fixe | Ancrage habitudes (ligne 1) |
-| **Portes** | Instantané | Cérémonie | Validation symbolique (lignes 116-128) |
-| **Vie normale** | Permanent | Continu | Nouveau mode de vie |
+| Étape | Durée | Type | Formule | Source |
+|-------|-------|------|---------|--------|
+| **Préparation** | Variable (proportionnelle) | `duree_jeune × 4` | 3j→12j, 7j→28j, 14j→56j | `/docs/Préparation aux jeune` (adapté) |
+| **Jeûne** | 3 à 14 jours | Variable (choix utilisateur) | - | Fréquences validées (lignes 57-69) |
+| **J-3 Validation plan** | Instantané | Étape intermédiaire | - | Logique UX (préparation mentale) |
+| **Reprise** | Variable (proportionnelle) | `duree_jeune × 2` | 3j→6j, 7j→14j, 14j→28j | Protocole médical (lignes 183-209) |
+| **Cristallisation** | 45 jours (6 semaines) | Fixe | - | Ancrage habitudes (ligne 1) |
+| **Portes** | Instantané | Cérémonie | - | Validation symbolique (lignes 116-128) |
+| **Vie normale** | Permanent | Continu | - | Nouveau mode de vie |
 
-**TOTAL CYCLE COMPLET (exemple jeûne 7 jours)** :
-- 30j préparation + 7j jeûne + 14j reprise + 45j cristallisation = **96 jours (~3 mois)**
-- Ensuite : Acquis intégrés à vie ✅
+**TOTAL CYCLE COMPLET (exemples réels)** :
 
-**EXEMPLES SELON DURÉE DU JEÛNE** :
+| Jeûne | Préparation | Jeûne | Reprise | Cristallisation | TOTAL | Durée réelle |
+|-------|-------------|-------|---------|-----------------|-------|--------------|
+| 3j | 12j (3×4) | 3j | 6j (3×2) | 45j | **66j** | ~2 mois |
+| 5j | 20j (5×4) | 5j | 10j (5×2) | 45j | **80j** | ~2,5 mois |
+| 7j | 28j (7×4) | 7j | 14j (7×2) | 45j | **94j** | ~3 mois |
+| 10j | 40j (10×4) | 10j | 20j (10×2) | 45j | **115j** | ~4 mois |
+| 14j | 56j (14×4) | 14j | 28j (14×2) | 45j | **143j** | ~5 mois |
 
-| Jeûne | Préparation | Jeûne | Reprise | Cristallisation | TOTAL |
-|-------|-------------|-------|---------|-----------------|-------|
-| 3j | 30j | 3j | 6j | 45j | **84j (~3 mois)** |
-| 5j | 30j | 5j | 10j | 45j | **90j (~3 mois)** |
-| 7j | 30j | 7j | 14j | 45j | **96j (~3 mois)** |
-| 10j | 30j | 10j | 20j | 45j | **105j (~3,5 mois)** |
-| 14j | 30j | 14j | 28j | 45j | **117j (~4 mois)** |
+---
+
+## 📋 RÉCAPITULATIF COMPLET DE L'EXPÉRIENCE UTILISATEUR
+
+### 🎯 PARCOURS CHRONOLOGIQUE DÉTAILLÉ
+
+#### 1️⃣ PRÉPARATION (Durée proportionnelle : jeûne × 4)
+- **Quand** : Dès la décision de jeûner
+- **Où** : `/pages/jeune.js` (mode préparation)
+- **Quoi** : Critères progressifs (quantités, féculents, transformés, hydratation)
+- **Validation** : J-0 → "Je suis prêt·e à commencer"
+
+#### 2️⃣ JEÛNE EN COURS (Durée variable : 3-14 jours)
+- **Quand** : Après validation préparation
+- **Où** : `/pages/jeune.js` (mode en cours)
+- **Quoi** : Validation quotidienne + messages spirituels + suivi poids
+- **Validation** : Jour par jour jusqu'à Jfinal
+
+#### 3️⃣ J-3 AVANT FIN : GÉNÉRATION AUTOMATIQUE PLAN REPRISE ⚡
+- **Quand** : EXACTEMENT 3 jours avant date_fin_jeune
+- **Où** : Notification + modale validation plan
+- **Quoi** :
+  - ✅ Système génère automatiquement le programme reprise (4 phases)
+  - ✅ Calcul proportionnel : reprise = jeûne × 2
+  - ✅ Liste de courses Phase 1-2 suggérée
+  - ✅ Utilisateur VALIDE le plan (engagement)
+  - ✅ Plan VERROUILLÉ en base (statut: plan_valide)
+- **Pourquoi** : Utilisateur en jeûne, ne pense pas nourriture, doit SE PRÉPARER
+  - 🧠 Préparation mentale (je vais remanger)
+  - 🛒 Préparation logistique (courses à faire)
+  - ⏰ Temps d'organisation (pas de stress dernier moment)
+- **Validation** : Case à cocher + bouton "Valider mon plan de reprise"
+
+#### 4️⃣ REPRISE ALIMENTAIRE (Durée proportionnelle : jeûne × 2)
+- **Quand** : Jour 1 après fin du jeûne
+- **Où** : `/pages/reprise-alimentaire.js` (plan déjà validé)
+- **Quoi** : Interface HYBRIDE
+  - 📆 **Vue principale** : JOUR PAR JOUR (détails complets)
+    - Objectif du jour expliqué
+    - Aliments autorisés avec portions
+    - Aliments interdits (sécurité)
+    - Validation checkboxes concrètes
+  - 🔮 **Aperçu latéral** : PHASES FUTURES
+    - Phases futures 🔒 VERROUILLÉES avec cadenas
+    - Dates de débloquage visibles
+    - Lien "Voir aliments" pour préparer courses
+    - Jour suivant 🔓 "À PRÉPARER" (anticipation)
+  - 📊 Barre progression globale (X/14 jours)
+  - ⬅️ ➡️ Navigation jour par jour
+- **Validation** : Jour par jour jusqu'à dernier jour
+
+#### 5️⃣ CRISTALLISATION (Durée fixe : 45 jours)
+- **Quand** : Après dernier jour reprise validé
+- **Où** : `/pages/cristallisation-45j.js`
+- **Quoi** : Routine hebdomadaire × 6 semaines (ancrage habitudes)
+- **Validation** : Jour par jour pendant 45 jours
+
+#### 6️⃣ PORTES DE CONSTANCE (Instantané)
+- **Quand** : Après 45 jours SI critères validés
+- **Où** : `/pages/portes-constance.js`
+- **Quoi** : Cérémonie symbolique (3 portes)
+- **Validation** : Lecture + bouton "Retour à ma vie normale"
+
+#### 7️⃣ VIE NORMALE AVEC ACQUIS (Permanent)
+- **Quand** : Après Portes validées
+- **Où** : Toutes les pages classiques de l'app
+- **Quoi** : Fonctionnement normal MAIS avec acquis intégrés
+  - Jeûne lundi automatique
+  - Badge "Portes validées"
+  - Détection dérive (alerte si écart)
+  - Jeûnes ponctuels suggérés
+
+---
+
+## 🎨 SCHÉMA VISUEL : EXPÉRIENCE UTILISATEUR COMPLÈTE
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                   🌟 CYCLE COMPLET : EXEMPLE JEÛNE 7 JOURS             │
+│                         (Durée totale : ~94 jours)                      │
+└─────────────────────────────────────────────────────────────────────────┘
+
+📅 TIMELINE CHRONOLOGIQUE :
+
+┌──────────────┐   ┌──────┐   ┌───┐   ┌──────────┐   ┌──────────┐
+│ PRÉPARATION  │ → │JEÛNE │ → │J-3│ → │ REPRISE  │ → │CRISTAL.  │ → 🏆
+│   28 jours   │   │7 jours│   │   │   │ 14 jours │   │ 45 jours │
+│  (7 × 4)     │   │       │   │   │   │  (7 × 2) │   │          │
+└──────────────┘   └──────┘   └───┘   └──────────┘   └──────────┘
+                                ▲
+                                │
+                        VALIDATION PLAN
+                      (Génération auto)
+
+
+📍 ÉTAPE 1 : PRÉPARATION (28 jours pour jeûne 7j)
+├─ J-28 : Décision de jeûner → Choix durée (7 jours)
+├─ J-28 à J-18 : Phase fondations (quantités, féculents, transformés)
+├─ J-12 à J-7 : Phase intensification (jeûne plein, hydratation)
+└─ J-0 : "Je suis prêt·e" → DÉBUT JEÛNE
+
+
+📍 ÉTAPE 2 : JEÛNE EN COURS (7 jours)
+├─ J1-J2 : Transition métabolique (messages encouragement)
+├─ J3-J5 : Entrée en cétose (messages clarté mentale)
+├─ J6-J7 : Cétose établie (messages approfondissement)
+└─ J7 validé → Attente J-3 pour génération plan
+
+
+📍 ÉTAPE 3 : J-3 AVANT FIN (Jour 5 du jeûne = J-3 avant fin)
+└─ 🔔 NOTIFICATION : "Ton jeûne se termine dans 3 jours"
+    │
+    ├─ ⚙️ SYSTÈME GÉNÈRE AUTOMATIQUEMENT :
+    │   ├─ Programme reprise 14 jours (7 × 2)
+    │   ├─ 4 phases proportionnelles :
+    │   │   └─ Phase 1 : J1-J2 (liquides)
+    │   │   └─ Phase 2 : J3-J5 (fibres)
+    │   │   └─ Phase 3 : J6-J9 (protéines)
+    │   │   └─ Phase 4 : J10-J14 (féculents)
+    │   └─ Liste courses Phase 1-2
+    │
+    ├─ 📱 MODALE VALIDATION UTILISATEUR :
+    │   ├─ Présentation du plan complet
+    │   ├─ Liste de courses suggérée
+    │   ├─ "J'ai lu et je m'engage" ☐
+    │   └─ [Valider mon plan de reprise] ✅
+    │
+    └─ ✅ PLAN VERROUILLÉ EN BASE
+        └─ statut: 'plan_valide'
+        └─ Jours pré-générés dans reprises_jours_valides
+
+
+📍 ÉTAPE 4 : REPRISE ALIMENTAIRE (14 jours)
+└─ Dernier jour jeûne validé → Redirection auto vers reprise
+
+    ┌────────────────────────────────────────────────────────┐
+    │ 📆 JOUR 1/14 : INTERFACE HYBRIDE                       │
+    ├────────────────────────────────────────────────────────┤
+    │                                                        │
+    │ 🎯 VUE PRINCIPALE : DÉTAILS DU JOUR                    │
+    │ ├─ Phase : RÉVEIL DIGESTIF                            │
+    │ ├─ Objectif expliqué                                  │
+    │ ├─ Aliments ✅ autorisés (avec portions)              │
+    │ ├─ Aliments ❌ interdits                              │
+    │ └─ Validation checkboxes                              │
+    │                                                        │
+    │ 🔮 APERÇU LATÉRAL : PHASES FUTURES                     │
+    │ ├─ Phase 1 (J1-J2) : ▶️ EN COURS                      │
+    │ │   └─ Jour 2 : 🔓 À préparer (cliquable)            │
+    │ ├─ Phase 2 (J3-J5) : 🔒 BLOQUÉ                        │
+    │ │   └─ Débloquage : 18 décembre                       │
+    │ │   └─ [Voir aliments phase 2] → Liste courses       │
+    │ ├─ Phase 3 (J6-J9) : 🔒 BLOQUÉ                        │
+    │ └─ Phase 4 (J10-J14) : 🔒 BLOQUÉ                      │
+    │                                                        │
+    │ 📊 Progression : ▓░░░░░░░░░░░░░  1/14                 │
+    │ [⬅️ Hier] [Accueil] [Demain (à préparer) ➡️]         │
+    └────────────────────────────────────────────────────────┘
+
+    Jour après jour, phases se débloquent automatiquement :
+    ├─ J1-J2 : Liquides uniquement
+    ├─ J3 : 🎉 Phase 2 débloquée → Fibres douces
+    ├─ J6 : 🎉 Phase 3 débloquée → Protéines & graisses
+    ├─ J10 : 🎉 Phase 4 débloquée → Féculents doux
+    └─ J14 : Dernier jour validé → Bouton "Cristallisation"
+
+
+📍 ÉTAPE 5 : CRISTALLISATION (45 jours)
+└─ Routine hebdomadaire × 6 semaines
+    ├─ Lundi : Jeûne progressif (16h → 24h → 48h)
+    ├─ Mardi-Dimanche : Règles alimentaires strictes
+    ├─ Validation quotidienne
+    └─ J45 : Calcul critères → Si ✅✅✅ → PORTES
+
+
+📍 ÉTAPE 6 : PORTES DE CONSTANCE (Instantané)
+└─ Cérémonie symbolique (3 portes)
+    └─ Message final : "Tu mènes ton bateau"
+        └─ Bouton "Retour vie normale avec acquis"
+
+
+📍 ÉTAPE 7 : VIE NORMALE AVEC ACQUIS (Permanent)
+└─ App fonctionne normalement + bonus permanents :
+    ├─ 🗓️ Jeûne lundi automatique dans planning
+    ├─ 🏅 Badge "Portes validées" visible
+    ├─ 🚨 Détection dérive (alerte si écart)
+    └─ 💡 Suggestions jeûnes ponctuels récurrents
+```
+
+---
+
+## 🔑 POINTS CLÉS À RETENIR (Réponses à tes questions)
+
+### ✅ Question 1 : Préparation proportionnelle
+**VALIDÉ** : `duree_preparation = duree_jeune × 4`
+- 3j jeûne → 12j préparation
+- 7j jeûne → 28j préparation
+- 14j jeûne → 56j préparation
+
+### ✅ Question 2 : C'est quoi "30 jours" dans validation ?
+**CORRIGÉ** : Ce n'était pas clair. Maintenant :
+- Préparation = PROPORTIONNELLE (pas fixe à 30j)
+- La validation se fait à J-0 (dernier jour de préparation)
+- Exemple : Pour jeûne 7j, préparation 28j → validation à J-0 = jour 28
+
+### ✅ Question 3 : Structure planification reprise (expérience UX)
+**VALIDÉ** : Logique complète implémentée
+1. **J-3 avant fin jeûne** : Génération AUTOMATIQUE du plan
+   - Système détecte : `date_fin - 3 jours`
+   - Génère programme 4 phases proportionnel
+   - Présente plan + liste courses à l'utilisateur
+   - **POURQUOI** : Utilisateur en jeûne, ne pense pas nourriture, doit SE PRÉPARER
+     - 🧠 Mentalement (accepter de remanger)
+     - 🛒 Logistiquement (faire courses tranquillement)
+     - ⏰ Sans stress (3 jours pour s'organiser)
+
+2. **Validation utilisateur obligatoire**
+   - Cases à cocher : "J'ai lu / Je m'engage"
+   - Bouton "Valider mon plan"
+   - Plan VERROUILLÉ en base après validation
+
+3. **Phases découpage automatique proportionnel**
+   - Phase 1 : ~11% durée reprise (liquides)
+   - Phase 2 : ~14% durée reprise (fibres)
+   - Phase 3 : ~18% durée reprise (protéines)
+   - Phase 4 : ~57% durée reprise (féculents)
+   
+4. **Interface HYBRIDE** (meilleur des 2 options)
+   - ✅ Vue principale : JOUR PAR JOUR (détails complets) — **Tu aimes ça** ✨
+   - ✅ Aperçu latéral : PHASES FUTURES avec 🔒 cadenas — **Tu aimes ça** ✨
+   - ✅ Jour suivant : 🔓 "À PRÉPARER" (anticipation) — **Tu aimes ça** ✨
+   - ✅ Phases bloquées cliquables → Liste courses suggérée — **Pratique** 🛒
+
+---
+
+## 💻 IMPLÉMENTATION TECHNIQUE : CHECKLIST DÉVELOPPEMENT
+
+### 📦 PHASE A : REPRISE ALIMENTAIRE (6-8h) [PRIORITAIRE]
+
+#### 1. Backend : Génération automatique J-3 (2h)
+- [ ] Créer fonction `verifierFinJeuneProche(userId)` dans `/lib/jeuneUtils.js`
+- [ ] Cron job quotidien OU vérification à la connexion
+- [ ] Détection : `date_fin - aujourd'hui === 3 jours`
+- [ ] Appel `genererProgrammeReprise()` si condition remplie
+- [ ] Insertion en base `reprises_alimentaires` (statut: 'proposition')
+- [ ] Génération liste courses automatique
+- [ ] Création notification utilisateur
+
+#### 2. Fonction génération programme (2h)
+- [ ] Créer `/lib/genererProgrammeReprise.js`
+- [ ] Fonction `genererProgrammeReprise({ dureeJeune, poidsDepart, dateFin, options })`
+- [ ] Fonction `calculerDureeReprise(dureeJeune)` → `dureeJeune × 2`
+- [ ] Fonction `decouper EnPhases(dureeJeune)` → calcul proportionnel 11%/14%/18%/57%
+- [ ] Fonction `getAlimentsPhase(phase)` → retourne aliments par phase
+- [ ] Fonction `getMessagePhase(phase, jour)` → messages contextuels
+- [ ] Fonction `genererListeCourses(jours)` → liste courses Phase 1-2
+- [ ] Tests unitaires avec exemples 3j, 7j, 14j
+
+#### 3. Base de données (30min)
+- [ ] Créer table `reprises_alimentaires` (15 fields)
+- [ ] Créer table `reprises_jours_valides` (13 fields)
+- [ ] Créer table `reprises_repas_consommes` (7 fields)
+- [ ] Créer indexes (user_id, jeune_id, date, statut)
+- [ ] Créer table `notifications` si pas existante
+- [ ] Tester insert/select avec données test
+
+#### 4. Frontend : Page validation plan J-3 (1h30)
+- [ ] Créer modale ou page `/pages/validation-plan-reprise.js`
+- [ ] Affichage programme généré (4 phases résumées)
+- [ ] Affichage liste courses Phase 1-2
+- [ ] Checkboxes engagement : "J'ai lu" + "Je m'engage"
+- [ ] Bouton "Valider mon plan de reprise"
+- [ ] Après validation : update statut → 'plan_valide'
+- [ ] Message confirmation : "Ton plan est prêt. Profite de tes 3 derniers jours."
+
+#### 5. Frontend : Page reprise alimentaire (2h30)
+- [ ] Créer `/pages/reprise-alimentaire.js`
+- [ ] Layout hybride : VUE JOUR (gauche) + APERÇU PHASES (droite)
+- [ ] Section "Jour actuel" :
+  - [ ] Titre avec date + phase actuelle
+  - [ ] Objectif du jour (message contextuel)
+  - [ ] Liste aliments autorisés (avec portions)
+  - [ ] Liste aliments interdits (sécurité)
+  - [ ] Checkboxes validation jour
+  - [ ] Bouton "Valider mon jour X"
+- [ ] Section "Aperçu phases" :
+  - [ ] Phase actuelle : ▶️ EN COURS
+  - [ ] Jour suivant : 🔓 "À préparer" (cliquable)
+  - [ ] Phases futures : 🔒 BLOQUÉ avec date débloquage
+  - [ ] Lien "Voir aliments phase X" → Modale détails + courses
+- [ ] Barre progression globale (X/Y jours validés)
+- [ ] Navigation ⬅️ ➡️ jour précédent/suivant
+- [ ] Gestion états : jour actuel, jours validés, jours futurs
+
+#### 6. Frontend : Modale phases futures (1h)
+- [ ] Créer composant `ModalePhaseFuture.js`
+- [ ] Props : phase (phase2/3/4), dateDebloquage, joursRestants
+- [ ] Affichage objectif phase
+- [ ] Liste aliments qui SERONT autorisés
+- [ ] Liste aliments toujours interdits
+- [ ] Liste de courses à prévoir
+- [ ] Bouton retour
+
+#### 7. Liaison jeune → reprise (30min)
+- [ ] Modifier `/pages/jeune.js` (ligne dernière validation)
+- [ ] Après validation dernier jour : vérifier si plan reprise validé
+- [ ] Si oui : redirection automatique `/reprise-alimentaire`
+- [ ] Si non : afficher erreur + lien validation plan
+
+#### 8. Data : Aliments par phase (1h)
+- [ ] Créer `/data/alimentsRepriseJeune.js`
+- [ ] Phase 1 : 5-10 liquides (bouillons, jus, infusions)
+- [ ] Phase 2 : 10-15 fibres douces (légumes cuits, poissons blancs)
+- [ ] Phase 3 : 10-15 protéines/graisses (œufs, avocats, huiles)
+- [ ] Phase 4 : 10-15 féculents doux (patates douces, riz, flocons)
+- [ ] Chaque aliment : { nom, icone, portion, conseil, phase }
+
+---
+
+### 📦 PHASE B : CRISTALLISATION 45 JOURS (4-5h) [SECONDAIRE]
+
+#### 1. Page cristallisation (2h)
+- [ ] Créer `/pages/cristallisation-45j.js`
+- [ ] Interface similaire reprise : jour par jour
+- [ ] Routine hebdomadaire répétée 6 fois
+- [ ] Règles alimentaires (féculents, extras, satiété)
+- [ ] Validation quotidienne
+
+#### 2. Fonction génération plan 45j (1h30)
+- [ ] Créer `/lib/genererProgrammeConsolidation45j.js`
+- [ ] Générer 45 jours avec règles par jour de semaine
+- [ ] Progression jeûnes hebdomadaires (16h → 24h → 48h)
+- [ ] Enregistrement en base
+
+#### 3. Liaison reprise → cristallisation (30min)
+- [ ] Bouton dernier jour reprise validé
+- [ ] Redirection automatique cristallisation
+
+---
+
+### 📦 PHASE C : PORTES & VIE NORMALE (3-4h) [OPTIONNEL]
+
+#### 1. Page Portes de Constance (1h30)
+- [ ] Créer `/pages/portes-constance.js`
+- [ ] Animation progressive 3 portes
+- [ ] Messages symboliques
+- [ ] Bouton "Retour vie normale"
+
+#### 2. Calcul critères portes (1h)
+- [ ] Fonction calcul automatique
+- [ ] 7 jours sans excès ?
+- [ ] 3 jours sans sucre ?
+- [ ] Jeûne sans compensation ?
+
+#### 3. Badge & détection dérive (1h30)
+- [ ] Badge "Portes validées" dans profil
+- [ ] Détection dérive (3j excès consécutifs)
+- [ ] Alerte douce si écart
+- [ ] Suggestion refaire cristallisation
+
+---
+
+### 🧪 TESTS & VALIDATION
+
+- [ ] Test cycle complet jeûne 3j (reprise 6j)
+- [ ] Test cycle complet jeûne 7j (reprise 14j)
+- [ ] Test cycle complet jeûne 14j (reprise 28j)
+- [ ] Test génération automatique J-3
+- [ ] Test validation plan utilisateur
+- [ ] Test déblocage phases progressif
+- [ ] Test navigation jour par jour
+- [ ] Test liste de courses suggérée
+- [ ] Test messages contextuels par phase
+- [ ] Test barre de progression
+
+---
+
+**ESTIMATION TOTALE** :
+- Phase A (reprise) : 6-8h ⚡ **PRIORITAIRE**
+- Phase B (cristallisation) : 4-5h 🟡 **SECONDAIRE**
+- Phase C (portes & vie) : 3-4h 🟢 **OPTIONNEL**
+- **TOTAL** : 13-17h de développement
+
+═══════════════════════════════════════════════════════════════════════════════
+🎯 FIN DU DOCUMENT - ARCHITECTURE COMPLÈTE VALIDÉE
+═══════════════════════════════════════════════════════════════════════════════
 
 ---
 
@@ -2096,68 +2480,451 @@ function decouper EnPhases(dureeJeune) {
 - Phase 3 (protéines) : J8-J12 (5j = 18%) ✅ Correspond au doc
 - Phase 4 (féculents) : J13-J18 (6j = 21%) + Transition J19-J28 (10j) ✅
 
-### 🎯 INTERFACE UTILISATEUR : COMMENT AFFICHER ?
+### 🎯 INTERFACE UTILISATEUR : EXPÉRIENCE COMPLÈTE (Hybrid Option 1 + 2)
 
-**Option 1 : Vue par PHASE (recommandée)** :
+**Principe** : Vue PAR JOUR (comme Option 2) + Aperçu phases futures avec cadenas (comme Option 1)
+
+---
+
+#### 📱 ÉCRAN 1 : PAGE PRINCIPALE REPRISE (Premier jour)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ 🌟 Ma reprise après jeûne de 7 jours                           │
-│ Programme généré : 14 jours (du 16 au 29 décembre)             │
+│ 🌟 Ma reprise après jeûne de 7 jours       [Profil] [Tableau]  │
+│ Programme : 14 jours (du 16 au 29 décembre)                    │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│ ▶️ PHASE 1 : RÉVEIL DIGESTIF (J1-J2)                           │
-│   🥤 Uniquement liquides                                        │
-│   ├─ Jour 1 (16 déc) : ☐ Validé                               │
-│   └─ Jour 2 (17 déc) : 🔒 À venir                             │
-│   Aliments : Bouillons, jus filtrés, eau citronnée            │
-│   [Voir les aliments autorisés]                                │
+│ ┌─────────────────────────────────────────────────────────────┐ │
+│ │ 📆 AUJOURD'HUI : Jour 1/14 — Lundi 16 décembre             │ │
+│ │ Phase actuelle : 🥤 RÉVEIL DIGESTIF (Liquides uniquement) │ │
+│ └─────────────────────────────────────────────────────────────┘ │
 │                                                                 │
-│ 🔒 PHASE 2 : FIBRES DOUCES (J3-J5)                            │
-│   🥗 Légumes cuits + poissons blancs                           │
-│   Débloquage : 18 décembre                                     │
+│ ┌─────────────────────────────────────────────────────────────┐ │
+│ │ 🎯 TON OBJECTIF DU JOUR :                                  │ │
+│ │                                                             │ │
+│ │ Réveiller ton système digestif en ultra douceur.           │ │
+│ │ Ton estomac est en "mode veille" depuis 7 jours.           │ │
+│ │ Aujourd'hui, tu réapprends à nourrir ton corps.            │ │
+│ │                                                             │ │
+│ │ ⚠️ VITAL : Cette étape prévient le syndrome de renutrition │ │
+│ │ (risque mortel si tu manges solide trop vite)              │ │
+│ └─────────────────────────────────────────────────────────────┘ │
 │                                                                 │
-│ 🔒 PHASE 3 : PROTÉINES & GRAISSES (J6-J9)                     │
-│   🥚 Œufs, avocats, huiles                                     │
-│   Débloquage : 21 décembre                                     │
+│ ── ALIMENTS AUTORISÉS AUJOURD'HUI ──────────────────────────── │
 │                                                                 │
-│ 🔒 PHASE 4 : FÉCULENTS DOUX (J10-J14)                         │
-│   🍠 Patate douce, riz complet (midi uniquement)              │
-│   Débloquage : 25 décembre                                     │
+│ ✅ 🥤 Bouillon de légumes clair                                 │
+│    └─ Sans morceaux, filtré, tiède (pas chaud)                │
+│    └─ Portion : 200ml par prise, 3-4 fois/jour                │
+│                                                                 │
+│ ✅ 🍋 Eau citronnée tiède                                       │
+│    └─ 1/2 citron pressé dans eau chaude                        │
+│    └─ À volonté (hydratation maximale)                         │
+│                                                                 │
+│ ✅ 🧃 Jus de légumes filtré                                     │
+│    └─ Carotte ou céleri (pas de fruits sucrés)                │
+│    └─ Maison si possible, 150ml max par prise                 │
+│                                                                 │
+│ ✅ ☕ Infusions                                                  │
+│    └─ Camomille, verveine, thym (sans sucre)                   │
+│    └─ À volonté                                                 │
+│                                                                 │
+│ ── ALIMENTS INTERDITS AUJOURD'HUI ──────────────────────────── │
+│                                                                 │
+│ ❌ Légumes solides (même cuits vapeur)                          │
+│ ❌ Protéines (poisson, œufs, viande)                            │
+│ ❌ Féculents (pain, riz, pâtes, pomme de terre)                │
+│ ❌ Fruits (trop sucrés pour l'instant)                          │
+│ ❌ Produits laitiers                                            │
+│ ❌ Matières grasses (huiles, beurre, avocat)                    │
+│                                                                 │
+│ ────────────────────────────────────────────────────────────── │
+│                                                                 │
+│ 📝 VALIDATION DE TON JOUR :                                     │
+│                                                                 │
+│ ☐ J'ai bu au moins 4 bouillons/jus aujourd'hui                │
+│ ☐ J'ai respecté les aliments autorisés uniquement              │
+│ ☐ Je me sens bien (pas de maux de ventre)                      │
+│                                                                 │
+│ [✅ Valider mon jour 1]                                         │
+│                                                                 │
+│ ────────────────────────────────────────────────────────────── │
+│                                                                 │
+│ 🔮 APERÇU DE TA REPRISE (phases à venir) :                     │
+│                                                                 │
+│ ▶️ PHASE 1 : RÉVEIL DIGESTIF (J1-J2) [EN COURS]                │
+│   └─ Jour 1 : ✅ Aujourd'hui                                    │
+│   └─ Jour 2 : 🔓 Demain (Mardi 17 déc) — À préparer            │
+│      └─ Même chose : liquides uniquement                        │
+│                                                                 │
+│ 🔒 PHASE 2 : FIBRES DOUCES (J3-J5) [BLOQUÉ]                    │
+│   └─ Débloquage : Mercredi 18 décembre                         │
+│   └─ Aperçu : Légumes cuits + poissons blancs                  │
+│   └─ [Voir les aliments de cette phase]                        │
+│                                                                 │
+│ 🔒 PHASE 3 : PROTÉINES & GRAISSES (J6-J9) [BLOQUÉ]             │
+│   └─ Débloquage : Samedi 21 décembre                           │
+│   └─ Aperçu : Œufs, avocats, huiles végétales                  │
+│                                                                 │
+│ 🔒 PHASE 4 : FÉCULENTS DOUX (J10-J14) [BLOQUÉ]                 │
+│   └─ Débloquage : Mercredi 25 décembre                         │
+│   └─ Aperçu : Patate douce, riz complet (midi uniquement)      │
+│                                                                 │
+│ ────────────────────────────────────────────────────────────── │
+│                                                                 │
+│ 📊 Progression globale : ▓░░░░░░░░░░░░░  1/14 jours validés    │
+│                                                                 │
+│ [⬅️ Jour précédent]  [Accueil]  [Jour suivant (à préparer) ➡️] │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-**Option 2 : Vue par JOUR (alternative)** :
+---
+
+#### 📱 ÉCRAN 2 : CONSULTATION "JOUR SUIVANT" (Préparation mentale)
+
+**Action** : L'utilisateur clique sur "Jour suivant (à préparer)" ou sur "Jour 2 : À préparer"
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ 📆 Jour 1/14 de ma reprise — 16 décembre                       │
-│ Phase actuelle : RÉVEIL DIGESTIF (Liquides uniquement)         │
+│ 🔮 Aperçu : Jour 2/14 — Mardi 17 décembre                      │
+│ Phase : 🥤 RÉVEIL DIGESTIF (suite)                              │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│ 🎯 Objectif du jour :                                          │
-│ Réveiller ton système digestif en ultra douceur.              │
-│ Ton estomac est en "mode veille" depuis 7 jours.              │
+│ ⚠️ Ce jour n'est pas encore accessible. Il se débloquera       │
+│    automatiquement demain (après validation du jour 1).        │
 │                                                                 │
-│ ✅ Aliments autorisés aujourd'hui :                            │
-│ ├─ 🥤 Bouillon de légumes clair (sans morceaux)               │
-│ ├─ 🍋 Eau citronnée tiède                                     │
-│ ├─ 🧃 Jus de légumes filtré (carotte, céleri)                 │
-│ └─ ☕ Infusions (camomille, verveine)                          │
+│ ┌─────────────────────────────────────────────────────────────┐ │
+│ │ 📋 CE QUI T'ATTEND DEMAIN :                                │ │
+│ │                                                             │ │
+│ │ Tu continueras la phase liquides (jour 2/2).               │ │
+│ │ Même chose qu'aujourd'hui : bouillons, jus filtrés,        │ │
+│ │ eau citronnée, infusions.                                   │ │
+│ │                                                             │ │
+│ │ 💡 Pourquoi 2 jours ?                                       │ │
+│ │ Ton système digestif a besoin de se réveiller doucement.   │ │
+│ │ Le jour 2 confirme que ton corps accepte bien les liquides │ │
+│ │ avant d'introduire des fibres solides.                      │ │
+│ └─────────────────────────────────────────────────────────────┘ │
 │                                                                 │
-│ ⚠️ Aliments INTERDITS aujourd'hui :                            │
-│ ❌ Légumes solides (même cuits)                                │
-│ ❌ Protéines (poisson, œufs, viande)                           │
-│ ❌ Féculents (pain, riz, pâtes)                                │
-│ ❌ Fruits (trop sucrés pour l'instant)                         │
+│ 🛒 PRÉPARATION POUR DEMAIN :                                    │
 │                                                                 │
-│ [Valider mon jour] [Voir phase suivante]                       │
+│ ☐ Vérifier que j'ai assez de bouillon (ou légumes pour en     │
+│   préparer)                                                     │
+│ ☐ Préparer mes citrons (3-4 pour la journée)                   │
+│ ☐ Avoir des infusions disponibles                              │
 │                                                                 │
-│ ◀️ Hier  |  Progression : ▓░░░░░░░░░░░░░  1/14  |  Demain ▶️ │
+│ 💭 PRÉPARATION MENTALE :                                        │
+│                                                                 │
+│ Demain, tu seras peut-être tenté·e de "passer à autre chose". │
+│ Rappelle-toi : cette lenteur est une FORCE, pas une faiblesse.│
+│ Ton corps te dira merci.                                       │
+│                                                                 │
+│ [⬅️ Retour au jour 1]  [Voir phase 2 (J3-J5)]                  │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+#### 📱 ÉCRAN 3 : CONSULTATION PHASE FUTURE (Phase 2 bloquée)
+
+**Action** : L'utilisateur clique sur "Voir les aliments de cette phase" pour Phase 2
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ 🔒 Phase 2 : FIBRES DOUCES (J3-J5)                             │
+│ Débloquage : Mercredi 18 décembre (dans 2 jours)               │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│ ⚠️ Cette phase n'est pas encore accessible.                     │
+│    Tu pourras la consulter en détail à partir du jour 3.       │
+│                                                                 │
+│ ┌─────────────────────────────────────────────────────────────┐ │
+│ │ 🎯 OBJECTIF DE CETTE PHASE :                               │ │
+│ │                                                             │ │
+│ │ Réintroduire les fibres CUITES en douceur.                 │ │
+│ │ Les légumes cuits vapeur sont faciles à digérer.           │ │
+│ │ On évite encore les fibres CRUES (trop agressives).        │ │
+│ └─────────────────────────────────────────────────────────────┘ │
+│                                                                 │
+│ 🥗 ALIMENTS QUI SERONT AUTORISÉS :                              │
+│                                                                 │
+│ ✅ 🍲 Soupe de légumes (sans féculents)                         │
+│    └─ Courgette, poireau, carotte cuite                        │
+│                                                                 │
+│ ✅ 🥦 Légumes cuits vapeur                                      │
+│    └─ Brocoli, haricots verts, carottes                        │
+│                                                                 │
+│ ✅ 🐟 Poisson blanc vapeur                                      │
+│    └─ Cabillaud, sole (100g max par repas)                     │
+│                                                                 │
+│ ❌ Toujours INTERDITS en Phase 2 :                              │
+│ ❌ Légumes crus (salades, tomates crues)                        │
+│ ❌ Féculents (riz, pâtes, pain, pomme de terre)                │
+│ ❌ Matières grasses (huiles, beurre, avocat)                    │
+│ ❌ Œufs, viandes                                                │
+│                                                                 │
+│ 🛒 COURSES À PRÉVOIR (tu peux anticiper) :                      │
+│                                                                 │
+│ ☐ Courgettes (2-3)                                              │
+│ ☐ Poireaux (2)                                                  │
+│ ☐ Carottes (5-6)                                                │
+│ ☐ Brocoli (1)                                                   │
+│ ☐ Haricots verts (200g)                                         │
+│ ☐ Poisson blanc frais (cabillaud ou sole, 300g)                │
+│                                                                 │
+│ 💡 CONSEIL :                                                     │
+│ Profite de ces 2 jours pour faire tes courses tranquillement.  │
+│ Le jour 3, tu seras peut-être fatigué·e ou moins motivé·e.     │
+│                                                                 │
+│ [⬅️ Retour]  [Voir Phase 3]  [Voir Phase 4]                    │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+#### 📱 ÉCRAN 4 : JOUR 3 (Début Phase 2 - Débloqué)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ 🌟 Ma reprise après jeûne de 7 jours       [Profil] [Tableau]  │
+│ Programme : 14 jours (du 16 au 29 décembre)                    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│ ┌─────────────────────────────────────────────────────────────┐ │
+│ │ 📆 AUJOURD'HUI : Jour 3/14 — Mercredi 18 décembre          │ │
+│ │ Phase actuelle : 🥗 FIBRES DOUCES [NOUVELLE PHASE !]      │ │
+│ └─────────────────────────────────────────────────────────────┘ │
+│                                                                 │
+│ ┌─────────────────────────────────────────────────────────────┐ │
+│ │ 🎉 BRAVO ! Tu passes à la phase 2                          │ │
+│ │                                                             │ │
+│ │ Tes 2 jours de liquides sont validés. Ton système digestif │ │
+│ │ est réveillé. Aujourd'hui, tu réintroduis les FIBRES.      │ │
+│ │                                                             │ │
+│ │ 🎯 OBJECTIF : Réhabituer tes intestins progressivement     │ │
+│ └─────────────────────────────────────────────────────────────┘ │
+│                                                                 │
+│ ── ALIMENTS AUTORISÉS AUJOURD'HUI ──────────────────────────── │
+│                                                                 │
+│ ✅ 🍲 Soupe de légumes (sans féculents)                         │
+│    └─ Courgette, poireau, carotte cuite                        │
+│    └─ Portion : 1 bol de 250ml, 2-3 fois/jour                 │
+│                                                                 │
+│ ✅ 🥦 Légumes cuits vapeur                                      │
+│    └─ Brocoli, haricots verts, carottes                        │
+│    └─ Portion : 150g par repas                                 │
+│                                                                 │
+│ ✅ 🐟 Poisson blanc vapeur                                      │
+│    └─ Cabillaud, sole (cuisson douce)                          │
+│    └─ Portion : 100g max (1 repas/jour seulement)             │
+│                                                                 │
+│ ✅ Tous les liquides de Phase 1 (bouillons, eau citronnée)     │
+│                                                                 │
+│ ── ALIMENTS INTERDITS AUJOURD'HUI ──────────────────────────── │
+│                                                                 │
+│ ❌ Légumes CRUS (salades, tomates, concombre)                   │
+│ ❌ Féculents (riz, pâtes, pain, pomme de terre)                │
+│ ❌ Matières grasses (huiles, beurre, avocat)                    │
+│ ❌ Œufs, viandes rouges                                         │
+│ ❌ Produits laitiers                                            │
+│                                                                 │
+│ ────────────────────────────────────────────────────────────── │
+│                                                                 │
+│ 📝 VALIDATION DE TON JOUR :                                     │
+│                                                                 │
+│ ☐ J'ai mangé au moins 2 repas avec légumes cuits              │
+│ ☐ Je n'ai pas mangé de légumes crus                            │
+│ ☐ Je n'ai pas ajouté d'huile ou de matières grasses           │
+│ ☐ Je me sens bien (digestion facile)                           │
+│                                                                 │
+│ [✅ Valider mon jour 3]                                         │
+│                                                                 │
+│ ────────────────────────────────────────────────────────────── │
+│                                                                 │
+│ 🔮 APERÇU DE TA REPRISE (phases à venir) :                     │
+│                                                                 │
+│ ✅ PHASE 1 : RÉVEIL DIGESTIF (J1-J2) [TERMINÉ]                 │
+│   └─ Jour 1 : ✅ Validé                                         │
+│   └─ Jour 2 : ✅ Validé                                         │
+│                                                                 │
+│ ▶️ PHASE 2 : FIBRES DOUCES (J3-J5) [EN COURS]                  │
+│   └─ Jour 3 : ✅ Aujourd'hui                                    │
+│   └─ Jour 4 : 🔓 Demain (Jeudi 19 déc) — À préparer            │
+│   └─ Jour 5 : 🔓 Après-demain (Vendredi 20 déc)                │
+│                                                                 │
+│ 🔒 PHASE 3 : PROTÉINES & GRAISSES (J6-J9) [BLOQUÉ]             │
+│   └─ Débloquage : Samedi 21 décembre (dans 3 jours)            │
+│   └─ Aperçu : Œufs, avocats, huiles végétales                  │
+│   └─ [Voir les aliments de cette phase]                        │
+│                                                                 │
+│ 🔒 PHASE 4 : FÉCULENTS DOUX (J10-J14) [BLOQUÉ]                 │
+│   └─ Débloquage : Mercredi 25 décembre (dans 7 jours)          │
+│                                                                 │
+│ ────────────────────────────────────────────────────────────── │
+│                                                                 │
+│ 📊 Progression globale : ▓▓▓░░░░░░░░░░░  3/14 jours validés    │
+│                                                                 │
+│ [⬅️ Jour précédent]  [Accueil]  [Jour suivant (à préparer) ➡️] │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### ✨ POINTS CLÉS DE CETTE EXPÉRIENCE UTILISATEUR :
+
+1. **Vue principale = PAR JOUR** (détails complets pour aujourd'hui)
+   - Objectif du jour expliqué
+   - Aliments autorisés avec portions précises
+   - Aliments interdits (évite les erreurs)
+   - Validation avec checkboxes concrètes
+
+2. **Aperçu phases futures avec CADENAS 🔒**
+   - Phases verrouillées = rassurantes (pas submergé d'infos)
+   - Date de débloquage visible (anticipation)
+   - Lien "Voir les aliments" = préparation mentale
+
+3. **Notion "À PRÉPARER" pour jour suivant 🔓**
+   - Cliquable pour voir en avance
+   - Liste de courses suggérée
+   - Préparation mentale (messages d'encouragement)
+
+4. **Progression visible**
+   - Barre de progression globale
+   - Phases terminées marquées ✅
+   - Phase en cours marquée ▶️
+   - Phases futures marquées 🔒
+
+5. **Navigation intuitive**
+   - Flèches ⬅️ ➡️ pour naviguer jour par jour
+   - Bouton [Accueil] pour retour tableau de bord
+   - Liens directs vers phases futures (préparation courses)
+
+---
+
+### 🔧 LOGIQUE BACKEND : SUGGESTION AUTOMATIQUE DU PLAN
+
+**Déclencheur** : J-3 avant fin du jeûne prévu
+
+```javascript
+// Fonction exécutée quotidiennement (cron job ou vérification à la connexion)
+async function verifierFinJeuneProche(userId) {
+  // 1. Récupérer le jeûne en cours de l'utilisateur
+  const { data: jeuneEnCours } = await supabase
+    .from('jeunes')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('statut', 'en_cours')
+    .single();
+  
+  if (!jeuneEnCours) return; // Pas de jeûne en cours
+  
+  // 2. Calculer les jours restants
+  const dateFin = new Date(jeuneEnCours.date_fin);
+  const aujourdhui = new Date();
+  const joursRestants = Math.ceil((dateFin - aujourdhui) / (1000 * 60 * 60 * 24));
+  
+  // 3. Si J-3 exactement ET plan pas encore généré
+  if (joursRestants === 3 && !jeuneEnCours.plan_reprise_genere) {
+    
+    // 4. Générer automatiquement le plan de reprise
+    const planReprise = genererProgrammeReprise({
+      dureeJeune: jeuneEnCours.duree_jours,
+      poidsDepart: jeuneEnCours.poids_depart,
+      dateFin: jeuneEnCours.date_fin,
+      options: {
+        vitesseTransition: 'normale', // ou 'lente', 'rapide'
+        prioriteCetose: jeuneEnCours.duree_jours >= 7 // true si jeûne long
+      }
+    });
+    
+    // 5. Enregistrer le plan en base (statut: 'proposition')
+    const { data: repriseCreee } = await supabase
+      .from('reprises_alimentaires')
+      .insert({
+        user_id: userId,
+        jeune_id: jeuneEnCours.id,
+        duree_jeune_jours: jeuneEnCours.duree_jours,
+        duree_reprise_jours: planReprise.duree_reprise_jours,
+        date_debut: planReprise.date_debut,
+        date_fin: planReprise.date_fin,
+        phases: planReprise.phases,
+        statut: 'proposition', // Pas encore validé par l'utilisateur
+        plan_genere_le: new Date()
+      })
+      .select()
+      .single();
+    
+    // 6. Générer les jours pré-remplis
+    const joursAPreparer = planReprise.jours.map(jour => ({
+      reprise_id: repriseCreee.id,
+      jour_numero: jour.numero,
+      date: jour.date,
+      phase: jour.phase,
+      aliments_autorises: jour.alimentsAutorises,
+      message_contextuel: jour.messageContextuel,
+      valide: false
+    }));
+    
+    await supabase
+      .from('reprises_jours_valides')
+      .insert(joursAPreparer);
+    
+    // 7. Générer la liste de courses (Phase 1-2 prioritaires)
+    const listeCourses = genererListeCourses(planReprise.jours.slice(0, 7)); // 7 premiers jours
+    
+    await supabase
+      .from('reprises_alimentaires')
+      .update({ liste_courses: listeCourses })
+      .eq('id', repriseCreee.id);
+    
+    // 8. Marquer le jeûne comme "plan généré"
+    await supabase
+      .from('jeunes')
+      .update({ plan_reprise_genere: true })
+      .eq('id', jeuneEnCours.id);
+    
+    // 9. Créer une notification pour l'utilisateur
+    await supabase
+      .from('notifications')
+      .insert({
+        user_id: userId,
+        type: 'plan_reprise_pret',
+        titre: 'Ton jeûne se termine dans 3 jours',
+        message: 'Ton plan de reprise est prêt ! Viens le valider et préparer tes courses.',
+        lien: '/reprise-alimentaire',
+        lu: false
+      });
+    
+    console.log(`✅ Plan de reprise généré pour user ${userId} (jeûne J-3)`);
+  }
+}
+
+// Fonction helper : générer liste de courses
+function genererListeCourses(premiers Jours) {
+  const alimentsUniques = new Set();
+  
+  premiersJours.forEach(jour => {
+    jour.alimentsAutorises.forEach(aliment => {
+      alimentsUniques.add(aliment.nom);
+    });
+  });
+  
+  return {
+    phase1_2: [
+      { nom: 'Légumes (courgettes, carottes, poireaux)', quantite: '1kg', categorie: 'Légumes' },
+      { nom: 'Poisson blanc (cabillaud ou sole)', quantite: '200-300g', categorie: 'Protéines' },
+      { nom: 'Citrons', quantite: '5-6', categorie: 'Fruits' },
+      { nom: 'Bouillon de légumes bio', quantite: '1L', categorie: 'Liquides' },
+      { nom: 'Infusions (camomille, verveine)', quantite: '2 boîtes', categorie: 'Liquides' }
+    ]
+  };
+}
+```
+
+---
 
 ### 🔧 IMPLÉMENTATION TECHNIQUE
 
