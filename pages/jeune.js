@@ -251,34 +251,52 @@ export default function Jeune() {
 
     setLoadingProgramme(true);
     try {
-      // Récupérer l'utilisateur connecté
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        alert("❌ Tu dois être connecté pour générer un programme");
-        setLoadingProgramme(false);
-        return;
-      }
-
       const dateFin = new Date(dateDebutJeune);
       dateFin.setDate(dateFin.getDate() + dureeJeune - 1);
       const dateFinStr = dateFin.toISOString().split('T')[0];
 
-      // Sauvegarder en base avec statut 'proposition'
-      const programmeSauvegarde = await genererEtSauvegarderProgramme(user.id, {
-        id: null, // Pas de jeûne enregistré dans la table 'jeunes'
-        duree_jours: dureeJeune,
-        date_fin: dateFinStr,
-        poids_depart: poidsDepart
-      });
+      // Tenter de récupérer l'utilisateur, mais ne pas bloquer si absent
+      let userId;
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        userId = user?.id;
+      } catch {}
 
-      if (programmeSauvegarde) {
+      let programmeSauvegarde;
+      if (userId) {
+        // Utilisateur connecté : sauvegarde Supabase
+        programmeSauvegarde = await genererEtSauvegarderProgramme(userId, {
+          id: null,
+          duree_jours: dureeJeune,
+          date_fin: dateFinStr,
+          poids_depart: poidsDepart
+        });
+        if (!programmeSauvegarde) throw new Error("Échec de la sauvegarde du programme");
         setProgrammeReprise(programmeSauvegarde);
         saveState("programmeReprise", programmeSauvegarde);
         setAlerteJ3(null);
         alert(`✅ Programme généré et sauvegardé ! ${programmeSauvegarde.duree_reprise_jours} jours de reprise créés.`);
       } else {
-        throw new Error("Échec de la sauvegarde du programme");
+        // Génération locale strictement sans userId (comme ideaux)
+        const programme = genererProgrammeReprise({
+          dureeJeune,
+          poidsDepart,
+          dateFin: dateFinStr,
+          options: {
+            genere_automatiquement: true,
+            genere_le: new Date().toISOString()
+          }
+        });
+        programmeSauvegarde = {
+          ...programme,
+          id: null,
+          statut: 'proposition',
+          plan_genere_le: new Date().toISOString()
+        };
+        setProgrammeReprise(programmeSauvegarde);
+        saveState("programmeReprise", programmeSauvegarde);
+        setAlerteJ3(null);
+        alert(`✅ Programme généré localement ! ${programmeSauvegarde.duree_reprise_jours} jours de reprise créés. Connecte-toi pour sauvegarder définitivement.`);
       }
     } catch (error) {
       console.error("Erreur génération:", error);
@@ -576,8 +594,6 @@ export default function Jeune() {
 
       {/* --- Préparation à la reprise (à partir de J4 ou moitié du jeûne) --- */}
       {showReprise && (
-      {/* Section "Préparation à la reprise" : affichée seulement si programme existe */}
-      {showReprise && programmeReprise && (
         <div style={{
           background: "#fffde7", border: "1px solid #ffe082", borderRadius: 12, padding: 16, marginBottom: 18
         }}>
@@ -585,19 +601,75 @@ export default function Jeune() {
             Préparation à la reprise alimentaire
           </div>
           <div>
-            Dans {dureeJeune - jourEnCours + 1} jours, tu sortiras de ce jeûne. Ce n'est pas une fin, c'est une entrée vers une alimentation consciente.<br />
+            Dans {dureeJeune - jourEnCours + 1} jours, tu sortiras de ce jeûne. Ce n’est pas une fin, c’est une entrée vers une alimentation consciente.<br />
             <button
               style={{
-                marginTop: 8, background: "#1976d2", color: "#fff", border: "none", borderRadius: 8,
-                padding: "6px 16px", fontWeight: 600, cursor: "pointer"
+                marginTop: 8, background: loadingProgramme ? "#90caf9" : "#1976d2", color: "#fff", border: "none", borderRadius: 8,
+                padding: "6px 16px", fontWeight: 600, cursor: loadingProgramme ? "not-allowed" : "pointer", opacity: loadingProgramme ? 0.7 : 1
               }}
-              onClick={() => window.location.href = "/validation-plan-reprise"}
+              disabled={loadingProgramme}
+              onClick={async () => {
+                setLoadingProgramme(true);
+                try {
+                  const dateFin = new Date(dateDebutJeune);
+                  dateFin.setDate(dateFin.getDate() + dureeJeune - 1);
+                  const dateFinStr = dateFin.toISOString().split('T')[0];
+                  // Tenter de récupérer l'utilisateur, mais ne pas bloquer si absent
+                  let userId;
+                  try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    userId = user?.id;
+                  } catch {}
+                  let programmeSauvegarde;
+                  if (userId) {
+                    programmeSauvegarde = await genererEtSauvegarderProgramme(userId, {
+                      id: null,
+                      duree_jours: dureeJeune,
+                      date_fin: dateFinStr,
+                      poids_depart: poidsDepart
+                    });
+                    if (programmeSauvegarde) {
+                      setProgrammeReprise(programmeSauvegarde);
+                      saveState("programmeReprise", programmeSauvegarde);
+                      setAlerteJ3(null);
+                      alert(`✅ Programme généré et sauvegardé ! ${programmeSauvegarde.duree_reprise_jours} jours de reprise créés.\nVous allez être redirigé vers la validation.`);
+                      window.location.href = "/validation-plan-reprise";
+                    } else {
+                      alert("❌ Erreur lors de la génération du programme");
+                    }
+                  } else {
+                    // Génération locale strictement sans userId (comme ideaux)
+                    const programme = genererProgrammeReprise({
+                      dureeJeune,
+                      poidsDepart,
+                      dateFin: dateFinStr,
+                      options: {
+                        genere_automatiquement: true,
+                        genere_le: new Date().toISOString()
+                      }
+                    });
+                    programmeSauvegarde = {
+                      ...programme,
+                      id: null,
+                      statut: 'proposition',
+                      plan_genere_le: new Date().toISOString()
+                    };
+                    setProgrammeReprise(programmeSauvegarde);
+                    saveState("programmeReprise", programmeSauvegarde);
+                    setAlerteJ3(null);
+                    alert(`✅ Programme généré localement ! ${programmeSauvegarde.duree_reprise_jours} jours de reprise créés. Connecte-toi pour sauvegarder définitivement.`);
+                  }
+                } catch (err) {
+                  alert("❌ Erreur inattendue : " + err.message);
+                } finally {
+                  setLoadingProgramme(false);
+                }
+              }}
             >
-              Visualiser mon plan de reprise
+              {loadingProgramme ? "Génération du plan en cours..." : "Générer mon plan de reprise"}
             </button>
           </div>
         </div>
-      )}
       )}
 
       {/* --- Passerelle automatique vers la reprise --- */}

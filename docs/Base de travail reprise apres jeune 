@@ -3127,3 +3127,21 @@ PROGRESSION PHASE A:
 ⏳ Restantes: 5 tâches (~5h30)
 
 PROCHAINE ÉTAPE: Task #8 - /pages/reprise-alimentaire.js (UI) - 2h30
+
+
+
+
+beug identifié
+
+Oui, c’est exactement ça :
+
+Quand l’utilisateur clique sur le bouton « Générer mon plan de reprise » (mis en évidence en vert sur ta capture dans jeune.js) :
+
+Une fonction (généralement genererProgrammeRepriseManuel) est appelée.
+Cette fonction génère automatiquement le plan de reprise (calcul, création des phases, etc.) et le sauvegarde dans la base Supabase et dans le localStorage.
+Ensuite, l’utilisateur est redirigé vers la page de validation (/validation-plan-reprise) :
+
+Sur cette page, le plan généré lui est proposé.
+Il peut alors lire le détail, cocher les cases d’engagement, et valider définitivement le plan.
+Le flux est donc :
+Bouton « Générer » → génération automatique du plan → affichage du plan sur la page de validation → validation par l’utilisateur.
