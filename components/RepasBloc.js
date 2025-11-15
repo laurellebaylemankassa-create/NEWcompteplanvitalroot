@@ -642,9 +642,9 @@ function getSuggestionsFromNotes(repasList) {
                   <div style={{ 
                     fontSize: 13, 
                     fontWeight: 'bold',
-                    color: a.cs >= 3 ? '#22c55e' : a.cs >= 2 ? '#f59e0b' : '#ef4444'
+                    color: a.qn >= 4 ? '#22c55e' : a.qn >= 3 ? '#f59e0b' : '#ef4444'
                   }}>
-                    CS: {a.cs || '?'}/5
+                    QN: {a.qn || '?'}/5
                   </div>
                 </div>
               ))}
@@ -704,6 +704,9 @@ function getSuggestionsFromNotes(repasList) {
           return '';
         })()}</label>
         <input value={quantite} onChange={e => setQuantite(e.target.value)} required={categorie !== 'Jeûne'} />
+        <div style={{ fontSize: 11, color: '#f59e0b', marginTop: 2, marginBottom: 8 }}>
+          ⚠️ Utilisez un <strong>point</strong> pour les décimales (ex: 0.5 et non 0,5)
+        </div>
 
         <label>Kcal {loadingKcal && "(recherche...)"}</label>
         <input 
