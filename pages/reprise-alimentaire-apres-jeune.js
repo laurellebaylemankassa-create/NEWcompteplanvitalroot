@@ -75,20 +75,39 @@ export default function RepriseAlimentaireApresJeune() {
 
   let joursAAfficher = [];
   let isPreview = false;
+  let maxJourAccessible = 0;
   if (jours.length > 0) {
-    // Mode test/forçage : on affiche tout le suivi réel
     if (forceSuivi) {
       joursAAfficher = jours;
       isPreview = false;
+      maxJourAccessible = jours.length;
     } else if (jourReprise < 1) {
       joursAAfficher = jours.slice(0, 2);
       isPreview = true;
+      maxJourAccessible = 2;
     } else {
-      // Dès le J1 de la reprise, affichage du vrai suivi quotidien (tous les jours jusqu'au jour courant)
       joursAAfficher = jours.slice(0, jourReprise);
       isPreview = false;
+      maxJourAccessible = jourReprise;
     }
   }
+
+  // Navigation jour par jour : état pour le jour sélectionné
+  const [selectedJourIdx, setSelectedJourIdx] = useState(0);
+  // Initialiser à dernier jour accessible à chaque changement de joursAAfficher
+  useEffect(() => {
+    if (joursAAfficher.length > 0) {
+      setSelectedJourIdx(joursAAfficher.length - 1);
+    }
+  }, [joursAAfficher.length]);
+
+  // Handler navigation
+  const handlePrevJour = () => {
+    setSelectedJourIdx(idx => Math.max(0, idx - 1));
+  };
+  const handleNextJour = () => {
+    setSelectedJourIdx(idx => Math.min(joursAAfficher.length - 1, idx + 1));
+  };
 
   // Calcul de la progression globale
   const totalJours = jours.length;
@@ -131,7 +150,35 @@ export default function RepriseAlimentaireApresJeune() {
         <div style={{background:'#fff3cd', color:'#856404', border:'1px solid #ffeeba', borderRadius:8, padding:'1rem 1.2rem', marginBottom:'1.5rem', fontWeight:600, fontSize:'1.08rem'}}>
           <span role="img" aria-label="info">ℹ️</span> La reprise alimentaire commencera le <b>{new Date(programme.date_debut_reprise).toLocaleDateString('fr-FR')}</b>.<br/>
           Tu peux prévisualiser les 2 premiers jours, mais tu ne pourras suivre le programme au quotidien qu'à partir de cette date.<br/>
-          <span style={{fontWeight:400, fontSize:'0.98rem', color:'#888'}}>Pour tester le suivi réel sans attendre, ajoute <code>?test=1</code> à l'URL.</span>
+          <span style={{fontWeight:400, fontSize:'0.98rem', color:'#888'}}>Pour tester le suivi réel sans attendre :</span>
+          <div style={{marginTop:'1rem'}}>
+            <button
+              onClick={() => {
+                // Ajoute ?test=1 à l'URL uniquement si ce n'est pas déjà le cas
+                if (typeof window !== 'undefined') {
+                  const url = new URL(window.location.href);
+                  url.searchParams.set('test', '1');
+                  if (window.location.href !== url.toString()) {
+                    window.location.href = url.toString();
+                  }
+                }
+              }}
+              style={{
+                background:'#1976d2',
+                color:'#fff',
+                border:'none',
+                borderRadius:8,
+                padding:'0.7rem 1.5rem',
+                fontWeight:700,
+                fontSize:'1.08rem',
+                cursor:'pointer',
+                marginTop:'0.5rem',
+                boxShadow:'0 1px 3px #0001'
+              }}
+            >
+              🚀 Voir le suivi réel (mode test)
+            </button>
+          </div>
         </div>
       )}
       {loading ? (
@@ -192,29 +239,108 @@ export default function RepriseAlimentaireApresJeune() {
           )}
 
           <div style={{marginBottom:'2rem'}}>
-            <h2 style={{color:'#1976d2', fontSize:'1.3rem', fontWeight:700, marginBottom:'1rem'}}>Jours accessibles</h2>
-            {joursAAfficher.length === 0 && (
-              <div style={{color:'#888'}}>Aucun jour à afficher pour l’instant.</div>
+            <h2 style={{color:'#1976d2', fontSize:'1.3rem', fontWeight:700, marginBottom:'1rem'}}>Jours de la reprise</h2>
+            {/* Mini-liste des jours (hybride) */}
+            <div style={{display:'flex', gap:8, marginBottom:18, flexWrap:'wrap'}}>
+              {jours.map((jour, idx) => {
+                const accessible = idx < maxJourAccessible;
+                const isSelected = idx === (selectedJourIdx + (jours.length - joursAAfficher.length));
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => accessible && setSelectedJourIdx(idx - (jours.length - joursAAfficher.length))}
+                    disabled={!accessible}
+                    style={{
+                      minWidth:36,
+                      padding:'0.3rem 0.7rem',
+                      borderRadius:6,
+                      border: isSelected ? '2px solid #1976d2' : '1px solid #b3e5fc',
+                      background: isSelected ? '#e3f2fd' : accessible ? '#fff' : '#f5f5f5',
+                      color: accessible ? (isSelected ? '#1976d2' : '#1976d2') : '#bbb',
+                      fontWeight: isSelected ? 700 : 500,
+                      cursor: accessible ? 'pointer' : 'not-allowed',
+                      position:'relative',
+                      boxShadow: isSelected ? '0 2px 8px #1976d233' : 'none',
+                      outline:'none',
+                      transition:'all 0.15s',
+                      display:'flex', alignItems:'center', justifyContent:'center', gap:3
+                    }}
+                    title={accessible ? `Accéder au jour ${jour.jour_numero}` : 'Jour verrouillé'}
+                  >
+                    {accessible ? (
+                      <span>{jour.jour_numero}</span>
+                    ) : (
+                      <span style={{display:'flex',alignItems:'center',gap:2}}>
+                        <span>{jour.jour_numero}</span>
+                        <span role="img" aria-label="verrou" style={{marginLeft:2, fontSize:'1.15em', color:'#c62828', fontWeight:700}}>🔒</span>
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+            {/* Navigation jour par jour */}
+            {joursAAfficher.length > 0 && (
+              <div style={{display:'flex', alignItems:'center', justifyContent:'center', gap:16, marginBottom:18}}>
+                <button
+                  onClick={handlePrevJour}
+                  disabled={selectedJourIdx === 0}
+                  style={{
+                    background:'#f5f5f5',
+                    color:'#1976d2',
+                    border:'1px solid #b3e5fc',
+                    borderRadius:6,
+                    padding:'0.5rem 1.1rem',
+                    fontWeight:600,
+                    fontSize:'1rem',
+                    cursor: selectedJourIdx === 0 ? 'not-allowed' : 'pointer',
+                    opacity: selectedJourIdx === 0 ? 0.5 : 1
+                  }}
+                >
+                  ← Jour précédent
+                </button>
+                <span style={{fontWeight:700, color:'#1976d2', fontSize:'1.08rem'}}>
+                  Jour {joursAAfficher[selectedJourIdx]?.jour_numero} – {joursAAfficher[selectedJourIdx]?.date}
+                </span>
+                <button
+                  onClick={handleNextJour}
+                  disabled={selectedJourIdx === joursAAfficher.length - 1}
+                  style={{
+                    background:'#f5f5f5',
+                    color:'#1976d2',
+                    border:'1px solid #b3e5fc',
+                    borderRadius:6,
+                    padding:'0.5rem 1.1rem',
+                    fontWeight:600,
+                    fontSize:'1rem',
+                    cursor: selectedJourIdx === joursAAfficher.length - 1 ? 'not-allowed' : 'pointer',
+                    opacity: selectedJourIdx === joursAAfficher.length - 1 ? 0.5 : 1
+                  }}
+                >
+                  Jour suivant →
+                </button>
+              </div>
             )}
-            {joursAAfficher.map((jour, idx) => (
-              <div key={idx} style={{background:'#fff', border:'1px solid #b3e5fc', borderRadius:10, marginBottom:18, padding:'1.1rem 1.2rem'}}>
+            {/* Affichage du jour sélectionné */}
+            {joursAAfficher.length > 0 && (
+              <div style={{background:'#fff', border:'1px solid #b3e5fc', borderRadius:10, marginBottom:18, padding:'1.1rem 1.2rem'}}>
                 <div style={{fontWeight:700, color:'#1976d2', fontSize:'1.1rem', marginBottom:4}}>
-                  Jour {jour.jour_numero} – {jour.date}
+                  Jour {joursAAfficher[selectedJourIdx]?.jour_numero} – {joursAAfficher[selectedJourIdx]?.date}
                 </div>
                 <div style={{color:'#444', marginBottom:6}}>
-                  <b>Phase {jour.phase}</b>
+                  <b>Phase {joursAAfficher[selectedJourIdx]?.phase}</b>
                 </div>
                 <div style={{color:'#388e3c', marginBottom:6, fontWeight:500}}>
-                  {jour.message_contextuel}
+                  {joursAAfficher[selectedJourIdx]?.message_contextuel}
                 </div>
                 <div style={{marginBottom:4}}>
                   <b>Aliments autorisés :</b>
                   <ul style={{margin:'0.3rem 0 0 1.2rem', color:'#333', fontSize:'1rem'}}>
-                    {jour.aliments_autorises && jour.aliments_autorises.slice(0, 6).map((alim, i) => (
+                    {joursAAfficher[selectedJourIdx]?.aliments_autorises && joursAAfficher[selectedJourIdx].aliments_autorises.slice(0, 6).map((alim, i) => (
                       <li key={i}>{alim.nom} {alim.portion ? `(${alim.portion})` : ''}</li>
                     ))}
-                    {jour.aliments_autorises && jour.aliments_autorises.length > 6 && (
-                      <li>...et {jour.aliments_autorises.length - 6} autres</li>
+                    {joursAAfficher[selectedJourIdx]?.aliments_autorises && joursAAfficher[selectedJourIdx].aliments_autorises.length > 6 && (
+                      <li>...et {joursAAfficher[selectedJourIdx].aliments_autorises.length - 6} autres</li>
                     )}
                   </ul>
                 </div>
@@ -222,7 +348,33 @@ export default function RepriseAlimentaireApresJeune() {
                   (Lecture seule, tu ne peux pas valider ce jour tant que la date n’est pas atteinte)
                 </div>
               </div>
-            ))}
+            )}
+            {/* Bloc anticipation : Repas du lendemain */}
+            {joursAAfficher.length > 0 && (selectedJourIdx + 1 < joursAAfficher.length || maxJourAccessible < jours.length) && (
+              <div style={{background:'#f5f5f5', border:'1px dashed #bdbdbd', borderRadius:8, padding:'1rem 1.2rem', marginBottom:10, color:'#888'}}>
+                <span role="img" aria-label="demain">⏭️</span> <b>Repas du lendemain</b> :
+                <ul style={{margin:'0.5rem 0 0 1.2rem', color:'#888', fontSize:'1rem'}}>
+                  {(selectedJourIdx + 1 < joursAAfficher.length
+                    ? joursAAfficher[selectedJourIdx + 1]?.aliments_autorises
+                    : (jours[maxJourAccessible]?.aliments_autorises || [])
+                  )?.slice(0, 6).map((alim, i) => (
+                    <li key={i}>{alim.nom} {alim.portion ? `(${alim.portion})` : ''}</li>
+                  ))}
+                  {(selectedJourIdx + 1 < joursAAfficher.length
+                    ? joursAAfficher[selectedJourIdx + 1]?.aliments_autorises
+                    : (jours[maxJourAccessible]?.aliments_autorises || [])
+                  )?.length > 6 && (
+                    <li>...et {((selectedJourIdx + 1 < joursAAfficher.length
+                      ? joursAAfficher[selectedJourIdx + 1]?.aliments_autorises
+                      : (jours[maxJourAccessible]?.aliments_autorises || [])
+                    ).length - 6)} autres</li>
+                  )}
+                </ul>
+                <div style={{fontSize:'0.95rem', color:'#bbb', marginTop:6}}>
+                  (Lecture seule, anticipation pour t’organiser)
+                </div>
+              </div>
+            )}
           </div>
 
           <div style={{background:'#fffde7', border:'1px solid #ffe082', borderRadius:10, padding:'1rem 1.2rem', color:'#f57c00', fontWeight:600}}>
