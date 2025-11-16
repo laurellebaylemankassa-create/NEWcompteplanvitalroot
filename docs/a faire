@@ -65,19 +65,22 @@
 ---
 
 ## 🔜 AMÉLIORATIONS FUTURES (APRÈS TODO ACTUELLE)
+- gerer comportement date et heure jeune pour generation plan de reprise + type de reprise et faire le lien avec bdd et cetose  
+- 
 - Réferentiel alimentaire avec quantite basé sur cuilliere 
 a soupe ou outil de mesure facile a visualiser propose plusieurs type avec une transco simple pour gestion des stat 
 - ⏰ **Affichage date/heure à chaque connexion** (ligne 43)
-- 🔗 Lier ideaux avec suivi jour ou app normal
-- 🎨 Possibilité de créer soi-même son défi
-- 🍔 Gérer le souci avec les fast food + -voir gestion fast food avec new maj referentiel comment ca s adapte
-- 📊 MAJ tableaux de bord
-- 🧘 Préparation aux jeûnes alimentaire → 📋 PLAN D'ACTION CRÉÉ (voir section dédiée ci-dessous)
+- finir page reprise et validation lie a la reprise du jeune cf base de travail reprise apres jeune 
+- creer base de travail pour les autre cycle du jeun een rapport avec la chronologie jeune
+(- 🧘 Préparation aux jeûnes alimentaire → 📋 PLAN D'ACTION CRÉÉ (voir section dédiée ci-dessous)
 - 🙏 Préparation au jeûne spirituel
 - Gerer la partie Post jeûne :
 - 🥗 Partie alimentation
 - 🙏 Partie spirituelle
 -Gerer la partie gain après jeûne à integrer dans sa routine 
+- 🔗 Lier ideaux avec suivi jour ou app normal
+- 🎨 Possibilité de créer soi-même son défi )
+- 🍔 Gérer le souci avec les fast food + -voir gestion fast food avec new maj referentiel comment ca s adapte 
 - 📚 Partie dev perso
 - Gerer la partie planning de vie 
 ( dans l esprit on a un planning structuré au travail pour atteindre ses 
@@ -87,7 +90,18 @@ desprit d investir en soir ou notre leverage c est le temps)
 - 📝 Revoir cahier des charges et technique
 - 📈 Liant de tout ça avec stat tableaux de bord 
 
-Creer la regle car il y a tjr des chise a ameliorer rien est parfa et on peut pas attendre le moment parfait la percfetion pour commencer donc decuder des tache qui feront que meme s il y a la p ca ne se subttue pas a nous, notre intuition et que on sait ce qu on doit faire il faut juste le faire avec serieux et application dans l esprit de l homme de babylone et gardant son puvoi r de vlonte on n asthesiant pas sa parole  en faisant ce qu ona  dit qu on allait faire en etant fidele dans le peux regle 1 oui 1non  et pour moi des que le jeune commence debut New era je ne veux plus être celle d avant ou adopter tes comportement qui la caracterise et la refasse ressurgir donc ca sera la marque du strict on dit on fait etre rigide dans cette aspect en aidant appuyant chaque instant par Dieu i can do it !
+Creer la regle car il y a tjr des chise a ameliorer rien est parfa et on peut pas attendre
+ le moment parfait la percfetion pour commencer donc decuder 
+ des tache qui feront que meme s il y a la p ca ne se subttue pas a nous, 
+ notre intuition et que on sait ce qu on doit faire il faut juste le 
+ faire avec serieux et application dans l esprit de l homme de babylone
+  et gardant son puvoi r de vlonte on n asthesiant pas sa parole 
+   en faisant ce qu ona  dit qu on allait faire en etant fidele d
+   ans le peux regle 1 oui 1non  et pour moi des que le jeune commence 
+   debut New era je ne veux plus être celle d avant ou adopter tes comportement
+    qui la caracterise et la refasse ressurgir donc ca sera la marque du strict
+     on dit on fait etre rigide dans cette aspect en aidant appuyant chaque
+      instant par Dieu i can do it !
 
 ═══════════════════════════════════════════════════════════════════════════════
 📋 PLAN D'ACTION : PRÉPARATION AU JEÛNE ALIMENTAIRE (ÉTAPE 1)

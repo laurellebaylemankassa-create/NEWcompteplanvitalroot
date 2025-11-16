@@ -268,10 +268,8 @@ export default function RepriseAlimentaireApresJeune() {
     }}>
       {/* Bouton retour au jeûne */}
       <div style={{marginBottom:'1.2rem'}}>
-        <Link href="/jeune" legacyBehavior>
-          <a style={{display:'inline-flex',alignItems:'center',background:'#f5f5f5',border:'1px solid #bdbdbd',borderRadius:8,padding:'0.5rem 1.1rem',color:'#1976d2',fontWeight:700,textDecoration:'none',fontSize:'1.05rem',boxShadow:'0 1px 3px #0001'}}>
-            <span style={{fontSize:'1.3em',marginRight:8}}>←</span> Retour au jeûne
-          </a>
+        <Link href="/jeune" style={{display:'inline-flex',alignItems:'center',background:'#f5f5f5',border:'1px solid #bdbdbd',borderRadius:8,padding:'0.5rem 1.1rem',color:'#1976d2',fontWeight:700,textDecoration:'none',fontSize:'1.05rem',boxShadow:'0 1px 3px #0001'}}>
+          <span style={{fontSize:'1.3em',marginRight:8}}>←</span> Retour au jeûne
         </Link>
       </div>
       {/* COLONNE CENTRALE */}
@@ -362,8 +360,7 @@ export default function RepriseAlimentaireApresJeune() {
         <div style={{color:'#c62828', fontWeight:600, margin:'2rem 0', whiteSpace:'pre-line'}}>
           {error}
           <div style={{marginTop:'2rem'}}>
-            <Link href="/validation-plan-reprise">
-              <a style={{
+            <Link href="/validation-plan-reprise" style={{
                 display:'inline-block',
                 background:'#1976d2',
                 color:'#fff',
@@ -376,7 +373,6 @@ export default function RepriseAlimentaireApresJeune() {
                 marginTop:'1rem'
               }}>
                 ↩️ Retour à la validation du plan
-              </a>
             </Link>
           </div>
         </div>
