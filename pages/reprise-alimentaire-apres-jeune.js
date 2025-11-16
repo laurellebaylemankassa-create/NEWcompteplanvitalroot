@@ -1,4 +1,141 @@
 import { useEffect, useState } from 'react';
+// Composant Aperçu Latéral des Phases
+function PhasesApercu({ phases, jours, dateAuj, onVoirAliments }) {
+  const [showAll, setShowAll] = useState(false);
+  // Regrouper les jours par phase
+  const phasesArray = Object.entries(phases).map(([key, phase], idx) => {
+    const joursPhase = jours.filter(j => j.phase === idx + 1);
+    const dateDebloc = joursPhase[0]?.date;
+    let statut = 'à venir';
+    let verrouille = true;
+    if (dateAuj >= dateDebloc) {
+      const dateFin = joursPhase[joursPhase.length - 1]?.date;
+      if (dateAuj > dateFin) {
+        statut = 'terminée';
+        verrouille = false;
+      } else {
+        statut = 'en cours';
+        verrouille = false;
+      }
+    }
+    return {
+      key,
+      phaseNum: idx + 1,
+      nom: phase.nom,
+      debut: phase.debut,
+      fin: phase.fin,
+      objectif: phase.objectif,
+      jours: joursPhase,
+      dateDebloc,
+      statut,
+      verrouille
+    };
+  });
+
+  // Afficher seulement la première phase (ou phases débloquées), puis bouton plus
+  let phasesToShow = phasesArray;
+  if (!showAll) {
+    // Afficher la première phase et toutes les phases déjà accessibles
+    const firstUnlockedIdx = phasesArray.findIndex(p => !p.verrouille);
+    const maxIdx = Math.max(0, firstUnlockedIdx);
+    phasesToShow = phasesArray.slice(0, maxIdx + 1);
+  }
+
+  return (
+    <aside style={{
+      background: '#f8f8fc',
+      borderRadius: 14,
+      boxShadow: '0 2px 8px #0001',
+      padding: '1.2rem 1.1rem',
+      marginBottom: '2rem',
+      marginTop: '1.5rem',
+      maxWidth: 340,
+      width: '100%',
+      fontSize: '1.01rem',
+      display: 'flex', flexDirection: 'column', gap: '1.1rem'
+    }}>
+      <div style={{fontWeight:700, color:'#1976d2', fontSize:'1.15rem', marginBottom:4}}>Phases de la reprise</div>
+      {phasesToShow.map(phase => (
+        <div key={phase.key} style={{
+          background: phase.statut === 'en cours' ? '#e3f2fd' : '#fff',
+          border: phase.statut === 'en cours' ? '2px solid #1976d2' : '1.5px solid #b3e5fc',
+          borderRadius: 10,
+          padding: '0.7rem 1rem',
+          opacity: phase.verrouille ? 0.6 : 1,
+          position: 'relative',
+          marginBottom: 2
+        }}>
+          <div style={{display:'flex', alignItems:'center', gap:8, marginBottom:2}}>
+            <span style={{fontSize:'1.25em', fontWeight:700}}>{['💧','🥬','🥚','🍚'][phase.phaseNum-1]}</span>
+            <span style={{fontWeight:600}}>Phase {phase.phaseNum} : {phase.nom}</span>
+            {phase.verrouille && <span title="Phase verrouillée" style={{marginLeft:6, color:'#c62828', fontSize:'1.2em'}}>🔒</span>}
+          </div>
+          <div style={{fontSize:'0.98rem', color:'#444', marginBottom:2}}>{phase.objectif}</div>
+          <div style={{fontSize:'0.97rem', color:'#1976d2', marginBottom:2}}>J{phase.debut} à J{phase.fin} ({phase.jours.length} jours)</div>
+          <div style={{fontSize:'0.95rem', color:'#888', marginBottom:2}}>Déblocage : {phase.dateDebloc}</div>
+          <div style={{fontSize:'0.95rem', color: phase.statut==='en cours'?'#388e3c':'#888', fontWeight: phase.statut==='en cours'?600:400, marginBottom:2}}>
+            Statut : {phase.statut}
+          </div>
+          <button
+            onClick={() => onVoirAliments(phase.phaseNum)}
+            disabled={phase.verrouille}
+            style={{
+              background: phase.verrouille ? '#eee' : 'linear-gradient(135deg, #43cea2 0%, #185a9d 100%)',
+              color: phase.verrouille ? '#aaa' : 'white',
+              border: 'none',
+              borderRadius: 7,
+              padding: '0.4rem 1.1rem',
+              fontWeight:600,
+              fontSize:'0.98rem',
+              cursor: phase.verrouille ? 'not-allowed' : 'pointer',
+              marginTop: 4
+            }}
+          >
+            Voir aliments
+          </button>
+        </div>
+      ))}
+      {!showAll && phasesToShow.length < phasesArray.length && (
+        <button
+          onClick={() => setShowAll(true)}
+          style={{
+            marginTop: 10,
+            background: 'linear-gradient(135deg, #43cea2 0%, #185a9d 100%)',
+            color: 'white',
+            border: 'none',
+            borderRadius: 7,
+            padding: '0.5rem 1.2rem',
+            fontWeight:700,
+            fontSize:'1rem',
+            cursor: 'pointer',
+            boxShadow:'0 1px 4px #0001'
+          }}
+        >
+          + Voir toutes les phases
+        </button>
+      )}
+      {showAll && phasesToShow.length === phasesArray.length && (
+        <button
+          onClick={() => setShowAll(false)}
+          style={{
+            marginTop: 10,
+            background: 'linear-gradient(135deg, #185a9d 0%, #43cea2 100%)',
+            color: 'white',
+            border: 'none',
+            borderRadius: 7,
+            padding: '0.5rem 1.2rem',
+            fontWeight:700,
+            fontSize:'1rem',
+            cursor: 'pointer',
+            boxShadow:'0 1px 4px #0001'
+          }}
+        >
+          − Réduire
+        </button>
+      )}
+    </aside>
+  );
+}
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 
@@ -113,8 +250,22 @@ export default function RepriseAlimentaireApresJeune() {
   const totalJours = jours.length;
   const currentJour = jourReprise && jourReprise > 0 ? Math.min(jourReprise, totalJours) : 0;
 
+  // Gestion modale aliments phase
+  const [modalAliments, setModalAliments] = useState(null); // phaseNum ou null
+  // ...existing code...
   return (
-    <div style={{padding:'2rem', maxWidth:'800px', margin:'0 auto', fontFamily:'Arial, sans-serif'}}>
+    <div style={{
+      padding: '2rem',
+      maxWidth: '1200px',
+      margin: '0 auto',
+      fontFamily: 'Arial, sans-serif',
+      display: 'flex',
+      flexDirection: 'row',
+      gap: '2.5rem',
+      alignItems: 'flex-start',
+      position: 'relative',
+      minHeight: '80vh'
+    }}>
       {/* Bouton retour au jeûne */}
       <div style={{marginBottom:'1.2rem'}}>
         <Link href="/jeune" legacyBehavior>
@@ -123,28 +274,52 @@ export default function RepriseAlimentaireApresJeune() {
           </a>
         </Link>
       </div>
-      {/* Barre de progression globale */}
-      {totalJours > 0 && (
-        <div style={{
-          marginBottom: '1.2rem',
-          background: '#e8f5e9',
-          borderRadius: 8,
-          padding: '0.7rem 1.2rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          fontWeight: 700,
-          color: '#388e3c',
-          fontSize: '1.13rem',
-          boxShadow: '0 1px 3px #0001'
-        }}>
-          <span>Progression : Jour {currentJour}/{totalJours}</span>
-          <div style={{flex:1, marginLeft:16, marginRight:8, height:10, background:'#c8e6c9', borderRadius:5, overflow:'hidden'}}>
-            <div style={{width: `${(currentJour/totalJours)*100}%`, height:'100%', background:'#43a047', borderRadius:5, transition:'width 0.3s'}}></div>
+      {/* COLONNE CENTRALE */}
+      <main style={{flex:1, minWidth:0, maxWidth:700, margin:'0 auto'}}>
+        <h1 style={{color:'#1976d2', fontWeight:900, fontSize:'2.3rem', marginBottom:'1.2rem', letterSpacing:'-1px'}}>Reprise alimentaire après jeûne</h1>
+        {/* Barre de progression globale */}
+        {totalJours > 0 && (
+          <div style={{
+            marginBottom: '1.2rem',
+            background: '#e8f5e9',
+            borderRadius: 10,
+            padding: '0.9rem 1.4rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontWeight: 800,
+            color: '#388e3c',
+            fontSize: '1.18rem',
+            boxShadow: '0 1px 3px #0001',
+            border: '2px solid #43a04722'
+          }}>
+            <span>Progression : <span style={{color:'#1976d2', fontWeight:900}}>Jour {currentJour}</span> / {totalJours}</span>
+            <div style={{flex:1, marginLeft:16, marginRight:8, height:12, background:'#c8e6c9', borderRadius:6, overflow:'hidden'}}>
+              <div style={{width: `${(currentJour/totalJours)*100}%`, height:'100%', background:'#43a047', borderRadius:6, transition:'width 0.3s'}}></div>
+            </div>
           </div>
-        </div>
+        )}
+
+      {/* ASIDE PHASES STICKY (desktop) */}
+      {programme && programme.phases && programme.jours_detailles && (
+        <aside style={{
+          position: 'sticky',
+          top: 32,
+          alignSelf: 'flex-start',
+          width: 340,
+          maxWidth: '95vw',
+          zIndex: 10,
+          display: 'block',
+          marginLeft: '2rem',
+        }}>
+          <PhasesApercu
+            phases={programme.phases}
+            jours={programme.jours_detailles}
+            dateAuj={dateAuj}
+            onVoirAliments={phaseNum => setModalAliments(phaseNum)}
+          />
+        </aside>
       )}
-      <h1 style={{color:'#1976d2', fontWeight:800, fontSize:'2.2rem', marginBottom:'1.5rem'}}>Reprise alimentaire après jeûne</h1>
       {/* Message explicite si prévisualisation */}
       {isPreview && programme && (
         <div style={{background:'#fff3cd', color:'#856404', border:'1px solid #ffeeba', borderRadius:8, padding:'1rem 1.2rem', marginBottom:'1.5rem', fontWeight:600, fontSize:'1.08rem'}}>
@@ -220,7 +395,7 @@ export default function RepriseAlimentaireApresJeune() {
             </div>
           </div>
 
-          {/* Liste de courses pour les 2 premiers jours */}
+            {/* Liste de courses pour les 2 premiers jours */}
           {listeCourses.length > 0 && (
             <div style={{background:'#fffde7', border:'1px solid #ffe082', borderRadius:10, padding:'1.1rem 1.3rem', marginBottom:'2rem'}}>
               <div style={{display:'flex',alignItems:'center',marginBottom:6}}>
@@ -382,6 +557,25 @@ export default function RepriseAlimentaireApresJeune() {
           </div>
         </>
       )}
+        {/* Modale aliments phase */}
+        {modalAliments && (
+          <div style={{position:'fixed', top:0, left:0, width:'100vw', height:'100vh', background:'#0008', zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center'}} onClick={()=>setModalAliments(null)}>
+            <div style={{background:'#fff', borderRadius:12, padding:'2rem 2.5rem', minWidth:320, maxWidth:420, boxShadow:'0 4px 24px #0003', position:'relative'}} onClick={e=>e.stopPropagation()}>
+              <button onClick={()=>setModalAliments(null)} style={{position:'absolute', top:10, right:10, background:'none', border:'none', fontSize:'1.5rem', color:'#1976d2', cursor:'pointer'}}>✖</button>
+              <h2 style={{color:'#1976d2', fontWeight:700, fontSize:'1.2rem', marginBottom:10}}>Aliments autorisés – Phase {modalAliments}</h2>
+              <ul style={{margin:0, paddingLeft:'1.2rem', color:'#333', fontSize:'1.05rem'}}>
+                {(() => {
+                  // Récupérer les aliments de la phase
+                  const aliments = require('../data/alimentsRepriseJeune').default.filter(a => a.phase === modalAliments);
+                  return aliments.map((a, i) => (
+                    <li key={i}>{a.nom} <span style={{color:'#888', fontSize:'0.97em'}}>{a.categorie ? `(${a.categorie})` : ''}</span></li>
+                  ));
+                })()}
+              </ul>
+            </div>
+          </div>
+        )}
+      </main>
     </div>
   );
 }
