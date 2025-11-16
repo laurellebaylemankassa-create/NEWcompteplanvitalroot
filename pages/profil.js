@@ -380,9 +380,17 @@ export default function ProfilPage() {
       <Link href="/jeune">
         <button style={{
           background: "#1976d2", color: "#fff", border: "none", borderRadius: 8,
+          padding: "10px 24px", fontWeight: 700, fontSize: 16, cursor: "pointer", marginRight: 12
+        }}>
+          Commencer un jeûne
+        </button>
+      </Link>
+      <Link href="/preparation-jeune">
+        <button style={{
+          background: "#388e3c", color: "#fff", border: "none", borderRadius: 8,
           padding: "10px 24px", fontWeight: 700, fontSize: 16, cursor: "pointer"
         }}>
-          Commencer un jeune
+          Me préparer à jeûner
         </button>
       </Link>
     </div>

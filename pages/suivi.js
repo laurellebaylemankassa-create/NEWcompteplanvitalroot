@@ -359,7 +359,59 @@ function ZoneBadgesProgression({ progression, history, palier }) {
 
 // MAIN COMPONENT
 export default function Suivi() {
-  // ----------- HANDLER POUR LA SAUVEGARDE D'UN REPAS -----------
+  // ----------- HOOKS PRINCIPAUX (ordre strict selon la checklist) -----------
+  // Initialiser selectedDate AVANT tout usage dans un useEffect ou une variable calculée
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0,10));
+  // Récupérer la date du jeûne programmé (stockée en localStorage ou BDD)
+  const [dateJeune, setDateJeune] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('dateJeunePrevu') || null;
+    }
+    return null;
+  });
+  // Liste des critères par jalon (doit matcher la timeline métier)
+  const criteresPreparation = [
+    { jour: -30, label: "Respect strict des quantités à chaque repas" },
+    { jour: -17, label: "Pas de féculents le soir (lun-dim) + action après repas" },
+    { jour: -14, label: "Éliminer tous produits transformés et sucreries" },
+    { jour: -12, label: "2 jours de jeûne plein" },
+    { jour: -7, label: "2L d’eau/jour, pas de repas après 19h, plage 45min" },
+    { jour: 0, label: "Lancement du jeûne" },
+  ];
+  // Calcul du critère actif du jour (en phase préparation)
+  let critereActif = null;
+  let jRelatif = null;
+  if (dateJeune && selectedDate) {
+    const dJeune = new Date(dateJeune);
+    const dSel = new Date(selectedDate);
+    jRelatif = Math.floor((dJeune - dSel) / (1000*60*60*24));
+    // Trouver le critère actif (le plus proche <= jRelatif)
+    critereActif = criteresPreparation.find((c, idx) => {
+      const next = criteresPreparation[idx+1];
+      return jRelatif <= c.jour && (!next || jRelatif > next.jour);
+    }) || null;
+  }
+  // Stockage des validations locales (clé: "prep_valid_{date}")
+  const [prepValid, setPrepValid] = useState(() => {
+    if (typeof window !== 'undefined' && selectedDate) {
+      return localStorage.getItem('prep_valid_' + selectedDate) === '1';
+    }
+    return false;
+  });
+  // Handler validation manuelle
+  const handleValiderCriterePrep = () => {
+    if (typeof window !== 'undefined' && selectedDate) {
+      localStorage.setItem('prep_valid_' + selectedDate, '1');
+      setPrepValid(true);
+      setSnackbar({ open: true, message: "Critère de préparation validé pour aujourd'hui !", type: "success" });
+    }
+  };
+  // Sync hook si date change
+  useEffect(() => {
+    if (typeof window !== 'undefined' && selectedDate) {
+      setPrepValid(localStorage.getItem('prep_valid_' + selectedDate) === '1');
+    }
+  }, [selectedDate]);
   // Import du contexte défis pour savoir si un défi alimentaire est en cours
   // Respecte la checklist : hooks, logique, handlers déclarés avant le rendu
   // Utilisation du hook useDefis pour la réactivité
@@ -388,19 +440,16 @@ export default function Suivi() {
   // ...tous les hooks, useEffect et logique métier ici...
   // ...calculs et logique...
   // ...handlers et fonctions utilitaires...
-  // ----------- HOOKS PRINCIPAUX -----------
+  // ----------- AUTRES HOOKS PRINCIPAUX -----------
   const [selectedType, setSelectedType] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', type: 'info' });
   // Objectif calorique et calories du jour
   const [objectifCalorique, setObjectifCalorique] = useState(1800); // Valeur par défaut, à personnaliser
   const [caloriesDuJour, setCaloriesDuJour] = useState(0);
-  // Ajout des hooks manquants pour la cohérence
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0,10));
   const [showInfo, setShowInfo] = useState(false);
   const [loading, setLoading] = useState(false);
   // Hook pour afficher/masquer l’historique des repas avec note
   const [showNotesHistory, setShowNotesHistory] = useState(false);
-
   // Plan de repas du jour (repas planifiés)
   const [repasPlan, setRepasPlan] = useState({});
   // Hook pour l'affichage de l'alerte calorique
@@ -874,6 +923,40 @@ export default function Suivi() {
                   <button onClick={() => setSelectedType("Dîner")}>🍲 Dîner</button>
                   <button onClick={() => setSelectedType("Autre")}>🍴 Autre</button>
                 </div>
+                {/* Bannière critère préparation si phase préparation */}
+                {critereActif && (
+                  <div style={{
+                    margin: '32px auto 0',
+                    maxWidth: 480,
+                    background: '#e3f2fd',
+                    border: '2px solid #1976d2',
+                    borderRadius: 12,
+                    padding: '18px 20px',
+                    fontWeight: 600,
+                    fontSize: 17,
+                    color: '#1976d2',
+                    boxShadow: '0 2px 12px #1976d233',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{fontSize: 18, fontWeight: 700, marginBottom: 6}}>🌙 Préparation au jeûne — Critère du jour</div>
+                    <div style={{marginBottom: 8}}>{critereActif.label}</div>
+                    <div style={{fontSize: 14, color: '#555', marginBottom: 10}}>J-{jRelatif} — {selectedDate}</div>
+                    {prepValid ? (
+                      <div style={{color:'#43a047', fontWeight:700, margin:'8px 0'}}>✅ Critère validé pour aujourd'hui !</div>
+                    ) : (
+                      <button
+                        style={{
+                          background: '#43a047', color: '#fff', border: 'none', borderRadius: 18,
+                          padding: '10px 28px', fontWeight: 700, fontSize: 17, cursor: 'pointer',
+                          boxShadow: '0 2px 8px #43a04733', transition: 'background 0.2s', marginTop: 8
+                        }}
+                        onClick={handleValiderCriterePrep}
+                      >
+                        ✅ Valider le critère du jour
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             ) : (
               <div

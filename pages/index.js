@@ -38,9 +38,22 @@ export default function Home() {
             color: '#fff',
             borderRadius: '5px',
             textDecoration: 'none',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            marginRight: '1rem'
           }}>
           🌟 Mes idéaux / routines
+        </Link>
+        <Link href="/preparation-jeune"
+          style={{ 
+            display: 'inline-block',
+            padding: '0.75rem 1.5rem',
+            backgroundColor: '#1976d2',
+            color: '#fff',
+            borderRadius: '5px',
+            textDecoration: 'none',
+            fontWeight: 'bold'
+          }}>
+          🧘‍♂️ Me préparer à jeûner
         </Link>
       </p>
     </div>

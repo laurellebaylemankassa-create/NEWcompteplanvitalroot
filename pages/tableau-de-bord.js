@@ -907,6 +907,31 @@ export default function TableauDeBord() {
             🥗 Voir mon suivi
           </button>
         </Link>
+        {/* Accès conditionnel à la préparation au jeûne */}
+        {/**
+         * Affiche le bouton d'accès à la préparation au jeûne
+         * uniquement si un jeûne est programmé (exemple : présence d'un profil avec un champ pourquoi rempli)
+         * À adapter selon la logique métier réelle (ici, on simule la condition)
+         */}
+        {typeof window !== 'undefined' && localStorage.getItem('jeune_programme') === '1' && (
+          <Link href="/preparation-jeune">
+            <button
+              style={{
+                background: "#388e3c",
+                color: "#fff",
+                border: "none",
+                borderRadius: 8,
+                padding: "10px 28px",
+                fontWeight: 700,
+                fontSize: 17,
+                cursor: "pointer",
+                boxShadow: "0 1px 6px #e0e0e0",
+              }}
+            >
+              🧘‍♂️ Me préparer à jeûner
+            </button>
+          </Link>
+        )}
         <Link href="/defis">
           <button
             style={{
