@@ -369,8 +369,8 @@ export default function Jeune() {
     if (isFini && programmeReprise) {
       // Sauvegarder le plan validé dans localStorage (clé dédiée)
       localStorage.setItem('programmeRepriseValide', JSON.stringify(programmeReprise));
-      // Rediriger automatiquement
-      window.location.href = '/reprise alimentaire après jeûne';
+      // Rediriger automatiquement (URL conforme Next.js)
+      window.location.href = '/reprise-alimentaire-apres-jeune';
     }
   }, [isFini, programmeReprise]);
   // Affiche la préparation à la reprise à partir de la moitié du jeûne ou du J4
@@ -809,6 +809,27 @@ export default function Jeune() {
               </ul>
             </div>
           )}
+          {/* Bouton d'accès manuel à la reprise alimentaire */}
+          <div style={{ marginTop: 24, textAlign: 'center' }}>
+            <button
+              style={{
+                background: 'linear-gradient(135deg, #43cea2 0%, #185a9d 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: 8,
+                padding: '0.75rem 2rem',
+                fontWeight: 600,
+                fontSize: '1rem',
+                cursor: 'pointer',
+                boxShadow: '0 2px 8px rgba(67,206,162,0.08)'
+              }}
+              onClick={() => {
+                window.location.href = '/reprise-alimentaire-apres-jeune';
+              }}
+            >
+              👀 Accéder à ma reprise alimentaire
+            </button>
+          </div>
         </div>
       )}
 

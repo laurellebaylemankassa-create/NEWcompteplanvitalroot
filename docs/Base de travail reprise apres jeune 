@@ -3259,6 +3259,28 @@ PLAN D’ACTION « ACTUALISATION » (par étape)
 
 3. WORKFLOW GÉNÉRAL
    - Mettre en place la redirection automatique stricte vers la page de reprise à la fin du jeûne.
+
+═══════════════════════════════════════════════════════════════════════════════
+TODO VALIDATION PLAN DE REPRISE – PRIORITÉS (15/11/2025)
+═══════════════════════════════════════════════════════════════════════════════
+
+TÂCHES URGENTES / PRIORITAIRES
+-----------------------------------
+1. Ajouter l’affichage du poids de départ, perte estimée, dates précises du jeûne, message personnel écrit avant le jeûne (page validation-plan-reprise.js)
+2. Corriger la redirection après validation (vers la page de reprise alimentaire validée, URL conforme)
+3. Corriger le bouton « Visualiser le plan validé » (éviter la double sauvegarde, utiliser la bonne URL)
+4. Vérifier l’absence de doublons (handlers, modals, checkboxes)
+
+TÂCHES NON PRIORITAIRES (À FAIRE PLUS TARD)
+-----------------------------------
+5. Ajouter/renforcer les alertes critiques et règles de sécurité (syndrome de renutrition, etc.) dans chaque phase (page validation-plan-reprise.js)
+  - Exemples : « ⚠️ VITAL : Prévenir syndrome de renutrition (mortel si ignoré) », « ❌ Aucun féculent le soir », « ❌ Aucun extra (fast-food, alcool, produits transformés) », « ✅ 2 litres d’eau par jour minimum », « Validation : Checkbox par liquide consommé »
+6. Ajouter/clarifier les options de personnalisation du plan (vitesse, cétose, ajustement des dates)
+7. Renforcer le wording du message d’engagement (fidèle à la base de travail)
+8. Améliorer le message de confirmation après validation (plus engageant)
+9. Bonus UX : conserver scroll-snap, progression, semaine-type, etc. (si non en conflit avec la base de travail)
+
+═══════════════════════════════════════════════════════════════════════════════
    - Sécuriser la navigation jour par jour (pas d’accès anticipé aux jours futurs).
    - Vérifier et corriger tous les wording, messages, alertes, règles de proportionnalité.
    - Supprimer les doublons éventuels (handlers, modals, checkboxes…).

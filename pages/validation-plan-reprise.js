@@ -94,7 +94,7 @@ export default function ValidationPlanReprise() {
         // Vérifier que la sauvegarde a bien fonctionné avant de rediriger
         const verif = localStorage.getItem('programmeRepriseValide');
         if (verif) {
-          router.push('/jeune?validation=success');
+          router.push('/reprise-alimentaire-apres-jeune');
         } else {
           setError("Erreur lors de la sauvegarde du plan. Merci de réessayer.");
           setValidating(false);
@@ -516,10 +516,12 @@ export default function ValidationPlanReprise() {
       <div style={{textAlign:'center', margin:'2rem 0'}}>
         <button
           onClick={() => {
-            if (programme) {
+            // Ne pas écraser si déjà validé
+            const planValide = localStorage.getItem('programmeRepriseValide');
+            if (!planValide && programme) {
               localStorage.setItem('programmeRepriseValide', JSON.stringify(programme));
             }
-            window.location.href = '/reprise alimentaire après jeûne';
+            window.location.href = '/reprise-alimentaire-apres-jeune';
           }}
           style={{
             padding:'0.75rem 2rem',
