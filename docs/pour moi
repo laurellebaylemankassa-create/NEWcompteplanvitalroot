@@ -1,3 +1,8 @@
+“Copilot, pour toute nouvelle tâche, commence IMPÉRATIVEMENT par compléter le template PLAN D’IMPLÉMENTATION (voir fichier PLAN_IMPLEMENTATION_TEMPLATE.md) en suivant chaque section.
+Attends ma validation du plan explicitement (je dois cocher ‘Plan validé par l’utilisateur’) avant toute génération de code.
+Si je ne valide pas, propose-moi une version corrigée du plan. AUCUNE modification de code n’est autorisée tant que ce plan n’est pas validé.”
+
+
 Règles à garder en tête pour travailler sereinement et efficacement sur mon app :
 
 Définir un temps de travail et un objectif du jour.

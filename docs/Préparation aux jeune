@@ -639,3 +639,106 @@ Dis-moi si tu veux une restitution sous forme de checklist, de diagramme, ou si 
 Je me concentre sur la préparation et ses transitions, tout en connaissant parfaitement le cycle complet pour garantir la conformité, la cohérence et la continuité UX, sans intervenir dans la logique métier propre au jeûne, à la reprise ou à la routine.
 
 
+Liste des modification via integration des plan d implemntation a chaque maj :
+
+
+
+═══════════════════════════════════════════════════════════════════════════════
+🟢 PLAN D’IMPLÉMENTATION DÉTAILLÉ & SUIVI D’AVANCEMENT (MAJ 17/11/25)
+═══════════════════════════════════════════════════════════════════════════════
+
+⚠️ Toutes les étapes ci-dessous sont réalisées en appliquant strictement la « Règle strict copilot » :
+- Audit des risques AVANT chaque modification
+- Application de la checklist stricte (ordre d’initialisation, absence de doublons, contrôle d’erreurs, etc.)
+- AUCUNE modification sans validation explicite de l’utilisateur
+- Rollback et traçabilité en cas de non-conformité (avec rapport dans le fichier Anomalie)
+- Validation utilisateur requise à chaque étape clé
+
+Chaque tâche ci-dessous comporte :
+- Description précise
+- Audit des risques associé
+- Contrôles qualité à prévoir
+- Pourcentage d’achèvement (à mettre à jour à chaque étape)
+
+
+
+1. Enrichir `/pages/preparation-jeune.js` (0% fait)
+   - Progression réelle, validation des critères, message personnel, synthèse finale.
+   - Respect strict de la « Règle strict copilot » : chaque point ci-dessous doit être coché et documenté pour chaque modification :
+     - [ ] Lecture complète du code concerné (hooks, variables, fonctions utilisées dans le rendu ou la logique)
+     - [ ] Initialisation systématique de chaque variable, hook ou handler/fonction utilisé avant usage
+     - [ ] Vérification explicite : tout handler/fonction utilisé dans le rendu (ex : onClick, onChange, etc.) est présent et initialisé dans le composant principal avant le rendu JSX
+     - [ ] Toujours déclarer les hooks, variables et handlers/fonctions dans l’ordre : d’abord les hooks (useState, useEffect…), puis les variables calculées, puis la logique métier, puis les handlers/fonctions, puis l’affichage dynamique. Ne jamais utiliser une variable ou fonction avant sa déclaration.
+     - [ ] Vérification systématique de la portée et de l’ordre d’exécution : tous les hooks, variables et handlers/fonctions doivent être déclarés dans le composant principal, dans l’ordre logique, et jamais en dehors ou avant leur déclaration.
+     - [ ] Relecture du code généré pour repérer toute utilisation prématurée ou hors contexte d’une variable, d’un hook ou d’un handler/fonction (notamment pour SSR et React).
+     - [ ] Ajout de nouvelle logique uniquement après l’initialisation des variables et handlers/fonctions nécessaires
+     - [ ] Suppression des doublons (aucune déclaration en double)
+     - [ ] Contrôle des erreurs (compilation, runtime, rendu) après chaque modification
+     - [ ] Test du rendu dans les différents cas d’usage
+     - [ ] Validation finale de la checklist avant de valider la modification
+     - [ ] Toute amélioration ou ajout doit s’intégrer dans l’univers du code existant : aucune suppression ou modification ne doit générer la perte d’une fonction, d’une logique ou d’un fonctionnement. Aucun conflit, aucune anomalie ne doit être créée. Si un risque est détecté, il doit être signalé et une alternative sans risque doit être proposée.
+     - [ ] Ordre d’initialisation des hooks et variables respecté (tous les hooks useState en début, puis useEffect, puis logique métier, puis handlers, puis rendu)
+     - [ ] Si un point n’est pas respecté, rollback immédiat, analyse et traçabilité dans le fichier Anomalie
+     - [ ] Aucune modification sans validation explicite de l’utilisateur
+   - Audit des risques : perte de données, régression, conflit, UX, sécurité, robustesse, synchronisation.
+   - Contrôles qualité : tests de sauvegarde/restauration, non-régression, cohérence, échappement, accessibilité, robustesse, cas limites.
+   - Avancement : [ ] Non commencé | [x] En cours | [x] Terminé
+
+
+
+2. Créer/adapter timeline et critères (0% fait)
+   - Timeline interactive, CriterePreparationCard, conseils.
+   - Respect strict de la « Règle strict copilot » : chaque point ci-dessus doit être coché et documenté pour chaque modification (voir checklist détaillée ci-dessus).
+   - Audit des risques : incohérence d’affichage, conflit de structure, accessibilité, UX.
+   - Contrôles qualité : tests d’affichage, navigation, accessibilité, cohérence des statuts.
+   - Avancement : [ ] Non commencé | [x] En cours | [x] Terminé
+
+
+
+3. Améliorer validation automatique dans `/suivi.js` (0% fait)
+   - Validation automatique des critères, synchronisation timeline.
+   - Respect strict de la « Règle strict copilot » : chaque point ci-dessus doit être coché et documenté pour chaque modification (voir checklist détaillée ci-dessus).
+   - Audit des risques : désynchronisation, régression, perte de progression, UX.
+   - Contrôles qualité : tests de synchro, non-régression, cohérence, cas limites.
+   - Avancement : [ ] Non commencé | [x] En cours | [x] Terminé
+
+
+
+4. Ajouter bannière sur `/tableau-de-bord.js` (0% fait)
+   - Détection jeûne programmé, bannière d’entrée.
+   - Respect strict de la « Règle strict copilot » : chaque point ci-dessus doit être coché et documenté pour chaque modification (voir checklist détaillée ci-dessus).
+   - Audit des risques : affichage intempestif, oubli de détection, UX.
+   - Contrôles qualité : tests d’affichage, navigation, cas limites.
+   - Avancement : [ ] Non commencé | [x] En cours | [x] Terminé
+
+
+
+5. Tester le workflow complet (0% fait)
+   - Déclenchement, validation, progression, feedback, passage au jeûne.
+   - Respect strict de la « Règle strict copilot » : chaque point ci-dessus doit être coché et documenté pour chaque modification (voir checklist détaillée ci-dessus).
+   - Audit des risques : régression globale, oubli de cas, UX, robustesse.
+   - Contrôles qualité : tests bout-en-bout, multi-device, cas limites, retours arrière.
+   - Avancement : [ ] Non commencé | [x] En cours | [x] Terminé
+
+
+
+6. Ajouter conseils et feedbacks UX (0% fait)
+   - Conseils pratiques, messages motivationnels, feedbacks contextuels.
+   - Respect strict de la « Règle strict copilot » : chaque point ci-dessus doit être coché et documenté pour chaque modification (voir checklist détaillée ci-dessus).
+   - Audit des risques : surcharge cognitive, incohérence, UX.
+   - Contrôles qualité : tests d’affichage, feedbacks, accessibilité.
+   - Avancement : [ ] Non commencé | [x] En cours | [x] Terminé
+
+
+
+7. Valider accessibilité et robustesse (0% fait)
+   - Tests multi-device, cas limites, accessibilité, gestion des retours arrière.
+   - Respect strict de la « Règle strict copilot » : chaque point ci-dessus doit être coché et documenté pour chaque modification (voir checklist détaillée ci-dessus).
+   - Audit des risques : inaccessibilité, bugs sur device, perte de progression.
+   - Contrôles qualité : tests d’accessibilité, multi-device, cas limites, retours arrière.
+   - Avancement : [ ] Non commencé | [x] En cours | [x] Terminé
+
+Mise à jour du pourcentage d’achèvement à chaque validation d’étape.
+
+═══════════════════════════════════════════════════════════════════════════════
+Suivi des modification 17/11/25

@@ -1,5 +1,13 @@
 Consigne = lors de chaque modification  suivre scrupuleusement " Méthode de travail pour toute modification du code" et respecter en suivant dans l ordre la Checklist à valider pour chaque modification.
 ## Méthode de travail pour toute modification du code
+## Règle stricte supplémentaire : Audit des risques obligatoire
+
+Avant toute modification du code, un audit des risques doit être réalisé et documenté. Cet audit doit identifier :
+- Les risques de perte de données, de régression, de conflit, d’impact UX, de sécurité, ou de toute anomalie potentielle.
+- Les impacts possibles sur la logique métier, la synchronisation, la robustesse et l’accessibilité.
+- Les contrôles qualité spécifiques à prévoir pour chaque risque identifié.
+
+Chaque modification doit être précédée d’un rapport d’audit soumis à validation. Toute modification à caractère de risque doit être accompagnée de mesures de prévention et de tests adaptés. Cette étape est immuable et fait partie intégrante du process strict Copilot.
 
 ### Bonnes pratiques
 1. Lecture complète du code concerné (hooks, variables, fonctions utilisées dans le rendu ou la logique)
