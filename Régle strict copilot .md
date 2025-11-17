@@ -1,84 +1,3 @@
-# Fonctionnalité : Mini-défis comportementaux
-
-## Intégration des 10 mini-défis
-
-Les 10 mini-défis sont intégrés dans l’application conformément au cahier des charges :
-- Référentiel JS/TS des défis dans `lib/defisReferentiel.js`
-- Initialisation automatique pour chaque utilisateur via `lib/initDefisUser.js` (aucun doublon, aucune suppression)
-- Suivi et progression dans la table Supabase `defis`
-- Composant UI dédié dans `pages/defis.js` : affichage, progression, feedback visuel
-- Respect de la méthode de travail et de la checklist à chaque étape
-
----
-# Mon Plan Vital
-
-## Description
-Mon Plan Vital est une application dédiée à la gestion de la santé et du bien-être. Elle permet aux utilisateurs de suivre leur alimentation, de gérer leur profil personnel, et d'accéder à divers outils pour améliorer leur qualité de vie.
-
-## Fonctionnalités
-- **Page d'accueil** : Présente un aperçu des fonctionnalités de l'application.
-- **Profil utilisateur** : Permet aux utilisateurs de saisir et de modifier leurs informations personnelles telles que la taille et le poids.
-- **Suivi des repas** : Affiche les repas du jour et permet de suivre l'alimentation.
-- **Synthèse des extras** : Présente un récapitulatif des extras déclarés par l'utilisateur.
-- **Déclaration d'extras** : Permet aux utilisateurs de déclarer des extras via un formulaire.
-- **Règles d'usage** : Fournit des informations sur les règles et les bonnes pratiques d'utilisation de l'application.
-- **Tableau de bord personnel** : Affiche des statistiques et des analyses sur les habitudes alimentaires.
-- **Humeur du jour** : Permet aux utilisateurs de saisir leur humeur quotidienne.
-- **Pause mentale** : Propose des exercices de pause mentale guidée.
-- **Défis en cours** : Affiche les défis que l'utilisateur a entrepris.
-- **Plan alimentaire structuré** : Présente un plan alimentaire personnalisé.
-
-## Structure du projet
-```
-mon-plan-vital
-├── pages
-│   ├── index.js
-│   ├── profil.js
-│   ├── suivi.js
-│   ├── extras.js
-│   ├── declarer-extra.js
-│   ├── regles.js
-│   ├── statistiques.js
-│   ├── checkin.js
-│   ├── pause.js
-│   ├── defis.js
-│   ├── plan.js
-│   └── _app.js
-├── components
-│   ├── Navigation.js
-│   ├── FormulaireProfil.js
-│   ├── SaisieRepas.js
-│   ├── RecapAlignement.js
-│   ├── ScoreBar.js
-│   ├── FocusDuMois.js
-│   └── (autres à créer)
-├── lib
-│   └── supabaseClient.js
-├── public
-│   └── (icônes / logos / images)
-├── install.sh
-├── vercel.json
-├── .gitignore
-├── package.json
-└── package-lock.json
-```
-
-## Installation
-Pour installer les dépendances du projet, exécutez le script suivant :
-
-```bash
-./install.sh
-```
-
-## Déploiement
-Le projet est configuré pour être déployé sur Vercel. Assurez-vous que le fichier `vercel.json` est correctement configuré pour vos besoins.
-
-## Contribuer
-Les contributions sont les bienvenues ! N'hésitez pas à soumettre des demandes de tirage ou à ouvrir des problèmes pour discuter des améliorations.
-
-## License
-Ce projet est sous licence MIT.
-
 Consigne = lors de chaque modification  suivre scrupuleusement " Méthode de travail pour toute modification du code" et respecter en suivant dans l ordre la Checklist à valider pour chaque modification.
 ## Méthode de travail pour toute modification du code
 
@@ -114,6 +33,8 @@ Consigne = lors de chaque modification  suivre scrupuleusement " Méthode de tra
 - [ ] l Ordre d’initialisation des hooks et variables a bien ete respecte confirmer en affichant ce qui a ete fait (règle stricte)
 
  [ ] Toute amélioration ou ajout s’intègre dans l’univers du code existant : aucune suppression ou modification ne doit générer la perte d’une fonction, d’une logique ou d’un fonctionnement. Aucun conflit, aucune anomalie ne doit être créée. Si un risque est détecté, il doit être signalé et une alternative sans risque doit être proposée.
+ Si un point de la cheklist n a pas ete respecter la modification et qualifié non conforme et un rollback doit etre effectué et tout le process doit etre repris avec analyse de la raison du roll back et conserve dans le fichier anomalie avec date et heure si tous les point on ete respecté copilot doit demander qu un test soit fait pour valider la maj si la maj ets valider alors 
 - [ ] Validation finale : la checklist est respectée
+- Copilot invite suite a la preuve de validation de l utilisateur de faire un push " attention" copilot ne push rien c est une suggestion pour rappeler a l utilisateur de push chaque changement effectué, en invitant a faire un pull egalement avant de push
 ---
 
