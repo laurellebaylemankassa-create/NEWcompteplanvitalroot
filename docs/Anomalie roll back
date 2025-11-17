@@ -1,0 +1,6 @@
+
+## [2025-11-17] Anomalie de nommage colonne planData/plan_data
+- Problème : Erreur lors de l’ajout d’un idéal : "Could not find the 'planData' column of 'ideaux' in the schema cache".
+- Cause : Incohérence entre le nom de colonne utilisé dans le code (planData) et le schéma Supabase (plan_data).
+- Étape de la checklist non respectée : relecture de la cohérence des noms de colonnes entre le code et la base.
+- Correction à faire : harmoniser tous les accès à la colonne en snake_case (plan_data) et vérifier la présence de la colonne dans la base.

@@ -74,7 +74,7 @@ export default function IdeauxPage() {
         date_cible: dateCible,
         statut: 'en cours',
         image_url: imageUrl,
-        planData,
+        plan_data: planData,
         plan_existant: true
       },
     ]);
@@ -693,21 +693,58 @@ ADD COLUMN IF NOT EXISTS plan_existant boolean DEFAULT false;
               onMouseOut={e => {e.currentTarget.style.boxShadow='0 2px 16px #00bcd422';e.currentTarget.style.transform='none'}}
             >
               {/* Affichage image motivante floue si présente */}
-              {ideal.image_url && (
-                <div style={{textAlign:'center', marginBottom:12}}>
-                  <img src={ideal.image_url} alt="visuel idéal" style={{
-                    width:'100%',
-                    maxHeight:160,
-                    objectFit:'cover',
-                    borderRadius:12,
-                    filter:'blur(12px)',
-                    transition:'filter 0.5s',
-                    boxShadow:'0 2px 8px #00bcd422',
-                    margin:'0 auto',
-                    display:'block',
-                  }} />
-                </div>
-              )}
+              {ideal.image_url && (() => {
+                // 1. Récupérer la date de début, date cible, durée d'un palier
+                let blur = 12;
+                try {
+                  let dateDebut = null, dateFin = null, palierDuree = 28; // 28j = 4 semaines par défaut
+                  if (ideal.plan_params_valides) {
+                    dateDebut = new Date(ideal.plan_params_valides.dateDebut);
+                    dateFin = new Date(ideal.date_cible);
+                    palierDuree = (ideal.plan_params_valides.palierDuree || 4) * 7; // nb semaines * 7
+                  }
+                  // 2. Calculer le nombre total de paliers théoriques
+                  let nPaliers = 1;
+                  if (dateDebut && dateFin && palierDuree > 0) {
+                    const diffJours = Math.ceil((dateFin - dateDebut) / (1000*60*60*24));
+                    nPaliers = Math.ceil(diffJours / palierDuree);
+                  }
+                  // 3. Calculer le nombre de paliers validés
+                  let paliersValides = 0;
+                  if (ideal.plan_data && ideal.plan_data.mois) {
+                    for (let i = 0; i < ideal.plan_data.mois.length; i++) {
+                      const mois = ideal.plan_data.mois[i];
+                      const total = mois.semaines.reduce((acc, s) => acc + s.actions.length, 0);
+                      let fait = 0;
+                      if (ideal.seances_reelles) {
+                        fait = ideal.seances_reelles.filter(s => s.fait && s.mois === mois.numero && s.annee === mois.annee).length;
+                      }
+                      // Palier validé si 100% des séances faites (ou seuil, ex 80%)
+                      if (total > 0 && fait / total >= 0.8) paliersValides++;
+                    }
+                  }
+                  // 4. Calcul du niveau de défloutage
+                  let defloutage = nPaliers > 0 ? paliersValides / nPaliers : 0;
+                  if (defloutage > 1) defloutage = 1;
+                  blur = 12 * (1 - defloutage);
+                  if (blur < 0) blur = 0;
+                } catch (e) { /* fallback flou max */ }
+                return (
+                  <div style={{textAlign:'center', marginBottom:12}}>
+                    <img src={ideal.image_url} alt="visuel idéal" style={{
+                      width:'100%',
+                      maxHeight:160,
+                      objectFit:'cover',
+                      borderRadius:12,
+                      filter:`blur(${blur}px)`,
+                      transition:'filter 1.5s cubic-bezier(0.4,0,0.2,1)',
+                      boxShadow:'0 2px 8px #00bcd422',
+                      margin:'0 auto',
+                      display:'block',
+                    }} />
+                  </div>
+                );
+              })()}
               <div style={{fontSize: '2.1rem', marginBottom: 6}}>
                 {ideal.statut === 'atteint' ? '🏅' : ideal.statut === 'en cours' ? '🌱' : '🎯'}
               </div>
@@ -857,8 +894,20 @@ ADD COLUMN IF NOT EXISTS plan_existant boolean DEFAULT false;
                     ✅ Valider le plan du Palier 1
                   </button>
                 ) : (
-                  <button 
-                    onClick={() => window.location.href = `/plan-action?id=${currentIdealId}`}
+                  <button
+                    onClick={() => {
+                      // Sécurisation de l’id : on prend l’id de l’idéal courant si possible
+                      const id = currentIdealId || (planData && planData.ideal && planData.ideal.id);
+                      if (typeof id === 'number' && id > 0) {
+                        // Vérification orthographe fichier/URL
+                        const url = `/plan-action?id=${id}`;
+                        console.log('[NAVIGATION] Redirection vers :', url);
+                        window.location.href = url;
+                      } else {
+                        alert('Impossible d’ouvrir le plan d’action : identifiant manquant ou invalide.');
+                        console.warn('[NAVIGATION] id manquant ou invalide pour la redirection plan-action');
+                      }
+                    }}
                     style={{
                       background: '#1976d2',
                       color: '#fff',

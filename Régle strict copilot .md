@@ -36,6 +36,8 @@ Chaque modification doit être précédée d’un rapport d’audit soumis à va
 - [ ] Contrôle des erreurs effectué (compilation, runtime, rendu)
 - [ ] Test du rendu dans les différents cas d’usage
 
+- [ ] Vérification stricte de la cohérence des noms de colonnes entre le code et la base de données (toute modification ou ajout de colonne doit être relu dans toutes les requêtes et le schéma Supabase)
+
 - [ ] Vérification de la portée et de l’ordre d’exécution des hooks et variables (tout doit être dans le composant, dans l’ordre logique)
 - [ ] Relecture du code pour repérer toute utilisation avant déclaration ou hors contexte React
 - [ ] l Ordre d’initialisation des hooks et variables a bien ete respecte confirmer en affichant ce qui a ete fait (règle stricte)

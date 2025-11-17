@@ -280,6 +280,42 @@ export default function PlanActionPage() {
     );
   }
 
+  // Défloutage progressif image motivante (si présente)
+  let blur = 12;
+  if (ideal.image_url && planData && ideal.plan_params_valides) {
+    try {
+      // 1. Récupérer la date de début, date cible, durée d'un palier
+      let dateDebut = new Date(ideal.plan_params_valides.dateDebut);
+      let dateFin = new Date(ideal.date_cible);
+      let palierDuree = (ideal.plan_params_valides.palierDuree || 4) * 7; // nb semaines * 7
+      // 2. Calculer le nombre total de paliers théoriques
+      let nPaliers = 1;
+      if (dateDebut && dateFin && palierDuree > 0) {
+        const diffJours = Math.ceil((dateFin - dateDebut) / (1000*60*60*24));
+        nPaliers = Math.ceil(diffJours / palierDuree);
+      }
+      // 3. Calculer le nombre de paliers validés
+      let paliersValides = 0;
+      if (planData.mois) {
+        for (let i = 0; i < planData.mois.length; i++) {
+          const mois = planData.mois[i];
+          const total = mois.semaines.reduce((acc, s) => acc + s.actions.length, 0);
+          let fait = 0;
+          if (ideal.seances_reelles) {
+            fait = ideal.seances_reelles.filter(s => s.fait && s.mois === mois.numero && s.annee === mois.annee).length;
+          }
+          // Palier validé si 100% des séances faites (ou seuil, ex 80%)
+          if (total > 0 && fait / total >= 0.8) paliersValides++;
+        }
+      }
+      // 4. Calcul du niveau de défloutage
+      let defloutage = nPaliers > 0 ? paliersValides / nPaliers : 0;
+      if (defloutage > 1) defloutage = 1;
+      blur = 12 * (1 - defloutage);
+      if (blur < 0) blur = 0;
+    } catch (e) { /* fallback flou max */ }
+  }
+
   const nbSemaines = 4;
   let semaines = [];
   let count = 0;
@@ -308,7 +344,20 @@ export default function PlanActionPage() {
       </div>
 
       {/* En-tête */}
-      <div style={{ background: 'linear-gradient(90deg, #00bcd4 0%, #43a047 100%)', color: '#fff', padding: '2.2rem 0 1.2rem 0', textAlign: 'center', borderBottomLeftRadius: 40, borderBottomRightRadius: 40, boxShadow: '0 4px 24px #00bcd455', marginBottom: 32 }}>
+      <div style={{ background: 'linear-gradient(90deg, #00bcd4 0%, #43a047 100%)', color: '#fff', padding: '2.2rem 0 1.2rem 0', textAlign: 'center', borderBottomLeftRadius: 40, borderBottomRightRadius: 40, boxShadow: '0 4px 24px #00bcd455', marginBottom: 32, position: 'relative' }}>
+        {/* Image motivante défloutée */}
+        {ideal.image_url && (
+          <div style={{position:'absolute', left:24, top:18, width:120, height:80, overflow:'hidden', borderRadius:12, boxShadow:'0 2px 8px #00bcd422', background:'#fff3', display:'flex', alignItems:'center', justifyContent:'center'}}>
+            <img src={ideal.image_url} alt="visuel idéal" style={{
+              width:'100%',
+              height:'100%',
+              objectFit:'cover',
+              filter:`blur(${blur}px)`,
+              transition:'filter 0.5s',
+              display:'block',
+            }} />
+          </div>
+        )}
         <div style={{ fontSize: '2.7rem', fontWeight: 900, letterSpacing: 1, marginBottom: 8 }}>🎯 Plan d'action</div>
         <div style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: 4 }}>{ideal.titre}</div>
         <div style={{ fontSize: '1rem', opacity: 0.9, marginBottom: 6 }}>Indicateur : {ideal.indicateur_principal}</div>

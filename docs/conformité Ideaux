@@ -65,12 +65,103 @@
 4. **Visualisation avancée de la progression**
 	- Ajouter une jauge circulaire ou un indicateur visuel de % de constance
 	- Afficher la dernière action réalisée et le statut global
-5. **Lien entre planning alimentaire et routines/idéal**
-	- Permettre d’associer un planning alimentaire à un idéal/routine
-	- Afficher la progression alimentaire dans la vue globale de l’idéal
+
+# Analyse approfondie : Défloutage proportionnel, paliers et date cible
+
+## Problématique
+Le niveau de défloutage de l’image motivante ne doit pas progresser trop vite à chaque palier, car l’objectif final peut être lointain et le nombre de paliers n’est pas connu à l’avance. Il faut intégrer la date de début, la date de fin de l’objectif final, et la progression réelle dans le temps, tout en gardant une motivation constante (ni trop rapide, ni décourageante).
+
+## Sources
+- `/docs/ancrage` : la progression (et donc le défloutage) doit être liée à la réalisation des actions programmées par palier, mais aussi à l’avancement global vers l’objectif final (date cible).
+- `/lib/generateAnchoringPlan.js` : le plan d’action est généré en fonction de la date de début, de la date cible, de la fréquence, etc. Le nombre de paliers est donc calculé dynamiquement selon la durée totale et la durée d’un palier (souvent 4 semaines).
+
+## Logique de génération des paliers
+- Le plan d’action propose un découpage en paliers (ex : 4 semaines/palier) jusqu’à la date cible.
+- Si la date cible est dans 6 mois et chaque palier dure 1 mois, il y aura 6 paliers.
+- Mais l’utilisateur peut avancer plus vite ou moins vite, et de nouveaux paliers peuvent être générés si besoin (logique adaptative).
+
+## Calcul du niveau de défloutage
+1. Calcul du nombre total de paliers théoriques :
+	- $N_{paliers} = \lceil \frac{\text{date fin objectif} - \text{date début}}{\text{durée d’un palier}} \rceil$
+	- Exemple : 6 mois d’objectif, 1 mois/palier → 6 paliers.
+2. Calcul du niveau de défloutage :
+	- $\text{Défloutage} = \frac{\text{nombre de paliers validés}}{N_{paliers}}$
+	- Si l’utilisateur avance plus vite (valide un palier en avance), le défloutage progresse un peu plus vite, mais reste borné par la date cible.
+	- Si l’utilisateur prend du retard, le défloutage stagne ou progresse très lentement.
+3. Gestion dynamique :
+	- Si de nouveaux paliers sont générés (plan adaptatif), recalculer $N_{paliers}$ à chaque mise à jour du plan.
+	- Le défloutage ne peut jamais dépasser 100% avant la date cible et la validation de tous les paliers.
+4. Motivation :
+	- Toujours garder une marge de progression visible (jamais totalement net avant la fin).
+	- Célébrer chaque palier franchi, mais réserver la netteté totale à l’atteinte de l’objectif final.
+
+## Exemple concret
+- Objectif final : 2025-11-01 → 2026-07-25 (≈9 mois)
+- Palier 1 : Novembre 2025 (1/9)
+- Si Palier 1 validé : défloutage ≈ 11% (blur 12px → 10.7px)
+- Si Palier 5 validé : défloutage ≈ 55% (blur 12px → 5.4px)
+- Si Palier 9 validé (objectif atteint) : blur 0px
+
+## Résumé
+- Le défloutage est proportionnel au nombre de paliers validés sur le nombre total de paliers théoriques (calculé selon la date cible).
+- Le système s’adapte si le plan évolue (nouveaux paliers).
+- La motivation reste constante, la progression visible, et la célébration reste forte à chaque étape.
 
 ---
 
 **Résumé** :
 - Les fondations sont solides (création/suivi d’idéal, plan, actions).
 - Les axes d’amélioration sont l’adaptation comportementale, la motivation dynamique, la visualisation avancée et l’intégration alimentaire.
+
+
+gestion des codes 
+
+---
+
+## [Analyse et plan d'action - Navigation & Validation palier]
+
+### 1. Problème navigation “Voir mon plan d’action”
+- **Constat** : Le bouton “Voir mon plan d’action” ne transmet pas l’id de l’idéal à la page `/plan-action`, ce qui provoque une erreur 400 (id=NaN) et le message “Plan introuvable”.
+- **Cause** : Mauvais passage de l’id dans l’URL ou dans le composant de navigation.
+- **Action corrective** :
+	- Vérifier le composant qui gère le bouton (probablement dans `/pages/ideaux.js` ou un composant enfant).
+	- Corriger la navigation pour transmettre l’id de l’idéal sélectionné (ex : `/plan-action?id=123`).
+	- Tester la navigation et la récupération de l’id côté `/pages/plan-action.js`.
+	- Ajouter un test de fallback/erreur si l’id est absent ou invalide.
+
+### 2. Feedback explicite de validation de palier
+- **Constat** : La validation d’un palier est implicite (calculée automatiquement si toutes les séances sont cochées), mais il n’y a pas de message ou d’animation “Palier validé !” pour l’utilisateur.
+- **Cause** : Logique de validation uniquement interne, sans feedback visuel ou interaction utilisateur.
+- **Action corrective** :
+	- Ajouter une détection automatique : si toutes les séances du palier courant sont cochées, afficher un message ou une animation “Palier validé !”
+	- Option : ajouter un bouton “Valider le palier” si une action manuelle est souhaitée (pour déclencher une célébration ou un feedback).
+	- Tester le feedback sur tous les cas (palier validé, non validé, revalidation après décochage).
+
+### 3. Suivi et conformité
+- Toutes les actions sont tracées dans ce document et dans la todo-list.
+- La checklist stricte est respectée (cohérence code/base, rollback, feedback utilisateur, test post-correction).
+- Les commits et correctifs sont documentés étape par étape.
+
+---
+
+## [Plan d’action détaillé]
+
+1. **Correction navigation “Voir mon plan d’action”**
+	- [ ] Identifier et corriger le passage de l’id dans le bouton/URL.
+	- [ ] Vérifier la récupération de l’id dans `/pages/plan-action.js`.
+	- [ ] Tester la navigation et l’affichage du plan.
+2. **Ajout feedback explicite validation palier**
+	- [ ] Ajouter un message/animation “Palier validé !” si toutes les séances du palier sont cochées.
+	- [ ] (Option) Ajouter un bouton “Valider le palier” si besoin d’une action manuelle.
+	- [ ] Tester le feedback dans tous les cas d’usage.
+3. **Mise à jour de la todo-list et du suivi d’avancement**
+	- [ ] Documenter chaque étape ici et dans la todo-list principale.
+
+---
+
+## [Suivi d’avancement - Missions en cours]
+
+- Correction navigation “Voir mon plan d’action” : 0% (analyse en cours)
+- Feedback explicite validation palier : 0% (analyse en cours)
+
+---
