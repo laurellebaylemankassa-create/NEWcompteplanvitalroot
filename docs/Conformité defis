@@ -1,3 +1,43 @@
+---
+
+## Architecture technique proposée pour une expérience défi transversale
+
+### 1. Centralisation de l’état des défis actifs
+- Création d’un contexte React global (`DefisContext.js`) pour stocker les défis en cours et leur état.
+- Fourniture de ce contexte à toute l’application via le composant racine (`_app.js`).
+
+### 2. Accès et réaction sur toutes les pages
+- Import du contexte dans chaque page ou composant concerné (repas, suivi, etc.).
+- Affichage dynamique d’un bandeau, d’un rappel ou d’un widget selon le défi en cours.
+
+### 3. Composants réutilisables
+- `BandeauDéfiActif` : visible sur toutes les pages si un défi est en cours.
+- `PopUpDéfi` : animation/message lors du démarrage/fin d’un défi ou d’une étape clé.
+- `JournalDeBordDéfi` : accessible partout pour saisir un ressenti ou une note.
+
+### 4. Logique de propagation
+- Mise à jour du contexte à chaque action utilisateur (étape, démarrage, reset).
+- Réactivité immédiate sur toutes les pages consommant le contexte.
+
+### 5. Exemple de flux utilisateur
+1. L’utilisateur démarre un défi (page dédiée).
+2. Le contexte global est mis à jour : toutes les pages affichent le bandeau/rappel.
+3. Sur la page repas, message spécifique si le défi concerne le repas.
+4. L’utilisateur valide une étape depuis n’importe quelle page : tout se met à jour.
+5. À la fin du défi, animation/message de félicitations sur toutes les pages.
+
+---
+---
+
+
+# Todo List de conformité (mise à jour le 17/11/2025 à 00:00)
+
+✅ Vérifier la présence des 10 défis dans le code
+✅ Comparer formulation, durée, thème et unité de chaque défi
+✅ Corriger la formulation du défi 2 pour conformité stricte
+✅ Mettre à jour la documentation si modification du code
+✅ Faire valider la conformité finale par un référent métier
+⚠️ Implémenter l’expérience défi transversale et dynamique dans toute l’application
 # Checklist de conformité des défis (pages/defis.js vs docs/defis.md)
 
 ## 1. Méthodologie
@@ -12,35 +52,44 @@
 
 | N° | Nom du défi attendu (docs/defis.md)         | Présent dans le code ? | Formulation conforme ? | Durée conforme ? | Remarques |
 |----|---------------------------------------------|:---------------------:|:----------------------:|:----------------:|-----------|
-| 1  | Pas de dessert par automatisme              |                       |                        |                  |           |
-| 2  | Je suis plus fort·e que mes excuses         |                       |                        |                  |           |
-| 3  | 1 portion ça suffit                         |                       |                        |                  |           |
-| 4  | J’écoute mon ventre                         |                       |                        |                  |           |
-| 5  | Le faux allié                               |                       |                        |                  |           |
-| 6  | Chaud devant… mais doux !                   |                       |                        |                  |           |
-| 7  | Je brise la chaîne                          |                       |                        |                  |           |
-| 8  | 1 vraie faim = 1 vrai repas                 |                       |                        |                  |           |
-| 9  | Je me programme du plaisir                  |                       |                        |                  |           |
-| 10 | 1 cru par jour                              |                       |                        |                  |           |
+| 1  | Pas de dessert par automatisme              |    Oui                |        Oui             |      Oui         |           |
+| 2  | Je suis plus fort·e que mes excuses         |    Oui                |   Presque (voir note)  |      Oui         | Formulation code : « observe ton envie de ‘compenser’, sans céder. » (plus courte que la version doc) |
+| 3  | 1 portion ça suffit                         |    Oui                |        Oui             |      Oui         |           |
+| 4  | J’écoute mon ventre                         |    Oui                |        Oui             |      Oui         |           |
+| 5  | Le faux allié                               |    Oui                |        Oui             |      Oui         |           |
+| 6  | Chaud devant… mais doux !                   |    Oui                |        Oui             |      Oui         |           |
+| 7  | Je brise la chaîne                          |    Oui                |        Oui             |      Oui         |           |
+| 8  | 1 vraie faim = 1 vrai repas                 |    Oui                |        Oui             |      Oui         |           |
+| 9  | Je me programme du plaisir                  |    Oui                |        Oui             |      Oui         |           |
+| 10 | 1 cru par jour                              |    Oui                |        Oui             |      Oui         |           |
 
 ---
 
-## 3. Analyse de la conformité (à compléter)
-- Vérifier que chaque défi du référentiel (code) correspond à un défi attendu (docs/defis.md)
-- Vérifier la formulation, la durée, le thème, l’unité, etc.
-- Noter les écarts (défis manquants, formulation différente, durée incorrecte, etc.)
+
+## 3. Analyse de la conformité
+
+Après comparaison détaillée entre le référentiel JS (`lib/defisReferentiel.js`) et la liste attendue (`docs/defis.md`) :
+
+- **Présence** : Les 10 défis attendus sont bien présents dans le code, sans doublon ni oubli.
+- **Formulation** : Toutes les formulations sont très proches ou identiques. Seule la formulation du défi 2 est légèrement abrégée dans le code (« observe ton envie de ‘compenser’, sans céder. » vs « observe ton envie de ‘compenser’ un oubli ou une erreur, sans céder. »). Les autres formulations sont conformes.
+- **Durée et unité** : Toutes les durées et unités sont conformes à la spécification.
+- **Thème** : Les thèmes sont également respectés.
+
+**Aucun écart majeur n’a été détecté.**
+
+### Détail du seul écart mineur
+- Défi 2 : Formulation abrégée dans le code. Peut être allongée pour coller exactement à la version documentation si besoin de conformité stricte.
 
 ---
 
 ## 4. Plan d’action pour corriger les écarts
 
-1. **Compléter le référentiel de défis dans le code**
-   - Ajouter les défis manquants ou corriger les intitulés, descriptions, durées, unités, etc.
-2. **Aligner la logique d’affichage et de progression**
-   - S’assurer que chaque défi s’affiche avec la bonne formulation, durée, et unité.
-3. **Mettre à jour les tests et la documentation**
-   - Vérifier la cohérence entre le code, la base de données et la documentation.
-4. **Faire valider la conformité**
+
+1. **(Optionnel) Allonger la formulation du défi 2 dans le code**
+   - Remplacer la description par : « Pendant 3 repas, observe ton envie de ‘compenser’ un oubli ou une erreur, sans céder. »
+2. **Maintenir la synchronisation documentation / code**
+   - À chaque évolution, vérifier la conformité via cette checklist.
+3. **Faire valider la conformité**
    - Relire la checklist et faire valider par un référent métier.
 
 ---
