@@ -1,0 +1,76 @@
+# Checklist de conformité – Idéaux & routines (vs. exigences "ancrage")
+
+## 1. Synthèse des exigences du document "ancrage"
+- Chaîne d’ancrage : Idéal → Objectif concret → Routine → Actions → Alternatives
+- Saisie d’un idéal = phrase émotionnelle + donnée mesurable + image motivante
+- Génération automatique d’un objectif concret (fréquence, durée, intensité, progression)
+- Génération automatique d’une routine (jours/semaine, rappel, adaptation)
+- Suivi des actions réalisées, adaptation intelligente (plan B, mini-victoires, messages motivationnels)
+- Visualisation de la progression (ex : jauge, image floutée/défloutée)
+- Tableaux de données : Ideaux, Objectifs, Routines, Actions, Alternatives
+
+## 2. Analyse de conformité des pages existantes
+
+
+### Page `/pages/ideaux.js`
+- ✅ Saisie d’un idéal (titre, description émotionnelle, indicateur, date cible, image)
+- ✅ Génération automatique d’un plan d’ancrage à la création
+- ✅ Génération d’un plan avec fréquence, durée, intensité, jours proposés
+- ✅ Visualisation du plan généré, personnalisation rapide
+- ✅ Suivi des séances réalisées, validation du palier
+- ✅ Ajout d’une image motivante (floue par défaut)
+- ⚠️ Défloutage progressif de l’image selon la progression réelle
+- ⚠️ Messages motivationnels personnalisés selon l’avancement ou la difficulté
+- ⚠️ Gestion intelligente des plans B/alternatives en cas de non-réalisation ou baisse d’énergie
+- ⚠️ Table "Alternatives" non gérée (pas de suggestions adaptatives)
+- ⚠️ Visualisation avancée de la progression (ex : jauge circulaire, % constance, dernière action)
+
+
+### Page `/pages/plan-action.js`
+- ✅ Visualisation détaillée du plan d’action semaine par semaine
+- ✅ Suivi des séances prévues et bonus, progression affichée
+- ⚠️ Messages motivationnels personnalisés selon le statut de la semaine
+- ⚠️ Suggestion d’alternatives ou plan B en cas de non-réalisation
+- ⚠️ Visualisation de l’image motivante avec flou/défloutage
+- ⚠️ Indicateurs avancés de progression (constance, dernière action, etc.)
+
+
+### Page `/pages/plan.js`
+- ⚠️ Lien explicite avec les routines/idéal (pas d’intégration directe avec la chaîne d’ancrage)
+- ⚠️ Pas de visualisation de la progression vers un idéal
+- ⚠️ Pas de messages motivationnels ni d’adaptation comportementale
+
+## 3. Zones conformes
+- Saisie et gestion des idéaux, génération de plans, suivi des séances (pages `ideaux.js` et `plan-action.js`)
+- Interface moderne, personnalisation rapide, gestion des séances bonus
+
+## 4. Écarts identifiés
+- Absence de défloutage progressif de l’image motivante selon la progression
+- Absence de messages motivationnels personnalisés et adaptatifs
+- Absence de gestion des plans B/alternatives (table "Alternatives")
+- Visualisation de la progression perfectible (pas de jauge circulaire, % constance, etc.)
+- Pas d’intégration directe entre le planning alimentaire (`plan.js`) et la chaîne d’ancrage
+
+## 5. Plan d’action pour correction
+1. **Défloutage progressif de l’image motivante**
+	- Implémenter un calcul du % de progression (actions réalisées / prévues)
+	- Appliquer dynamiquement un filtre CSS `blur()` sur l’image selon ce %
+2. **Messages motivationnels personnalisés**
+	- Ajouter une fonction qui affiche un message selon l’avancement, la réussite ou la difficulté (ex : encouragement, plan B, mini-victoire)
+	- Utiliser l’historique des actions pour adapter le message
+3. **Gestion des plans B/alternatives**
+	- Créer une table "Alternatives" (Supabase)
+	- Lorsqu’une action n’est pas réalisée ou en cas de baisse d’énergie, proposer une alternative adaptée (ex : marche douce, étirements)
+	- Afficher la suggestion et permettre de la valider
+4. **Visualisation avancée de la progression**
+	- Ajouter une jauge circulaire ou un indicateur visuel de % de constance
+	- Afficher la dernière action réalisée et le statut global
+5. **Lien entre planning alimentaire et routines/idéal**
+	- Permettre d’associer un planning alimentaire à un idéal/routine
+	- Afficher la progression alimentaire dans la vue globale de l’idéal
+
+---
+
+**Résumé** :
+- Les fondations sont solides (création/suivi d’idéal, plan, actions).
+- Les axes d’amélioration sont l’adaptation comportementale, la motivation dynamique, la visualisation avancée et l’intégration alimentaire.
