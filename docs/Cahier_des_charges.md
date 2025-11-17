@@ -135,3 +135,55 @@ nutritionnel intelligent et bienveillant, pour :
 ● Évite la surcharge cognitive
 ● Oriente vers l’autonomie alimentaire
 ● Doit donner envie d’être quittée... parce qu’on se suffit à soi-même
+
+
+## Structure du projet
+```
+mon-plan-vital
+├── pages
+│   ├── index.js
+│   ├── profil.js
+│   ├── suivi.js
+│   ├── extras.js
+│   ├── declarer-extra.js
+│   ├── regles.js
+│   ├── statistiques.js
+│   ├── checkin.js
+│   ├── pause.js
+│   ├── defis.js
+│   ├── plan.js
+│   └── _app.js
+├── components
+│   ├── Navigation.js
+│   ├── FormulaireProfil.js
+│   ├── SaisieRepas.js
+│   ├── RecapAlignement.js
+│   ├── ScoreBar.js
+│   ├── FocusDuMois.js
+│   └── (autres à créer)
+├── lib
+│   └── supabaseClient.js
+├── public
+│   └── (icônes / logos / images)
+├── install.sh
+├── vercel.json
+├── .gitignore
+├── package.json
+└── package-lock.json
+```
+
+## Installation
+Pour installer les dépendances du projet, exécutez le script suivant :
+
+```bash
+./install.sh
+```
+
+## Déploiement
+Le projet est configuré pour être déployé sur Vercel. Assurez-vous que le fichier `vercel.json` est correctement configuré pour vos besoins.
+
+## Contribuer
+Les contributions sont les bienvenues ! N'hésitez pas à soumettre des demandes de tirage ou à ouvrir des problèmes pour discuter des améliorations.
+
+## License
+Ce projet est sous licence MIT.

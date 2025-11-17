@@ -1,0 +1,52 @@
+# Checklist de conformité des défis (pages/defis.js vs docs/defis.md)
+
+## 1. Méthodologie
+- Analyse du fichier `pages/defis.js` (logique d'affichage, gestion, progression des défis)
+- Référence des 10 mini-défis attendus (voir `docs/defis.md`)
+- Identification des zones conformes et des écarts
+- Plan d'action pour corriger les écarts
+
+---
+
+## 2. Checklist de conformité
+
+| N° | Nom du défi attendu (docs/defis.md)         | Présent dans le code ? | Formulation conforme ? | Durée conforme ? | Remarques |
+|----|---------------------------------------------|:---------------------:|:----------------------:|:----------------:|-----------|
+| 1  | Pas de dessert par automatisme              |                       |                        |                  |           |
+| 2  | Je suis plus fort·e que mes excuses         |                       |                        |                  |           |
+| 3  | 1 portion ça suffit                         |                       |                        |                  |           |
+| 4  | J’écoute mon ventre                         |                       |                        |                  |           |
+| 5  | Le faux allié                               |                       |                        |                  |           |
+| 6  | Chaud devant… mais doux !                   |                       |                        |                  |           |
+| 7  | Je brise la chaîne                          |                       |                        |                  |           |
+| 8  | 1 vraie faim = 1 vrai repas                 |                       |                        |                  |           |
+| 9  | Je me programme du plaisir                  |                       |                        |                  |           |
+| 10 | 1 cru par jour                              |                       |                        |                  |           |
+
+---
+
+## 3. Analyse de la conformité (à compléter)
+- Vérifier que chaque défi du référentiel (code) correspond à un défi attendu (docs/defis.md)
+- Vérifier la formulation, la durée, le thème, l’unité, etc.
+- Noter les écarts (défis manquants, formulation différente, durée incorrecte, etc.)
+
+---
+
+## 4. Plan d’action pour corriger les écarts
+
+1. **Compléter le référentiel de défis dans le code**
+   - Ajouter les défis manquants ou corriger les intitulés, descriptions, durées, unités, etc.
+2. **Aligner la logique d’affichage et de progression**
+   - S’assurer que chaque défi s’affiche avec la bonne formulation, durée, et unité.
+3. **Mettre à jour les tests et la documentation**
+   - Vérifier la cohérence entre le code, la base de données et la documentation.
+4. **Faire valider la conformité**
+   - Relire la checklist et faire valider par un référent métier.
+
+---
+
+> **Remarque :**
+> Pour remplir la colonne "Présent dans le code ?" et les autres, il faut comparer le contenu du référentiel de défis dans `lib/defisReferentiel.js` (et la logique de `pages/defis.js`) avec la liste ci-dessus.
+> 
+> **Étape suivante :**
+> - Extraire la liste des défis du code (`defisReferentiel`) et la comparer point par point à la liste attendue.
