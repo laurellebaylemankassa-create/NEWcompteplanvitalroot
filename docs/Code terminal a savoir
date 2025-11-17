@@ -1,0 +1,6 @@
+pwd                # pour voir le dossier où tu es
+ls                 # pour voir les fichiers présents
+git status         # pour voir l’état Git ici (qui montre ce qui est modifié dans CE codespace)
+git pull           # ça ne met à jour que CE codespace
+# ou
+git restore --source=origin/main -- "Nom exact du fichier"
