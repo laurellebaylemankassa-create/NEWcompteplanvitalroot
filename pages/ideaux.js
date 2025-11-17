@@ -897,15 +897,25 @@ ADD COLUMN IF NOT EXISTS plan_existant boolean DEFAULT false;
                   <button
                     onClick={() => {
                       // Sécurisation de l’id : on prend l’id de l’idéal courant si possible
-                      const id = currentIdealId || (planData && planData.ideal && planData.ideal.id);
-                      if (typeof id === 'number' && id > 0) {
-                        // Vérification orthographe fichier/URL
+                      let id = currentIdealId;
+                      if (id && (typeof id === 'string' ? id.length > 0 : typeof id === 'number' && id > 0)) {
+                        console.log('[NAVIGATION] Utilisation de currentIdealId:', id, 'type:', typeof id);
+                      } else if (planData && planData.ideal && planData.ideal.id && (typeof planData.ideal.id === 'string' ? planData.ideal.id.length > 0 : typeof planData.ideal.id === 'number' && planData.ideal.id > 0)) {
+                        id = planData.ideal.id;
+                        console.log('[NAVIGATION] Fallback sur planData.ideal.id:', id, 'type:', typeof id);
+                      } else if (Array.isArray(ideaux) && ideaux.length === 1 && ideaux[0].id && (typeof ideaux[0].id === 'string' ? ideaux[0].id.length > 0 : typeof ideaux[0].id === 'number' && ideaux[0].id > 0)) {
+                        id = ideaux[0].id;
+                        console.log('[NAVIGATION] Fallback sur ideaux[0].id:', id, 'type:', typeof id);
+                      } else {
+                        console.warn('[NAVIGATION] Aucun id valide trouvé', { currentIdealId, planData, ideaux });
+                      }
+                      if ((typeof id === 'string' && id.length > 0) || (typeof id === 'number' && id > 0)) {
                         const url = `/plan-action?id=${id}`;
-                        console.log('[NAVIGATION] Redirection vers :', url);
+                        console.log('[NAVIGATION] Redirection vers :', url, { idSource: id, currentIdealId, planData, ideaux });
                         window.location.href = url;
                       } else {
                         alert('Impossible d’ouvrir le plan d’action : identifiant manquant ou invalide.');
-                        console.warn('[NAVIGATION] id manquant ou invalide pour la redirection plan-action');
+                        console.warn('[NAVIGATION] id manquant ou invalide pour la redirection plan-action', { currentIdealId, planData, ideaux });
                       }
                     }}
                     style={{
