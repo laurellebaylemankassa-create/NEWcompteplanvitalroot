@@ -22,10 +22,11 @@ export default function PlanActionPage() {
 
   async function loadIdeal() {
     try {
+      console.log('[DEBUG] id reçu dans plan-action:', id, 'type:', typeof id);
       const { data, error } = await supabase
         .from('ideaux')
         .select('*')
-        .eq('id', parseInt(id, 10))
+        .eq('id', id)
         .single();
 
       if (error) throw error;
