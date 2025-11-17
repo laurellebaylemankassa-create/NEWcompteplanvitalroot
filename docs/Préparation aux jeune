@@ -520,102 +520,122 @@ ETAPE 7
 Routine normale spirituelle
 
 ═══════════════════════════════════════════════════════════════════════════════
-## 🟢 PLAN D’ACTION – INTÉGRATION DE LA PRÉPARATION AU JEÛNE (à partir d’ici)
+
+## 🟢 PLAN D’ACTION – INTÉGRATION DE LA PRÉPARATION AU JEÛNE (Mise à jour)
 ═══════════════════════════════════════════════════════════════════════════════
 
-### 1. Architecture technique & fichiers à créer/modifier
+### 1. Architecture technique & état des fichiers
 
-- **Créer la page** `/pages/preparation-jeune.js` : interface principale de la préparation.
-- **Adapter la page** `/pages/suivi.js` : rendre contextuelle la saisie des repas selon la phase de préparation.
-- **Créer/adapter les composants** :
-   - `TimelineProgressionPreparation` (timeline spécifique à la préparation)
-   - `CriterePreparationCard` (affichage des critères actifs/verrouillés)
-   - `BannierePreparation` (bannière contextuelle sur `/suivi.js`)
-- **Stockage** : prévoir un espace (localStorage ou BDD) pour :
-   - Les critères validés chaque jour
-   - Le message personnel de préparation
-   - La progression globale de la préparation
+- `/pages/preparation-jeune.js` : déjà créée, affiche la timeline, la date du jeûne, le J-XX, et les jalons. À enrichir pour la progression réelle, la validation, et le message personnel.
+- `/pages/suivi.js` : déjà adaptée, affiche une bannière contextuelle avec le critère du jour, permet la validation manuelle, et stocke la progression (localStorage). À compléter pour la synchronisation et la validation automatique selon la saisie.
+- Composants à créer/adapter :
+   - `TimelineProgressionPreparation` : pour une timeline visuelle et interactive (actuellement, timeline statique dans la page).
+   - `CriterePreparationCard` : pour détailler chaque critère, son statut, et ses conseils.
+   - `BannierePreparation` : déjà présente sous forme de bannière dans `/suivi.js`, à factoriser si besoin.
+- **Stockage** : localStorage utilisé pour la progression et le message personnel. Prévoir la synchronisation avec Supabase si multi-device ou suivi long terme.
 
 ---
 
-### 2. Découpage du workflow utilisateur
+### 2. Workflow utilisateur (état réel)
 
 #### a. Déclenchement de la préparation
-- Depuis le tableau de bord, détection d’un jeûne programmé.
+- Depuis le tableau de bord, détection d’un jeûne programmé (à implémenter sur `/tableau-de-bord.js`).
 - Affichage d’une bannière : « Tu as un objectif de jeûne prévu le XX/XX ! [Commencer ma préparation] ».
 - Clic → redirection vers `/preparation-jeune.js`.
 
 #### b. Initialisation de la préparation
-- Affichage du récap : date du jeûne, durée de préparation, J-XX.
-- Explication : pourquoi préparer son jeûne ?
-- Bouton : « Démarrer mon suivi de préparation ».
+- Affichage du récap : date du jeûne, durée, J-XX, explication du pourquoi.
+- Bouton : « Démarrer mon suivi de préparation » (déjà présent).
 
 #### c. Timeline de préparation (vue principale)
-- Affichage d’une timeline avec :
-   - **Phases** : Fondations (J-30 à J-18), Intensification (J-12 à J-1)
-   - **Critères** par jalon : 
-      - J-30 : Respect strict des quantités
-      - J-17 : Pas de féculents le soir, action après repas
-      - J-14 : Plus de produits transformés, plus de sucreries
-      - J-12 : 2 jours de jeûne plein
-      - J-7 : 2L d’eau/jour, pas de repas après 19h, plage 45min
-      - J-0 : Lancement du jeûne
-   - Statut : [EN COURS], [VERROUILLÉ], [À VENIR]
-   - Déblocage automatique des critères à la bonne date
+- Timeline affichée (statique), à rendre interactive : progression réelle, validation des jours, conseils, accès au message personnel.
+- Statut des jalons : [EN COURS], [VERROUILLÉ], [À VENIR] (déjà géré dynamiquement).
 
 #### d. Validation quotidienne des critères
-- Chaque jour, l’utilisateur clique sur « Voir mes repas du jour » → `/suivi.js`
-- Sur `/suivi.js` :
-   - Affichage d’une bannière contextuelle : « Préparation au jeûne – Critère du jour »
-   - Affichage du critère actif à valider (ex : « Respect strict des quantités »)
-   - Saisie des repas : validation automatique ou manuelle du critère selon la saisie
-   - Remontée de la validation à la timeline de préparation
+- Sur `/suivi.js` : bannière contextuelle affichant le critère du jour, validation manuelle possible (stockée localement).
+- À compléter : validation automatique selon la saisie du repas (ex : heure, féculents, etc.), et synchronisation avec la timeline de préparation.
 
 #### e. Progression & feedback
-- Sur `/preparation-jeune.js` :
-   - Progression globale (ex : 1/9 critères validés)
-   - Affichage des jours validés pour chaque critère
-   - Conseils pratiques et explications pour chaque critère
-   - Accès au message personnel de préparation (à rédiger et rejouer)
+- Sur `/preparation-jeune.js` : progression globale à afficher (ex : X/9 critères validés), conseils pratiques, accès au message personnel (à ajouter).
 
 #### f. Fin de la préparation
-- À J-0, affichage d’un écran de synthèse : « Tu es prêt·e, ton jeûne commence demain ! »
-- Bouton : « Commencer mon jeûne » → passage automatique en mode jeûne
+- À J-0, afficher un écran de synthèse et bouton « Commencer mon jeûne » (à ajouter).
 
 ---
 
-### 3. Règles métier et UX à respecter
+### 3. Règles métier et UX à respecter (rappel)
 
-- **Déblocage automatique** des critères à la bonne date (pas d’accès anticipé)
-- **Validation obligatoire** de chaque critère via la saisie quotidienne dans `/suivi.js`
-- **Feedback immédiat** sur la progression (bannières, scores, conseils)
-- **Message personnel** à rédiger et à rejouer avant le jeûne
-- **Navigation fluide** entre `/preparation-jeune.js` et `/suivi.js`
-- **Séparation stricte** des contextes (préparation ≠ suivi classique)
+- Déblocage automatique des critères à la bonne date (OK).
+- Validation obligatoire de chaque critère via la saisie quotidienne dans `/suivi.js` (partiel : manuelle, à automatiser pour certains critères).
+- Feedback immédiat sur la progression (bannières, scores, conseils).
+- Message personnel à rédiger et à rejouer avant le jeûne (à ajouter sur `/preparation-jeune.js`).
+- Navigation fluide entre `/preparation-jeune.js` et `/suivi.js` (OK).
+- Séparation stricte des contextes (préparation ≠ suivi classique).
 
 ---
 
 ### 4. Points d’attention
 
-- **Synchronisation** : la validation d’un critère dans `/suivi.js` doit mettre à jour la timeline de `/preparation-jeune.js`.
-- **Accessibilité** : chaque critère doit être expliqué, avec conseils et feedbacks adaptés.
-- **Robustesse** : gestion des cas où l’utilisateur saute un jour, revient en arrière, ou modifie la date du jeûne.
+- Synchronisation : la validation d’un critère dans `/suivi.js` doit mettre à jour la timeline de `/preparation-jeune.js` (à améliorer).
+- Accessibilité : chaque critère doit être expliqué, avec conseils et feedbacks adaptés (à enrichir dans les composants dédiés).
+- Robustesse : gestion des cas où l’utilisateur saute un jour, revient en arrière, ou modifie la date du jeûne (à tester et fiabiliser).
 
 ---
 
-### 5. Étapes de développement (ordre conseillé)
+### 5. Étapes de développement (ordre conseillé, MAJ)
 
-1. Créer `/pages/preparation-jeune.js` avec la structure de timeline et la logique de phases/jalons.
-2. Créer/adapter les composants d’affichage des critères et de progression.
-3. Adapter `/suivi.js` pour afficher la bannière et les critères actifs selon le contexte préparation.
-4. Mettre en place le stockage et la synchronisation des validations.
+1. Enrichir `/pages/preparation-jeune.js` : progression réelle, validation, message personnel, synthèse finale.
+2. Créer/adapter les composants d’affichage des critères, timeline interactive, et conseils.
+3. Améliorer `/suivi.js` : validation automatique des critères selon la saisie, synchronisation avec la timeline.
+4. Ajouter la détection et la bannière sur `/tableau-de-bord.js`.
 5. Tester le workflow complet (déclenchement, validation, progression, feedback, passage au jeûne).
 6. Ajouter les conseils, messages, et feedbacks UX.
-7. Valider l’accessibilité et la robustesse.
+7. Valider l’accessibilité et la robustesse (tests multi-device, cas limites).
 
 ---
 
-Ce plan d’action est prêt à être intégré à partir de la ligne 523 du fichier, et servira de référence pour toute l’implémentation.
+Ce plan d’action est à jour selon l’état du code et sert de référence pour la suite de l’implémentation.
 Dis-moi si tu veux une restitution sous forme de checklist, de diagramme, ou si tu valides ce plan pour passer à la phase suivante.
+
+
+═══════════════════════════════════════════════════════════════════════════════
+🔎 ANALYSE DES ZONES D’INTERVENTION – PRÉPARATION AU JEÛNE (contexte cycle complet)
+═══════════════════════════════════════════════════════════════════════════════
+
+## 1. Phase(s) dont je ne dois pas m’occuper directement (mais que je dois connaître)
+
+- **La phase de JEÛNE (proprement dite)**
+   - Je ne dois pas développer ni modifier la logique, les écrans ou les feedbacks spécifiques à la phase de jeûne elle-même (suivi du jeûne, gestion des symptômes, etc.).
+   - MAIS : Je dois bien comprendre cette phase pour :
+      - Assurer la bonne transition depuis la préparation (déclenchement, feedback, passage d’état)
+      - Garantir la cohérence des données et des messages (avant/après)
+      - Anticiper les liens et les dépendances (ex : critères de préparation validés → autorisation de commencer le jeûne)
+
+## 2. Phases où j’interviens totalement, partiellement, ou très faiblement
+
+### a) Phases où j’interviens totalement
+- **Préparation du jeûne**
+   - Timeline, critères, progression, feedbacks, validation, conseils, gestion des cas limites, synthèse finale.
+
+### b) Phases où j’interviens partiellement (chevauchement)
+- **Transition vers le jeûne**
+   - Je dois gérer :
+      - Le passage d’état (fin de préparation → début du jeûne)
+      - Les feedbacks et messages de transition
+      - La synchronisation des données (critères, progression)
+      - Les cas limites (retour arrière, modification de date juste avant le jeûne)
+
+### c) Phases où j’interviens très faiblement (veille de cohérence)
+- **Reprise alimentaire**
+   - Je ne développe pas la logique de reprise, mais je dois :
+      - Vérifier que la transition depuis le jeûne est cohérente avec la préparation (ex : conseils personnalisés selon la préparation)
+      - Garantir la continuité UX et la bonne transmission des données
+- **Routine post-reprise**
+   - Simple veille de cohérence : je ne développe rien, mais je dois m’assurer que la préparation et ses critères sont bien pris en compte dans la suite du parcours utilisateur.
+
+---
+
+**Résumé synthétique** :
+Je me concentre sur la préparation et ses transitions, tout en connaissant parfaitement le cycle complet pour garantir la conformité, la cohérence et la continuité UX, sans intervenir dans la logique métier propre au jeûne, à la reprise ou à la routine.
 
 
