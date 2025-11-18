@@ -24,6 +24,7 @@ function RetourAccueil() {
 // ----------- HANDLER POUR LA SAUVEGARDE D'UN REPAS -----------
 // La fonction handleSaveRepas est définie plus bas dans le composant principal, après l’import unique de Supabase.
 import React, { useState, useEffect, useRef } from 'react';
+import BandeauDefiActif from '../components/BandeauDefiActif';
 import { supabase } from '../lib/supabaseClient';
 import Link from 'next/link';
 import RepasBloc from "../components/RepasBloc";
@@ -145,22 +146,6 @@ function getWeeklyExtrasHistory(repasSemaine, selectedDate, nbWeeks = 16) {
     });
   }
   return weeks;
-}
-
-function getWeeklyPalier(history) {
-  // Correction : le palier est toujours inférieur à la consommation max observée
-  let maxExtras = 0;
-  for (let i = history.length - 1; i >= 0; i--) {
-    if (history[i].count > maxExtras) {
-      maxExtras = history[i].count;
-    }
-  }
-  let palier = Math.max(1, maxExtras - 1);
-  // On descend le palier d'un cran si la semaine actuelle respecte le palier
-  if (history[0] && history[0].count <= palier && palier > 1) {
-    palier = palier - 1;
-  }
-  return palier;
 }
 
 function getProgressionMessage(history, palier) {
@@ -515,7 +500,7 @@ export default function Suivi() {
     : 0;
 
   // Calcul du palier et de l'objectif final
-  const currentPalier = getWeeklyPalier(weeklyHistory);
+  const currentPalier = 1; // Palier métier : 1 extra autorisé par semaine
   const objectifFinal = 1;
 
   // ----------- CALCUL DES EXTRAS HORS QUOTA -----------
@@ -673,6 +658,13 @@ export default function Suivi() {
         message={snackbar.message}
         type={snackbar.type}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
+      />
+
+      {/* Bandeau défi actif statique pour test visuel */}
+      <BandeauDefiActif
+        defi={{ nom: "Défi test", duree: 5 }}
+        progression={4}
+        onOpenJournal={() => {}}
       />
 
       <h1 style={{

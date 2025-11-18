@@ -16,7 +16,10 @@ _Décrire exactement ce qui est attendu (fonctionnalité, écran, comportement, 
 
 ## **Audit des risques préalable**
 - _Lister tous les risques : technique, UX, sécurité, conflit, régression, perte de données, robustesse, accessibilité, etc._
-- _Détection de tout risque déclenche une proposition immédiate de rollback, documentée dans le fichier Anomalie avec date et heure_
+- documenter ces risque en point de vigilance et a integrer dans la cheklist du controle qualité
+
+**Sous-checklist à valider systématiquement :**
+- [ ] Vérification de la présence/import de toutes les fonctions, hooks et variables utilisées dans le code modifié
 
 ## **Checklist stricte sécurité & qualité (à cocher AVANT toute modification)**
 - [ ] Lecture complète du code concerné (dépendances, hooks, variables, fonctions…)
@@ -36,6 +39,8 @@ _Décrire exactement ce qui est attendu (fonctionnalité, écran, comportement, 
 
 ## **Contrôles qualité à prévoir**  
 _Ex : tests de sauvegarde/restauration, accessibilité, non-régression, performance, multi-device, compatibilité, échappement, robustesse, cas limites_
+ici ajouter analyse de l audit des risque et s assurer qu il n a aucune anomalie pour garantir la conformité de la modification
+ _ si a ce stade anoamie bug identifié alors proposition immédiate de rollback a l endroit ou l'anomalie a ete detecté ( pour revenir a l etat ou il n yavait pas de bug) a confirmé avec utilisateur ou revenir a l etat initial du code avant  modification , tjr documenter les anomalies rencontres dans le fichier Anomalie roll back avec date et heure_
 
 ## **Mise à jour de l’avancement**  
 - [ ] Non commencé | [ ] En cours | [ ] Terminé  

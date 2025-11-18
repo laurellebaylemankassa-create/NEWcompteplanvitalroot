@@ -1,3 +1,4 @@
+import BandeauDefiActif from '../components/BandeauDefiActif';
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 
@@ -42,7 +43,13 @@ function RepasForm({ initial, onCancel, onSave }) {
   };
 
   return (
-  <form onSubmit={handleSubmit} style={{ marginBottom: 24, background: "#f9f9f9", padding: 16, borderRadius: 10 }}>
+    <>
+      <BandeauDefiActif
+        defi={{ nom: "Défi test", duree: 5 }}
+        progression={3}
+        onOpenJournal={() => {}}
+      />
+      <form onSubmit={handleSubmit} style={{ marginBottom: 24, background: "#f9f9f9", padding: 16, borderRadius: 10 }}>
       <h2>{initial?.id ? "Modifier le repas" : "Ajouter un repas"}</h2>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
         <input

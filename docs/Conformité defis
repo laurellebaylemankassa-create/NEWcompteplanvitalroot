@@ -99,3 +99,104 @@ Après comparaison détaillée entre le référentiel JS (`lib/defisReferentiel.
 > 
 > **Étape suivante :**
 > - Extraire la liste des défis du code (`defisReferentiel`) et la comparer point par point à la liste attendue.
+
+
+
+
+
+---
+
+## Vérification de compréhension 18/11/25 11:33 — Auto-analyse Copilot
+
+Avant : J’associais à tort la validation de palier et le feedback à la logique “idéaux” (plans d’action), pensant que la progression et le feedback devaient être gérés dans `/pages/ideaux.js`.
+
+Après relecture attentive des fichiers métier et code :
+- L’architecture métier impose une expérience défi transversale, centralisée dans un contexte global `DefisContext.js`, accessible sur toutes les pages concernées (repas, suivi, etc.).
+- Les “paliers” dans la logique “défis” correspondent à des étapes de progression d’un défi, et non aux paliers des plans d’action/idéaux.
+- Toute la gestion du feedback, de la progression, des étapes/paliers de défi doit être centralisée dans la logique “défis” : `lib/defisReferentiel.js`, `lib/initDefisUser.js`, `pages/defis.js`, `components/DefisContext.js`, et les composants UI dédiés.
+- Les fichiers “idéaux” ne sont pas concernés par la gestion des défis.
+
+Correction : Le plan d’implémentation et la liste des fichiers concernés doivent strictement suivre cette logique : tout est centré sur la gestion des défis, leur contexte global, et leur affichage transversal sur toutes les pages concernées.
+
+---
+
+
+
+ PLAN D’IMPLÉMENTATION COPILOT (MISSION : Expérience défi transversale et dynamique)
+⚠️ AUCUNE modification de code ne doit être produite tant que l’utilisateur n’a pas validé explicitement ce plan d’implémentation rempli par Copilot.
+
+─────────────────────────────────────────────────────────────
+
+Titre de la tâche
+Implémenter l’expérience défi transversale et dynamique dans toute l’application
+
+Description précise de la modification attendue
+Permettre à l’utilisateur de vivre une expérience défi fluide, cohérente et motivante sur toutes les pages : affichage dynamique du défi actif, progression en temps réel, feedback visuel et contextuel, synchronisation immédiate de l’état du défi (démarrage, étape, fin) sur l’ensemble de l’application. Garantir la robustesse de la logique métier, la réactivité du contexte global, et la possibilité de rollback immédiat en cas d’anomalie.
+
+Fichiers concernés
+defisReferentiel.js (définition des défis)
+initDefisUser.js (initialisation état utilisateur)
+DefisContext.js (contexte global défis)
+BandeauDefiActif.js (bandeau transversal)
+PopUpDefi.js (feedback animation/étape)
+JournalDeBordDefi.js (notes/résultats)
+defis.js (page principale défis)
+Toutes pages consommant le contexte défi (repas, suivi, etc.)
+Audit des risques préalable
+Risque d’incohérence entre l’état global et l’affichage sur certaines pages
+Risque d’erreur de référence (fonction non définie, import manquant)
+Risque de régression sur la progression ou la synchronisation du défi
+Risque d’affichage incorrect (bandeau, pop-up, journal)
+Risque de perte de données utilisateur (notes, progression)
+Risque d’absence de rollback en cas d’anomalie
+Risque de non-respect du template strict (voir anomalies documentées dans Anomalie roll back et MARKDOWN)
+Documenter ces risques en point de vigilance et les intégrer dans la checklist du contrôle qualité
+Sous-checklist à valider systématiquement :
+
+ Vérification de la présence/import de toutes les fonctions, hooks et variables utilisées dans le code modifié
+Checklist stricte sécurité & qualité (à cocher AVANT toute modification)
+ Lecture complète du code concerné (dépendances, hooks, variables, fonctions…)
+ Initialisation systématique avant usage (hooks, variables, handlers)
+ Séparation stricte des étapes : initialisation ➔ logique ➔ handler ➔ rendu
+ Vérification : toute fonction ou handler utilisé dans le rendu est présent et initialisé avant usage
+ Ordre et portée logiques stricts (jamais déclaration, appel ou usage prématuré)
+ Pas de doublons ni de déclarations superflues
+ Contrôle d’erreur systématique (compilation, runtime, SSR, rendu, accessibilité)
+ Test du rendu sur tous les cas d’usage et cas limites
+ Préservation stricte des fonctionnalités existantes
+ Mise à jour précise et justifiée du pourcentage d’avancement
+ Toute anomalie ou erreur ➔ rollback immédiat, rapport d’anomalie avec contexte, date et heure (cf. fichier ANOMALIE)
+ Documentation claire de chaque étape, chaque validation, et toute action automatisée (Copilot/IA)
+ Validation utilisateur OBLIGATOIRE avant toute implémentation
+ Toutes les cases ci-dessus doivent être cochées et documentées avant de poursuivre.
+Contrôles qualité à prévoir
+Tests de synchronisation et d’affichage du défi actif sur toutes les pages
+Tests de progression et de feedback (bandeau, pop-up, journal)
+Tests de non-régression sur la logique de défi et la propagation du contexte
+Tests multi-device et accessibilité
+Analyse de l’audit des risques et vérification de l’absence d’anomalie
+Prise en compte des retours d’expérience et anomalies documentées dans Anomalie roll back et MARKDOWN pour renforcer la vigilance et la rigueur
+Vérification stricte de la conformité code/documentation via checklist
+Contrôle qualité renforcé : audit de risque exhaustif, rapport Markdown avant/après, respect du template à chaque étape
+Si anomalie/bug identifié, proposition immédiate de rollback à l’endroit où l’anomalie a été détectée (pour revenir à l’état sans bug), à confirmer avec l’utilisateur, et documentation dans le fichier Anomalie roll back avec date et heure
+Double vérification et retour d’expérience (sécurité process)
+Suite aux anomalies rencontrées lors des précédentes évolutions (voir fichiers Anomalie roll back et MARKDOWN), une double vérification systématique est désormais exigée :
+
+Vérification stricte de la conformité code/documentation via checklist
+Contrôle qualité renforcé : audit de risque exhaustif, rapport Markdown avant/après, respect du template à chaque étape
+Justification : Cette double vérification a été demandée pour garantir qu’aucune anomalie (fonction non définie, import manquant, non-respect du template, absence de rollback, etc.) ne puisse être introduite lors d’une évolution. Elle s’appuie sur le retour d’expérience documenté et vise à sécuriser durablement le process, en évitant toute régression ou perte de conformité.
+
+Mise à jour de l’avancement
+ Non commencé | [ ] En cours | [ ] Terminé
+Avancement précis/Pourcentage réel (à MAJ à chaque étape) : ____ %
+Historique des mises à jour : ___
+Proposition de rollback
+Tout risque ou anomalie détecté :
+Décrire l’action de rollback, son contexte (fichier, modification en cause), l’alternative sûre proposée.
+Ajouter dans le fichier ANOMALIE roll back : date, heure, détail complet pour traçabilité.
+Rapport Markdown Copilot
+Générer un rapport structuré AVANT et APRÈS toute modification (structure, fonctions, hooks, changements, etc.).
+Ce rapport doit permettre une validation éclairée, claire et synthétique.
+À valider par l'utilisateur avant code.
+Validation explicite de l’utilisateur (OBLIGATOIRE)
+ Plan validé par l’utilisateur à la date : ___

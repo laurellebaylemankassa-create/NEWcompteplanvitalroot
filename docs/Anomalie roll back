@@ -1,6 +1,24 @@
+# [2025-11-17] Anomalies liées à la correction de l’expérience défi dynamique dans /pages/suivi.js
+- Problème 1 : Appel à la fonction inexistante `getWeeklyPalier`, provoquant une erreur ReferenceError lors du calcul du palier hebdomadaire.
+- Problème 2 : Retour de la variable `palier` non définie dans la fonction `getWeeklyExtrasHistory`, générant une erreur ReferenceError.
+- Problème 3 : Non-respect du template strict (absence de rapport Markdown avant/après, checklist incomplète, absence d’audit de risque exhaustif).
+- Décision : Refus de toutes les modifications initiées, rollback complet à l’état antérieur, documentation de chaque anomalie.
+- Action de rollback :
+	- Suppression de l’appel à `getWeeklyPalier` et restauration de la logique d’origine.
+	- Correction de `getWeeklyExtrasHistory` pour retourner le tableau `weeks`.
+	- Documentation complète des erreurs et du processus dans ce fichier.
+	- Rappel : toute future modification doit respecter strictement le template validé, avec rapport Markdown et audit de risque systématique.
+
+# [2025-11-17] Anomalie d’insertion composant BandeauDefiActif dans /pages/suivi.js
+- Problème : Insertion du composant `BandeauDefiActif` dans la fonction `RetourAccueil` et dans une boucle, provoquant une erreur de build : `Expression expected`.
+- Cause : Mauvaise lecture du code, insertion dans une fonction/boucle au lieu du return principal du composant React.
+- Étape de la checklist non respectée : lecture complète du code concerné et test du rendu avant modification.
+- Action de rollback : suppression immédiate du code fautif, retour à l’état antérieur du fichier.
+- Proposition de correction : insérer le composant uniquement dans le return principal du composant React exporté par la page (`export default function Suivi() { ... }`).
 
 ## [2025-11-17] Anomalie de nommage colonne planData/plan_data
 - Problème : Erreur lors de l’ajout d’un idéal : "Could not find the 'planData' column of 'ideaux' in the schema cache".
 - Cause : Incohérence entre le nom de colonne utilisé dans le code (planData) et le schéma Supabase (plan_data).
 - Étape de la checklist non respectée : relecture de la cohérence des noms de colonnes entre le code et la base.
 - Correction à faire : harmoniser tous les accès à la colonne en snake_case (plan_data) et vérifier la présence de la colonne dans la base.
+

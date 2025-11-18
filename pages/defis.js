@@ -1,3 +1,4 @@
+import BandeauDefiActif from '../components/BandeauDefiActif';
 
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
@@ -198,6 +199,11 @@ const Defis = () => {
 
     return (
         <div>
+            <BandeauDefiActif
+                defi={{ nom: "Défi test", duree: 5 }}
+                progression={2}
+                onOpenJournal={() => {}}
+            />
             <RetourArriere />
             <h1>Mes défis</h1>
             <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
