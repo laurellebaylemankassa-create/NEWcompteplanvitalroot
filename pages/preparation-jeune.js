@@ -17,6 +17,7 @@ export default function PreparationJeune() {
   const [preparationActive, setPreparationActive] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [preparationData, setPreparationData] = useState(null);
+  const [feedbackMessage, setFeedbackMessage] = useState("");
   const criteresMetier = [
     { id: 1, label: "Respect strict des quantités à chaque repas", jalon: 30, description: "Réapprendre à ton corps ce qu'est une vraie portion" },
     { id: 2, label: "Supprimer les féculents le soir (lun-dim)", jalon: 17, description: "Alléger la digestion le soir pour préparer le jeûne" },
@@ -136,16 +137,15 @@ export default function PreparationJeune() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('criteresPreparation', JSON.stringify(criteresInit));
     }
+    setFeedbackMessage("✅ Préparation activée ! Suivi et critères disponibles.");
     // Feedback visuel (console)
     console.log('Préparation activée, critères initialisés, timeline affichée. Source : action utilisateur, validation modale.');
   }
 
-  const handleResetPreparation = () => {
+  // Handler pour réinitialiser toute la préparation
+  function handleResetPreparation() {
     setPreparationData(null);
     setPreparationActive(false);
-    localStorage.removeItem('preparationData');
-    localStorage.removeItem('preparationActive');
-    // Optionnel : réinitialiser les autres états liés à la préparation
     setCriteres([]);
     setProgression(0);
     setMessagePerso("");
@@ -153,7 +153,17 @@ export default function PreparationJeune() {
     setDateJeune(null);
     setDureeJeune(null);
     setJCourant(null);
-    console.log('Préparation réinitialisée.');
+    setFeedbackMessage("Préparation réinitialisée. Vous pouvez recommencer le suivi.");
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('preparationData');
+      localStorage.removeItem('preparationActive');
+      localStorage.removeItem('criteresPreparation');
+      localStorage.removeItem('dateJeune');
+      localStorage.removeItem('dureeJeune');
+      localStorage.removeItem('messagePersoPreparation');
+    }
+    // Feedback visuel (console)
+    console.log('Préparation réinitialisée. Source : action utilisateur, bouton réinitialisation.');
   };
 
   return (
@@ -200,9 +210,11 @@ export default function PreparationJeune() {
             <p style={{ color: "#388e3c", fontWeight: 600, fontSize: "1.08rem", marginBottom: 0 }} aria-live="polite">
               ✅ Suivi de préparation activé. Tu peux valider tes critères et suivre ta progression !
             </p>
-            <button onClick={handleResetPreparation} style={{ marginTop: '14px', backgroundColor: '#f44336', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '5px', cursor: 'pointer' }}>
-              Réinitialiser ma préparation
-            </button>
+            {preparationActive && (
+              <button onClick={handleResetPreparation} style={{ marginTop: '14px', backgroundColor: '#f44336', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '5px', cursor: 'pointer' }}>
+                Réinitialiser ma préparation
+              </button>
+            )}
           </>
         )}
       </div>
@@ -236,6 +248,19 @@ export default function PreparationJeune() {
           </div>
           <div style={{ color: '#1976d2', fontWeight: 600, marginBottom: 6 }}>Ton message à toi-même :</div>
           <div style={{ background: '#fff', borderRadius: 8, padding: 10, color: '#333', fontStyle: 'italic', marginBottom: 8 }}>{messagePerso || <span style={{ color: '#888' }}>[Aucun message saisi]</span>}</div>
+        </div>
+      )}
+      {/* Message de feedback */}
+      {feedbackMessage && (
+        <div
+          className="feedback-message"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          style={{ marginBottom: 12, padding: '10px 18px', borderRadius: '8px', background: '#e6f7ff', color: '#005580', fontWeight: 600, boxShadow: '0 2px 8px rgba(0,0,0,0.07)', display: 'flex', alignItems: 'center', gap: '0.7em' }}
+        >
+          <span style={{ fontSize: '1.3em' }} aria-hidden="true">✅</span>
+          <span>{feedbackMessage}</span>
         </div>
       )}
       <div style={{ textAlign: "center", marginTop: 32 }}>

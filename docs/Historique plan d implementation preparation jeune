@@ -104,6 +104,11 @@ La modale doit valider les données saisies, les sauvegarder dans le `localStora
 
 ---
 # 🟢 PLAN D’IMPLÉMENTATION — RESTAURATION DU WORKFLOW MÉTIER PRÉPARATION JEÛNE (18/11/2025) 19:22
+## Mise à jour de l’avancement
+- [ ] Non commencé | [ ] En cours | [ ] Terminé
+- Avancement précis/Pourcentage réel : 0 %
+- Historique des mises à jour :
+  - 18/11/2025 : Plan d’implémentation rédigé et soumis pour validation
 
 ## Titre de la tâche
 Restaurer et fiabiliser le workflow métier de la préparation au jeûne (timeline, critères, validation, réinitialisation, feedback)
