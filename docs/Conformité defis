@@ -200,3 +200,166 @@ Ce rapport doit permettre une validation éclairée, claire et synthétique.
 À valider par l'utilisateur avant code.
 Validation explicite de l’utilisateur (OBLIGATOIRE)
  Plan validé par l’utilisateur à la date : ___
+
+---
+
+## PLAN D’IMPLÉMENTATION COPILOT — Synchronisation dynamique des catégories/aliments dans les défis
+
+### Titre de la tâche
+Synchronisation dynamique des catégories et aliments du référentiel dans les composants de saisie des défis
+
+### Description précise de la modification attendue
+- Les composants de saisie des défis doivent utiliser dynamiquement les catégories et aliments issus du référentiel alimentaire (`referentiel.js` ou `alimentsRepriseJeune.js`).
+- Toute évolution du référentiel doit se répercuter automatiquement dans les formulaires de validation des défis (plus de duplication ou de liste statique).
+- L’utilisateur doit pouvoir sélectionner les catégories/aliments à jour lors de la validation d’un défi alimentaire.
+- La logique métier des défis doit rester cohérente et robuste.
+
+### Fichiers concernés
+- `/components/SaisieDefisDynamiques.js`
+- `/components/SaisieDefiAlimentaire.js`
+- `/data/referentiel.js`
+- `/data/alimentsRepriseJeune.js`
+- `/lib/defisReferentiel.js` (pour vérification de la couverture des comportements)
+
+### Audit des risques préalable
+- Risque d’incohérence entre le référentiel et les listes affichées dans les défis
+- Risque de régression sur la validation ou le filtrage des défis alimentaires
+- Risque d’erreur d’import ou de synchronisation dynamique
+- Risque de perte de robustesse ou de feedback utilisateur
+- Rollback : retour à la version précédente et rapport d’anomalie en cas de bug
+
+### Contrôles conformité à réaliser
+- Lire toutes les entrées du fichier `Anomalie roll back` pour identifier les points de vigilance.
+- Créer une checklist adaptée pour éviter les erreurs similaires.
+- Analyser les risques et s’assurer qu’aucune anomalie n’est présente avant de commencer.
+
+### Checklist stricte sécurité & qualité (à cocher AVANT toute modification)
+- [ ] Lecture complète du code concerné (dépendances, hooks, variables, fonctions…)
+- [ ] Initialisation systématique des listes dynamiques depuis le référentiel
+- [ ] Séparation stricte des étapes (import ➔ logique ➔ rendu)
+- [ ] Vérification de la synchronisation à chaque étape clé
+- [ ] Contrôle d’erreur systématique (compilation, runtime, rendu)
+- [ ] Test du rendu sur tous les cas d’usage (création, validation, refresh)
+- [ ] Préservation stricte des fonctionnalités existantes
+- [ ] Mise à jour précise de l’avancement
+- [ ] Toute anomalie ➔ rollback immédiat, rapport d’anomalie avec contexte, date et heure
+- [ ] Documentation claire de chaque étape et validation utilisateur obligatoire
+- [ ] Toutes les cases ci-dessus doivent être cochées et documentées avant de poursuivre.
+
+### Mise à jour de l’avancement
+- [ ] Non commencé | [ ] En cours | [ ] Terminé
+- Avancement précis/Pourcentage réel (**à MAJ à chaque étape**) : ____ %
+- Historique des mises à jour : ___
+
+### Point de vigilance
+- Rapport basé sur les anomalies passées pour anticiper les erreurs similaires.
+- Informer l’utilisateur de l’impact de cette analyse.
+
+### Proposition de rollback
+- Tout risque ou anomalie détecté :
+  - Décrire l’action de rollback, son contexte (fichier, modification en cause), l’alternative sûre proposée.
+  - Ajouter dans le fichier `Anomalie roll back` : date, heure, détail complet pour traçabilité.
+
+### Contrôles qualité à prévoir
+- Test affichage et sélection des catégories/aliments dans les défis
+- Test validation et progression avec les nouveaux aliments
+- Test robustesse en cas d’évolution du référentiel
+- Test sauvegarde, restauration, accessibilité, non-régression, cohérence UI, test multi-device
+
+### Rapport Markdown Copilot
+- Générer un rapport structuré AVANT et APRÈS toute modification (structure, fonctions, hooks, changements, etc.).
+- Ce rapport doit permettre une validation éclairée, claire et synthétique.
+- À valider par l'utilisateur avant code.
+
+### Amélioration continue
+- Relier chaque action utilisateur à la mise à jour des états métier.
+- Tester systématiquement le parcours utilisateur complet après chaque modification.
+- Ajouter un contrôle visuel ou un feedback pour chaque action clé.
+- Documenter toute anomalie ou écart dans le fichier dédié et proposer immédiatement une correction ou un rollback.
+- Relire le plan et le template avant chaque implémentation pour s’assurer que toutes les étapes sont respectées.
+
+### Validation explicite de l’utilisateur (OBLIGATOIRE)
+- [ ] Plan validé par l’utilisateur à la date : ___
+
+---
+
+## PLAN D’IMPLÉMENTATION COPILOT — Connexion dynamique au référentiel alimentaire + correction schéma Supabase (SaisieDefiAlimentaire.js)
+
+### Titre de la tâche
+Connexion dynamique au référentiel alimentaire et correction du schéma d’enregistrement dans le composant SaisieDefiAlimentaire.js
+
+### Description précise de la modification attendue
+- Remplacer les listes statiques (catégories, aliments) par des listes dynamiques issues de `data/referentiel.js`.
+- Ajouter un datalist pour les suggestions d’aliments et de catégories.
+- Préremplir automatiquement la catégorie et les kcal si l’aliment est reconnu.
+- Corriger l’objet envoyé à Supabase pour supprimer le champ `fastFood` absent du schéma réel.
+- Conserver toute la logique métier existante (validation, progression, feedback).
+
+### Fichiers concernés
+- `/components/SaisieDefiAlimentaire.js`
+- `/data/referentiel.js`
+
+### Audit des risques préalable
+- Risque d’incohérence entre la saisie et le référentiel (catégories/aliments non synchronisés).
+- Risque de régression sur la validation ou le filtrage des défis alimentaires.
+- Risque d’erreur d’import ou de synchronisation dynamique.
+- Risque de perte de robustesse ou de feedback utilisateur.
+- Risque d’erreur d’enregistrement Supabase (champ absent, typage, etc.).
+- Respect strict des hooks React (déclaration en haut du composant).
+
+**Sous-checklist à valider systématiquement :**
+- [ ] Vérification de la présence/import de toutes les fonctions, hooks et variables utilisées dans le code modifié
+
+### Checklist stricte sécurité & qualité (à cocher AVANT toute modification)
+- [ ] Lecture complète du code concerné (dépendances, hooks, variables, fonctions…)
+- [ ] Initialisation systématique avant usage (hooks, variables, handlers)
+- [ ] Tous les hooks React (useState, useEffect, useMemo, etc.) sont déclarés uniquement en haut du corps du composant fonctionnel
+- [ ] Séparation stricte des étapes : initialisation ➔ logique ➔ handler ➔ rendu
+- [ ] Vérification : toute fonction ou handler utilisé dans le rendu est présent et initialisé avant usage
+- [ ] Ordre et portée logiques stricts (jamais déclaration, appel ou usage prématuré)
+- [ ] Pas de doublons ni de déclarations superflues
+- [ ] Contrôle d’erreur systématique (compilation, runtime, SSR, rendu, accessibilité)
+- [ ] Test du rendu sur tous les cas d’usage et cas limites
+- [ ] Préservation stricte des fonctionnalités existantes
+- [ ] Mise à jour précise et justifiée du pourcentage d’avancement
+- [ ] Toute anomalie ou erreur ➔ rollback immédiat, rapport d’anomalie avec contexte, date et heure (cf. fichier ANOMALIE)
+- [ ] Documentation claire de chaque étape, chaque validation, et toute action automatisée (Copilot/IA)
+- [ ] Validation utilisateur OBLIGATOIRE avant toute implémentation
+- [ ] Toutes les cases ci-dessus doivent être cochées et documentées avant de poursuivre.
+
+### Contrôles conformité à réaliser
+- Test affichage et sélection des catégories/aliments dans le formulaire
+- Test validation et progression avec les nouveaux aliments
+- Test robustesse en cas d’évolution du référentiel
+- Test sauvegarde, restauration, accessibilité, non-régression, cohérence UI, test multi-device
+- Lire les entrées du fichier anomalies Roll back pour anticiper les risques et créer une checklist adaptée
+
+### Mise à jour de l’avancement
+- [x] Non commencé | [ ] En cours | [ ] Terminé
+- Avancement précis/Pourcentage réel (**à MAJ à chaque étape**) : 0 %
+- Historique des mises à jour : 18/11/2025, plan rédigé et inséré
+
+### Point de vigilance
+- Vérifier la cohérence des catégories/aliments avec le référentiel à chaque rendu.
+- Vérifier la suppression du champ `fastFood` dans l’objet envoyé à Supabase.
+- Vérifier la robustesse des hooks et la séparation stricte des étapes.
+- Documenter toute anomalie ou écart dans le fichier dédié et proposer immédiatement une correction ou un rollback.
+
+### Proposition de rollback
+- En cas d’erreur d’enregistrement ou de régression, revenir à la version précédente du composant et documenter l’anomalie dans le fichier dédié (date, heure, contexte).
+
+### Rapport Markdown Copilot
+- Générer un rapport structuré AVANT et APRÈS la modification (structure, fonctions, hooks, changements, etc.).
+- Ce rapport doit permettre une validation éclairée, claire et synthétique.
+- À valider par l'utilisateur avant code.
+
+### Amélioration continue
+- Relier chaque action utilisateur à la mise à jour des états métier.
+- Tester systématiquement le parcours utilisateur complet après chaque modification.
+- Ajouter un contrôle visuel ou un feedback pour chaque action clé.
+- Relire le plan et le template avant chaque implémentation pour s’assurer que toutes les étapes sont respectées.
+
+### Validation explicite de l’utilisateur (OBLIGATOIRE)
+- [ ] Plan validé par l’utilisateur à la date : ___
+
+---

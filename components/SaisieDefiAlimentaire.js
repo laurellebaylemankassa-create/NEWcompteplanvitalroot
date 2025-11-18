@@ -1,15 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useDefis } from './DefisContext';
 import { supabase } from '../lib/supabaseClient';
+import referentielAliments from '../data/referentiel';
 
 export default function SaisieDefiAlimentaire() {
     const { defisEnCours, refreshDefis } = useDefis();
     const defi = defisEnCours.find(d => d.nom === '🧀 1 portion ça suffit');
     const repasTypes = ["Petit-déjeuner", "Déjeuner", "Collation", "Dîner", "Autre"];
-    // Catégories de repas, inclut 'Jeûne' pour la logique métier
-    const categorieOptions = [
-        "féculent", "protéines", "légumes", "fruit", "extra", "poisson", "volaille", "viande", "autres", "fromage", "boisson", "produit laitier", "Jeûne"
-    ];
+    // Listes dynamiques issues du référentiel
+    const categorieOptions = useMemo(() => {
+        try {
+            const cats = (referentielAliments || []).map(a => a.categorie).filter(Boolean);
+            return Array.from(new Set(cats)).concat(['Jeûne']);
+        } catch (e) {
+            return ['Jeûne'];
+        }
+    }, []);
+    const alimentsFromReferentiel = useMemo(() => {
+        try {
+            return (referentielAliments || []).map(a => a.nom).filter(Boolean);
+        } catch (e) {
+            return [];
+        }
+    }, []);
     const getDefaultHeure = () => {
         const now = new Date();
         return now.toTimeString().slice(0,5);
@@ -39,6 +52,16 @@ export default function SaisieDefiAlimentaire() {
         }
     }, [categorie]);
 
+    // Si l'utilisateur saisit un aliment reconnu, préremplir la catégorie et les kcal
+    useEffect(() => {
+        if (!aliment || aliment.trim() === '') return;
+        const found = (referentielAliments || []).find(a => a.nom.toLowerCase() === aliment.trim().toLowerCase());
+        if (found) {
+            if (found.categorie) setCategorie(found.categorie);
+            if (found.kcal !== undefined && found.kcal !== null) setKcal(String(found.kcal));
+        }
+    }, [aliment]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage('');
@@ -58,23 +81,25 @@ export default function SaisieDefiAlimentaire() {
         const kcalToSend = isJeune ? null : (kcal === '' ? null : isNaN(Number(kcal)) ? kcal : Number(kcal));
         const alimentToSend = isJeune ? '' : aliment;
         const categorieToSend = isJeune ? 'Jeûne' : categorie;
+        const repasDebugPayload = {
+            type,
+            date,
+            heure,
+            aliment: alimentToSend,
+            categorie: categorieToSend,
+            quantite: quantiteToSend,
+            kcal: kcalToSend,
+            est_extra: false,
+            note,
+            ressenti,
+            satiete: '',
+        };
+        // DEBUG: log dans la console et affichage UI
+        console.log('[DEBUG SaisieDefiAlimentaire] Insertion repas_reels:', repasDebugPayload);
+        setMessage('[DEBUG] Données envoyées à Supabase: ' + JSON.stringify(repasDebugPayload));
         const { data, error } = await supabase
             .from("repas_reels")
-            .insert([{
-                type,
-                date,
-                heure,
-                aliment: alimentToSend,
-                categorie: categorieToSend,
-                quantite: quantiteToSend,
-                kcal: kcalToSend,
-                est_extra: false,
-                note,
-                ressenti,
-                planifie: false,
-                fastFood: false,
-                satiete: '',
-            }]);
+            .insert([repasDebugPayload]);
         if (error) {
             setErreur("Erreur Supabase : " + error.message);
             return;
