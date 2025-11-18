@@ -1,4 +1,186 @@
 ═══════════════════════════════════════════════════════════════════════════════
+🟢 PLAN D’IMPLÉMENTATION COPILOT — SYNCHRONISATION DES CRITÈRES PRÉPARATION JEÛNE / SUIVI (18/11/2025)
+═══════════════════════════════════════════════════════════════════════════════
+
+### Titre de la tâche
+Synchroniser la validation des critères métier entre `/preparation-jeune.js` et `/suivi.js` (workflow préparation au jeûne)
+
+### Description précise de la modification attendue
+- Utiliser une clé commune dans localStorage (`criteresPreparation`) pour stocker le statut des critères (id, valide, dateValidation)
+- Lorsqu’un critère est validé dans `/suivi.js`, mettre à jour la clé `criteresPreparation` dans localStorage
+- Dans `/preparation-jeune.js`, lire et mettre à jour ce même tableau pour afficher la progression en temps réel
+- Ajouter une fonction utilitaire partagée pour valider un critère (par id) et synchroniser l’état dans les deux pages
+- Tester la synchronisation : valider un critère dans `/suivi.js` → affichage instantané dans `/preparation-jeune.js`
+
+### Fichiers concernés
+- `/pages/preparation-jeune.js`
+- `/pages/suivi.js`
+
+### Audit des risques préalable
+- **Technique** :
+  - Désynchronisation des critères entre les deux pages
+  - Perte de progression ou de données utilisateur
+  - Conflit de structure ou de format des critères
+  - Régression sur la logique métier ou l’affichage
+  - Risque de doublon ou d’initialisation incorrecte
+- **UX** :
+  - Affichage non mis à jour, feedback absent ou trompeur
+  - Problème d’accessibilité (navigation clavier, ARIA)
+- **Sécurité** :
+  - Données sensibles non protégées dans le localStorage
+- **Robustesse** :
+  - Gestion des cas limites (modification d’un critère, retour arrière, reset)
+- **Régression** :
+  - Perte de fonctionnalités existantes ou conflit avec hooks/logique existante
+
+#### Sous-checklist à valider systématiquement
+- [ ] Vérification de la présence/import de toutes les fonctions, hooks et variables utilisées dans le code modifié
+- [ ] Identifier l’ordre de tous les hooks React (useState, useEffect, etc.) afin de s’assurer qu’ils sont déclarés uniquement en haut du corps du composant fonctionnel
+
+### Checklist stricte sécurité & qualité (à cocher AVANT toute modification)
+- [ ] Lecture complète du code concerné (dépendances, hooks, variables, fonctions…)
+- [ ] Initialisation systématique avant usage (hooks, variables, handlers)
+- [ ] Tous les hooks React (useState, useEffect, etc.) sont déclarés uniquement en haut du corps du composant fonctionnel
+- [ ] Séparation stricte des étapes : initialisation, logique calculée, handlers/fonctions, rendu
+- [ ] Vérification de la présence/import de toutes les fonctions, hooks et variables utilisées dans le code modifié
+- [ ] Pas de doublons ni de déclarations superflues
+- [ ] Contrôle d’erreur systématique (compilation, runtime, SSR, rendu, accessibilité)
+- [ ] Test du rendu sur tous les cas d’usage et cas limites
+- [ ] Préservation stricte des fonctionnalités existantes
+- [ ] Documentation claire de chaque étape, chaque validation, et toute action automatisée
+- [ ] Validation utilisateur OBLIGATOIRE avant toute implémentation
+
+### Contrôles conformité à réaliser
+- Tests de sauvegarde/restauration des critères
+- Vérification de l’accessibilité (navigation clavier, ARIA)
+- Tests de non-régression sur les deux pages
+- Tests multi-device (desktop, mobile, tablette)
+- Gestion des cas limites (ex. : modification d’un critère, retour arrière, reset)
+- Contrôle de cohérence du format des critères (id, statut, date)
+- Lire toutes les entrées d’anomalies enregistrées dans le fichier `ANOMALIE roll back` afin d’identifier les points de vigilance pour anticiper le risque d’erreur similaire lors du codage de cette modification
+
+### Mise à jour de l’avancement
+- [ ] Non commencé | [ ] En cours | [ ] Terminé
+- Avancement précis/Pourcentage réel : 0 %
+- Historique des mises à jour :
+  - 18/11/2025 : Plan d’implémentation rédigé et validé par l’utilisateur
+
+### Point de vigilance
+- Vérifier les entrées du fichier `ANOMALIE roll back` pour identifier les erreurs similaires rencontrées par le passé
+- Ajouter des tests spécifiques pour éviter les régressions identifiées
+- Documenter toute anomalie détectée dans le fichier `ANOMALIE roll back` avec date, heure, et détail complet
+
+### 🟢 Amélioration continue (Copilot)
+- Toujours relier explicitement chaque action utilisateur (ex : validation d’un critère) à la mise à jour des états métier (activation, progression, affichage dynamique).
+- Vérifier systématiquement que chaque étape du plan est traduite en code et testée dans le workflow réel (affichage, activation, synchronisation, feedback).
+- Après chaque modification, tester le parcours complet utilisateur et documenter le résultat (capture, rapport d’exécution).
+- Ne jamais supposer qu’un état est synchronisé sans vérification concrète (affichage, console, tests).
+- Ajouter un contrôle visuel ou un feedback à chaque action clé pour garantir la conformité UX et métier.
+- Documenter toute anomalie ou écart dans le fichier dédié et proposer immédiatement une correction ou un rollback.
+- Relire le plan et le template avant chaque implémentation pour s’assurer que toutes les étapes sont respectées.
+- Se parler à soi-même (Copilot) : « Ai-je bien relié chaque étape du plan au code ? Ai-je testé le workflow complet ? Ai-je documenté chaque action et chaque anomalie ? »
+
+### Proposition de rollback
+- En cas de problème, revenir à la version précédente des deux fichiers
+- Documenter toute anomalie dans le fichier `ANOMALIE roll back` avec date, heure, et détail complet
+
+### Rapport Markdown Copilot
+- **Avant modification** :
+  - Les critères métier ne sont pas synchronisés entre `/preparation-jeune.js` et `/suivi.js`
+  - La progression et la validation ne sont pas partagées
+- **Après modification** :
+  - Synchronisation stricte des critères via localStorage
+  - Validation d’un critère dans `/suivi.js` → affichage instantané dans `/preparation-jeune.js`
+  - Fonction utilitaire partagée pour garantir la cohérence
+  - Tests et documentation réalisés
+
+### Validation explicite de l’utilisateur (OBLIGATOIRE)
+- [x] Plan validé par l’utilisateur à la date : 18/11/2025
+### 🟢 Amélioration continue (Copilot)
+- Toujours relier explicitement chaque action utilisateur (ex : validation d’un critère) à la mise à jour des états métier (activation, progression, affichage dynamique).
+- Vérifier systématiquement que chaque étape du plan est traduite en code et testée dans le workflow réel (affichage, activation, synchronisation, feedback).
+- Après chaque modification, tester le parcours complet utilisateur et documenter le résultat (capture, rapport d’exécution).
+- Ne jamais supposer qu’un état est synchronisé sans vérification concrète (affichage, console, tests).
+- Ajouter un contrôle visuel ou un feedback à chaque action clé pour garantir la conformité UX et métier.
+- Documenter toute anomalie ou écart dans le fichier dédié et proposer immédiatement une correction ou un rollback.
+- Relire le plan et le template avant chaque implémentation pour s’assurer que toutes les étapes sont respectées.
+- Se parler à soi-même (Copilot) : « Ai-je bien relié chaque étape du plan au code ? Ai-je testé le workflow complet ? Ai-je documenté chaque action et chaque anomalie ? »
+═══════════════════════════════════════════════════════════════════════════════
+🟢 PLAN D’IMPLÉMENTATION — SYNCHRONISATION DES CRITÈRES PRÉPARATION JEÛNE / SUIVI (18/11/2025)
+═══════════════════════════════════════════════════════════════════════════════
+
+## Titre de la tâche
+Synchroniser la validation des critères métier entre `/preparation-jeune.js` et `/suivi.js` (workflow préparation au jeûne)
+
+## Description précise de la modification attendue
+- Utiliser une clé commune dans localStorage (`criteresPreparation`) pour stocker le statut des critères (id, valide, dateValidation)
+- Lorsqu’un critère est validé dans `/suivi.js`, mettre à jour la clé `criteresPreparation` dans localStorage
+- Dans `/preparation-jeune.js`, lire et mettre à jour ce même tableau pour afficher la progression en temps réel
+- Ajouter une fonction utilitaire partagée pour valider un critère (par id) et synchroniser l’état dans les deux pages
+- Tester la synchronisation : valider un critère dans `/suivi.js` → affichage instantané dans `/preparation-jeune.js`
+
+## Fichiers concernés
+- `/pages/preparation-jeune.js`
+- `/pages/suivi.js`
+
+## Audit des risques préalable
+- Désynchronisation des critères entre les deux pages
+- Perte de progression ou de données utilisateur
+- Conflit de structure ou de format des critères
+- Régression sur la logique métier ou l’affichage
+- Risque de doublon ou d’initialisation incorrecte
+- [En cas de risque] : rollback immédiat, rapport dans `ANOMALIE roll back`
+
+## Checklist stricte sécurité & qualité (à cocher AVANT toute modification)
+- [ ] Lecture complète du code concerné (dépendances, hooks, variables, fonctions…)
+- [ ] Initialisation systématique avant usage (hooks, variables, handlers)
+- [ ] Tous les hooks React (useState, useEffect, etc.) sont déclarés uniquement en haut du corps du composant fonctionnel
+- [ ] Séparation stricte des étapes : initialisation, logique calculée, handlers/fonctions, rendu
+- [ ] Vérification de la présence/import de toutes les fonctions, hooks et variables utilisées dans le code modifié
+- [ ] Pas de doublons ni de déclarations superflues
+- [ ] Contrôle d’erreur systématique (compilation, runtime, SSR, rendu, accessibilité)
+- [ ] Test du rendu sur tous les cas d’usage et cas limites
+- [ ] Préservation stricte des fonctionnalités existantes
+- [ ] Documentation claire de chaque étape, chaque validation, et toute action automatisée
+- [ ] Validation utilisateur OBLIGATOIRE avant toute implémentation
+
+## Contrôles conformité à réaliser
+- Tests de sauvegarde/restauration des critères
+- Vérification de l’accessibilité (navigation clavier, ARIA)
+- Tests de non-régression sur les deux pages
+- Tests multi-device (desktop, mobile, tablette)
+- Gestion des cas limites (ex. : modification d’un critère, retour arrière, reset)
+- Contrôle de cohérence du format des critères (id, statut, date)
+- Lire toutes les entrées d’anomalies enregistrées dans le fichier `ANOMALIE roll back` afin d’identifier les points de vigilance pour anticiper le risque d’erreur similaire lors du codage de cette modification
+
+## Mise à jour de l’avancement
+- [ ] Non commencé | [ ] En cours | [ ] Terminé
+- Avancement précis/Pourcentage réel : 0 %
+- Historique des mises à jour :
+  - 18/11/2025 : Plan d’implémentation rédigé et soumis pour validation
+
+## Point de vigilance
+- Vérifier les entrées du fichier `ANOMALIE roll back` pour identifier les erreurs similaires rencontrées par le passé
+- Ajouter des tests spécifiques pour éviter les régressions identifiées
+- Documenter toute anomalie détectée dans le fichier `ANOMALIE roll back` avec date, heure, et détail complet
+
+## Proposition de rollback
+- En cas de problème, revenir à la version précédente des deux fichiers
+- Documenter toute anomalie dans le fichier `ANOMALIE roll back` avec date, heure, et détail complet
+
+## Rapport Markdown Copilot
+- **Avant modification** :
+  - Les critères métier ne sont pas synchronisés entre `/preparation-jeune.js` et `/suivi.js`
+  - La progression et la validation ne sont pas partagées
+- **Après modification** :
+  - Synchronisation stricte des critères via localStorage
+  - Validation d’un critère dans `/suivi.js` → affichage instantané dans `/preparation-jeune.js`
+  - Fonction utilitaire partagée pour garantir la cohérence
+  - Tests et documentation réalisés
+
+## Validation explicite de l’utilisateur (OBLIGATOIRE)
+- [ ] Plan validé par l’utilisateur à la date : ___
+═══════════════════════════════════════════════════════════════════════════════
 📝 AUDIT DE CONFORMITÉ – PRÉPARATION JEÛNE (18/11/2025)
 ═══════════════════════════════════════════════════════════════════════════════
 

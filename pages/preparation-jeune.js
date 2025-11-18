@@ -93,6 +93,13 @@ import StartPreparationModal from '../components/StartPreparationModal';
 import TimelineProgressionPreparation from '../components/TimelineProgressionPreparation';
 
 export default function PreparationJeune() {
+  // === ÉTAT POUR L’EXPANSION/RÉDUCTION DES PHASES ===
+  const [phasesOuvertes, setPhasesOuvertes] = useState(phasesMetier.map(() => false));
+
+  // Handler pour toggler l’état d’une phase
+  const togglePhase = idx => {
+    setPhasesOuvertes(prev => prev.map((open, i) => i === idx ? !open : open));
+  };
 
   // === HOOKS & VARIABLES (ordre strict) ===
   // Date du jeûne, durée, jour courant
@@ -326,37 +333,41 @@ export default function PreparationJeune() {
           <div style={{ height: 8, background: '#e3f2fd', borderRadius: 6, marginBottom: 18 }}>
             <div style={{ width: `${(progression/9)*100}%`, height: '100%', background: '#1976d2', borderRadius: 6 }}></div>
           </div>
-          {phasesMetier.map(phase => (
+          {phasesMetier.map((phase, idx) => (
             <div key={phase.nom} style={{ marginBottom: 24 }}>
-              <div style={{ fontWeight: 700, color: '#1976d2', fontSize: '1.12rem', marginBottom: 4 }}>
-                ═══ PHASE {phase.nom.toUpperCase()} ({phase.debut === phase.fin ? `J-${phase.debut}` : `J-${phase.debut} à J-${phase.fin}`}) ═══
+              <div style={{ fontWeight: 700, color: '#1976d2', fontSize: '1.12rem', marginBottom: 4, cursor: 'pointer', userSelect: 'none' }} onClick={() => togglePhase(idx)}>
+                {phasesOuvertes[idx] ? '−' : '+'} PHASE {phase.nom.toUpperCase()} ({phase.debut === phase.fin ? `J-${phase.debut}` : `J-${phase.debut} à J-${phase.fin}`})
               </div>
-              <div style={{ color: '#444', fontSize: '1.01rem', marginBottom: 10 }}>{phase.explication}</div>
-              {phase.criteres.map(critere => {
-                const estDebloque = jCourant !== null && jCourant <= critere.jalon;
-                return (
-                  <div key={critere.id} style={{ borderBottom: '1px solid #e0e0e0', paddingBottom: 12, marginBottom: 12 }}>
-                    <div style={{ fontWeight: 700, color: estDebloque ? '#1976d2' : '#888', fontSize: '1.07rem' }}>{critere.titre}</div>
-                    <div style={{ color: '#555', fontSize: '0.99rem', marginBottom: 4 }}>{critere.conseil}</div>
-                    <div style={{ color: '#888', fontSize: '0.97rem', marginBottom: 4 }}>Jalon : J-{critere.jalon}</div>
-                    {!estDebloque ? (
-                      <div style={{ color: '#f44336', fontWeight: 600, fontSize: '0.98rem', display: 'flex', alignItems: 'center', gap: '0.5em' }}>
-                        <span aria-hidden="true" style={{ fontSize: '1.2em' }}>🔒</span>
-                        Critère verrouillé — Débloquage automatique le J-{critere.jalon}
+              {phasesOuvertes[idx] && (
+                <>
+                  <div style={{ color: '#444', fontSize: '1.01rem', marginBottom: 10 }}>{phase.explication}</div>
+                  {phase.criteres.map(critere => {
+                    const estDebloque = jCourant !== null && jCourant <= critere.jalon;
+                    return (
+                      <div key={critere.id} style={{ borderBottom: '1px solid #e0e0e0', paddingBottom: 12, marginBottom: 12 }}>
+                        <div style={{ fontWeight: 700, color: estDebloque ? '#1976d2' : '#888', fontSize: '1.07rem' }}>{critere.titre}</div>
+                        <div style={{ color: '#555', fontSize: '0.99rem', marginBottom: 4 }}>{critere.conseil}</div>
+                        <div style={{ color: '#888', fontSize: '0.97rem', marginBottom: 4 }}>Jalon : J-{critere.jalon}</div>
+                        {!estDebloque ? (
+                          <div style={{ color: '#f44336', fontWeight: 600, fontSize: '0.98rem', display: 'flex', alignItems: 'center', gap: '0.5em' }}>
+                            <span aria-hidden="true" style={{ fontSize: '1.2em' }}>🔒</span>
+                            Critère verrouillé — Débloquage automatique le J-{critere.jalon}
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => validerCritere(critere.id)}
+                            style={{ background: '#1976d2', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 22px', fontWeight: 700, fontSize: 16, cursor: 'pointer', marginTop: 6 }}
+                            disabled={criteres.find(c => c.id === critere.id)?.valide}
+                            aria-label={`Valider le critère ${critere.titre}`}
+                          >
+                            {criteres.find(c => c.id === critere.id)?.valide ? 'Critère validé' : 'Valider ce critère'}
+                          </button>
+                        )}
                       </div>
-                    ) : (
-                      <button
-                        onClick={() => validerCritere(critere.id)}
-                        style={{ background: '#1976d2', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 22px', fontWeight: 700, fontSize: 16, cursor: 'pointer', marginTop: 6 }}
-                        disabled={criteres.find(c => c.id === critere.id)?.valide}
-                        aria-label={`Valider le critère ${critere.titre}`}
-                      >
-                        {criteres.find(c => c.id === critere.id)?.valide ? 'Critère validé' : 'Valider ce critère'}
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
+                    );
+                  })}
+                </>
+              )}
             </div>
           ))}
         </div>

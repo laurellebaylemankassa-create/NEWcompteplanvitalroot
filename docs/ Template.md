@@ -106,6 +106,17 @@ Permettre à l’utilisateur de suivre sa progression, valider chaque critère, 
 - Progression : 0 %
 - Historique des mises à jour : 17/11/2025, démarrage
 
+## 🟢 Amélioration continue (Copilot)
+
+- Toujours relier explicitement chaque action utilisateur (ex : validation de la modale) à la mise à jour des états métier (activation, initialisation des critères, affichage dynamique).
+- Vérifier systématiquement que chaque étape du plan est traduite en code et testée dans le workflow réel (affichage, activation, réinitialisation, feedback).
+- Après chaque modification, tester le parcours complet utilisateur et documenter le résultat (capture, rapport d’exécution).
+- Ne jamais supposer qu’un état est synchronisé sans vérification concrète (affichage, console, tests).
+- Ajouter un contrôle visuel ou un feedback à chaque action clé pour garantir la conformité UX et métier.
+- Documenter toute anomalie ou écart dans le fichier dédié et proposer immédiatement une correction ou un rollback.
+- Relire le plan et le template avant chaque implémentation pour s’assurer que toutes les étapes sont respectées.
+- Se parler à soi-même (Copilot) : « Ai-je bien relié chaque étape du plan au code ? Ai-je testé le workflow complet ? Ai-je documenté chaque action et chaque anomalie ? »
+
 **Rollback automatique (si nécessaire)**
 - Inversion immédiate du code (rollback Git)
 - Signalement fichier ANOMALIE roll back (date/heure), détail impact
@@ -119,7 +130,7 @@ Permettre à l’utilisateur de suivre sa progression, valider chaque critère, 
 
 ---
 
-## 🟢 Amélioration continue (Copilot)
+
 
 - Toujours relier explicitement chaque action utilisateur (ex : validation de la modale) à la mise à jour des états métier (activation, initialisation des critères, affichage dynamique).
 - Vérifier systématiquement que chaque étape du plan est traduite en code et testée dans le workflow réel (affichage, activation, réinitialisation, feedback).
