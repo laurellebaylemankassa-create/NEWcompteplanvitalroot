@@ -32,6 +32,34 @@ Respect stricte des quantités à (j-30)
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
 │  🔔 NOUVEAU : Tu as un objectif de jeûne prévu le 15 décembre !            │
+[Améliorations à faire après la modification actuelle]
+
+═══════════════════════════════════════════════════════════════════════════════
+🟢 AXES D’AMÉLIORATION UX ET PERSONNALISATION DU CYCLE DE JEÛNE
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Feedback audio ou vidéo
+   - Permettre à l’utilisateur d’enregistrer un message vocal ou vidéo à lui-même.
+   - Saisie pendant la préparation (optionnelle, alternative au texte).
+   - Rejoué au démarrage du jeûne et à la fin (bilan).
+   - Ne jamais proposer audio/vidéo et texte en même temps ; laisser l’utilisateur choisir.
+
+2. Projection sur la réussite
+   - Proposer d’imaginer et d’écrire « Comment je me sentirai après ce jeûne ».
+   - Saisie pendant la préparation (si pas de message audio/vidéo).
+   - Affichage à la fin du jeûne pour comparer intention et ressenti réel.
+   - Adapter selon le type de jeûne et le message existant ; ne pas surcharger.
+
+3. Rappel visuel et émotionnel du parcours
+   - Synthèse animée ou visuelle (progression, critères validés, moments forts, conseils, stats).
+   - À la fin de la préparation (J-0, avant le lancement du jeûne) et à la fin du jeûne (bilan).
+   - Mettre en avant les réussites, efforts, et un message d’encouragement personnalisé.
+
+4. Variation et personnalisation de l’expérience
+   - Définir un critère (aléatoire, selon profil, historique, type de jeûne) pour varier les propositions (audio, texte, visuel, rituel, gratitude, etc.).
+   - Objectif : chaque expérience de jeûne doit être différente, adaptée au comportement et au vécu de l’utilisateur.
+
+Note : Les comportements et propositions UX doivent évoluer d’un jeûne à l’autre, en fonction du vécu, du profil et des choix de l’utilisateur. Ces axes seront détaillés et intégrés progressivement dans les prochaines évolutions du workflow.
 │     → Lance ta préparation de 30 jours pour maximiser tes chances          │
 │     [Commencer ma préparation]  [Plus tard]                                │
 │                                                                              │
