@@ -1,6 +1,7 @@
-
 import Link from "next/link";
 import React, { useEffect, useState } from 'react';
+import StartPreparationModal from '../components/StartPreparationModal';
+import TimelineProgressionPreparation from '../components/TimelineProgressionPreparation';
 
 export default function PreparationJeune() {
 
@@ -14,6 +15,8 @@ export default function PreparationJeune() {
   // Critères de préparation (statut dynamique)
   // État de démarrage du suivi de préparation (workflow interactif)
   const [preparationActive, setPreparationActive] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [preparationData, setPreparationData] = useState(null);
   const criteresMetier = [
     { id: 1, label: "Respect strict des quantités à chaque repas", jalon: 30, description: "Réapprendre à ton corps ce qu'est une vraie portion" },
     { id: 2, label: "Supprimer les féculents le soir (lun-dim)", jalon: 17, description: "Alléger la digestion le soir pour préparer le jeûne" },
@@ -115,6 +118,44 @@ export default function PreparationJeune() {
     return date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
   }
 
+  // Handler pour validation de la modale et activation complète du workflow
+  function handleStartPreparationModal(data) {
+    // Sauvegarde des données de préparation
+    setPreparationData(data);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('preparationData', JSON.stringify(data));
+      localStorage.setItem('preparationActive', 'true');
+      localStorage.setItem('dateJeune', data.startDate);
+      localStorage.setItem('dureeJeune', data.duration);
+    }
+    // Activation de la préparation
+    setPreparationActive(true);
+    // Initialisation des critères métier
+    const criteresInit = criteresMetier.map(c => ({ ...c, valide: false, dateValidation: null }));
+    setCriteres(criteresInit);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('criteresPreparation', JSON.stringify(criteresInit));
+    }
+    // Feedback visuel (console)
+    console.log('Préparation activée, critères initialisés, timeline affichée. Source : action utilisateur, validation modale.');
+  }
+
+  const handleResetPreparation = () => {
+    setPreparationData(null);
+    setPreparationActive(false);
+    localStorage.removeItem('preparationData');
+    localStorage.removeItem('preparationActive');
+    // Optionnel : réinitialiser les autres états liés à la préparation
+    setCriteres([]);
+    setProgression(0);
+    setMessagePerso("");
+    setSyntheseVisible(false);
+    setDateJeune(null);
+    setDureeJeune(null);
+    setJCourant(null);
+    console.log('Préparation réinitialisée.');
+  };
+
   return (
     <div style={{ maxWidth: 600, margin: "0 auto", padding: "2.5rem 1rem", fontFamily: "system-ui, Arial, sans-serif" }}>
       <h1 style={{ color: "#1976d2", fontWeight: 800, fontSize: "2.2rem", marginBottom: 18 }}>
@@ -133,7 +174,7 @@ export default function PreparationJeune() {
               Clique sur le bouton ci-dessous pour commencer ton suivi de préparation, valider chaque critère et suivre ta progression jour après jour.
             </p>
             <button
-              onClick={handleStartPreparation}
+              onClick={() => setIsModalOpen(true)}
               aria-label="Démarrer mon suivi de préparation"
               style={{
                 background: "linear-gradient(90deg, #43cea2 0%, #185a9d 100%)",
@@ -155,47 +196,23 @@ export default function PreparationJeune() {
             </div>
           </>
         ) : (
-          <p style={{ color: "#388e3c", fontWeight: 600, fontSize: "1.08rem", marginBottom: 0 }} aria-live="polite">
-            ✅ Suivi de préparation activé. Tu peux valider tes critères et suivre ta progression !
-          </p>
+          <>
+            <p style={{ color: "#388e3c", fontWeight: 600, fontSize: "1.08rem", marginBottom: 0 }} aria-live="polite">
+              ✅ Suivi de préparation activé. Tu peux valider tes critères et suivre ta progression !
+            </p>
+            <button onClick={handleResetPreparation} style={{ marginTop: '14px', backgroundColor: '#f44336', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '5px', cursor: 'pointer' }}>
+              Réinitialiser ma préparation
+            </button>
+          </>
         )}
       </div>
       {/* Timeline de préparation dynamique */}
       {preparationActive && (
-        <div style={{ background: "#fff", borderRadius: 12, boxShadow: "0 1px 6px #e0e0e0", padding: "1.5rem 1.2rem", marginBottom: 18 }}>
-          <h3 style={{ color: "#1976d2", fontWeight: 700, fontSize: "1.1rem", marginBottom: 10 }}>Timeline de préparation</h3>
-          <div style={{ marginBottom: 12 }}>
-            <strong style={{ color: '#388e3c' }}>Progression globale :</strong> <span style={{ color: '#1976d2', fontWeight: 700 }}>{progression}/{criteresMetier.length} critères validés</span>
-            <div style={{ background: '#e3f2fd', borderRadius: 8, height: 12, marginTop: 6, marginBottom: 8, width: '100%' }}>
-              <div style={{ background: '#1976d2', height: 12, borderRadius: 8, width: `${(progression/criteresMetier.length)*100}%`, transition: 'width 0.4s' }}></div>
-            </div>
-          </div>
-          <ul style={{ color: "#444", fontSize: "1.05rem", lineHeight: 1.7, margin: 0, paddingLeft: 18 }}>
-            {criteres.map((critere, idx) => (
-              <li key={critere.id} style={{ marginBottom: 10, opacity: critere.valide ? 0.6 : 1 }}>
-                <strong>J-{critere.jalon}</strong> : {critere.label}
-                <span style={{ color: getStatut(critere.jalon) === '[EN COURS]' ? '#1976d2' : getStatut(critere.jalon) === '[VERROUILLÉ]' ? '#888' : '#aaa', fontWeight: 600, marginLeft: 8 }}>{getStatut(critere.jalon)}</span>
-                <br />
-                <span style={{ fontSize: '0.98rem', color: '#888' }}>{critere.description}</span>
-                {!critere.valide && getStatut(critere.jalon) === '[EN COURS]' && (
-                  <button onClick={() => validerCritere(critere.id)} style={{ marginLeft: 12, background: '#43cea2', color: '#fff', border: 'none', borderRadius: 6, padding: '4px 14px', fontWeight: 600, cursor: 'pointer', fontSize: 14 }}>Valider</button>
-                )}
-                {critere.valide && <span style={{ color: '#388e3c', fontWeight: 600, marginLeft: 10 }}>✅ Validé</span>}
-              </li>
-            ))}
-          </ul>
-          <div style={{ color: '#888', fontSize: '0.98rem', marginTop: 16 }}>
-            <span>Légende : </span>
-            <span style={{ color: '#1976d2', fontWeight: 600 }}>EN COURS</span>,
-            <span style={{ color: '#aaa', fontWeight: 600, marginLeft: 8 }}>À VENIR</span>,
-            <span style={{ color: '#888', fontWeight: 600, marginLeft: 8 }}>VERROUILLÉ</span>
-          </div>
-          <div style={{ color: '#888', fontSize: '0.98rem', marginTop: 8 }}>
-            {dateJeune && (
-              <span>Jeûne programmé le <strong>{formatDate(dateJeune)}</strong> ({jCourant !== null ? `J-${jCourant}` : ''})</span>
-            )}
-          </div>
-        </div>
+        <TimelineProgressionPreparation
+          criteres={criteres}
+          progression={progression}
+          onValider={validerCritere}
+        />
       )}
       {/* Message personnel */}
       <div style={{ background: '#f8f8fc', borderRadius: 12, boxShadow: '0 1px 6px #e0e0e0', padding: '1.2rem 1.1rem', marginBottom: 18 }}>
@@ -237,6 +254,11 @@ export default function PreparationJeune() {
           </button>
         </Link>
       </div>
+      <StartPreparationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleStartPreparationModal}
+      />
     </div>
   );
 }

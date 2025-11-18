@@ -105,6 +105,9 @@ Permettre à l’utilisateur de démarrer activement sa préparation via un bout
 ## Validation explicite de l’utilisateur (OBLIGATOIRE)
 - [ ] Plan validé par l’utilisateur à la date : ___
 
+
+
+
 ---
 # 🟢 PLAN D’IMPLÉMENTATION RÉTROACTIF — ENRICHISSEMENT DE /pages/preparation-jeune.js (ajout progression, critères, message, synthèse)
 
