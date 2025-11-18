@@ -1,0 +1,67 @@
+{
+  "name": "Mon Plan Vital Root - Development",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-20-bullseye",
+  
+  // Configuration pour optimiser l'utilisation des ressources Codespaces
+  "hostRequirements": {
+    "cpus": 2,
+    "memory": "4gb",
+    "storage": "32gb"
+  },
+  
+  // Features à installer
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+  
+  // Ports à forward
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": {
+      "label": "Application Next.js",
+      "onAutoForward": "notify"
+    }
+  },
+  
+  // Extensions VSCode recommandées
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "github.copilot",
+        "github.copilot-chat"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit"
+        }
+      }
+    }
+  },
+  
+  // Commandes post-création du Codespace
+  "postCreateCommand": "npm install",
+  
+  // Script de démarrage post-attach
+  "postAttachCommand": "echo 'Environment ready! Run npm run dev to start the development server.'",
+  
+  // Timeout d'inactivité (en minutes) - recommandé pour éviter les coûts
+  "settings": {
+    "codespaces.idleTimeout": 30
+  },
+  
+  // Utilisateur non-root pour la sécurité
+  "remoteUser": "node",
+  
+  // Variables d'environnement
+  "containerEnv": {
+    "NODE_ENV": "development"
+  }
+}
