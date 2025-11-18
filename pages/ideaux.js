@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { generateAnchoringPlan } from '../lib/generateAnchoringPlan';
@@ -23,6 +24,19 @@ export default function IdeauxPage() {
   const [message, setMessage] = useState('');
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef();
+  // Feedback UX : palier validé
+  const [palierValide, setPalierValide] = useState(false);
+  // Détection automatique : toutes les séances du palier courant cochées ?
+  useEffect(() => {
+    if (!reel || !Array.isArray(reel) || reel.length === 0) {
+      setPalierValide(false);
+      return;
+    }
+    // On regarde la semaine sélectionnée (palier courant)
+    const semaineCourante = reel[selectedSemaine] || [];
+    const toutesCochees = semaineCourante.length > 0 && semaineCourante.every(s => s.fait === true || s === true);
+    setPalierValide(toutesCochees);
+  }, [reel, selectedSemaine]);
 
   useEffect(() => {
     fetchIdeaux();
@@ -320,14 +334,13 @@ export default function IdeauxPage() {
           const seancesNormales = sem.actions.map((action) => {
             const seance = normalSeances.find(s => s.date_prevue === action.date);
             return {
-              fait: seance?.statut === 'fait',
-              duree: seance?.duree_reelle || seance?.duree_prevue || 15,
+              fait: seance?.statut === 'fait' || seance?.fait === true,
+              duree: seance?.duree_reelle || seance?.duree_prevue || action.duree || planParams?.duree || 15,
               distance_km: seance?.distance_km || 0,
               vitesse: seance?.vitesse || null,
               date: action.date
             };
           });
-          
           // Ajouter les séances bonus de cette semaine
           const bonusSemaine = bonusSeances.filter(b => b.semaine_numero === sem.numero);
           bonusSemaine.forEach(bonus => {
@@ -340,7 +353,6 @@ export default function IdeauxPage() {
               bonus: true
             });
           });
-          
           return seancesNormales;
         });
 
@@ -1141,7 +1153,22 @@ ADD COLUMN IF NOT EXISTS plan_existant boolean DEFAULT false;
                         const nbRealisees = reel[selectedSemaine]?.filter(obj => obj.fait).length || 0;
                         const nbPrevues = semaines[selectedSemaine].actions.length;
                         if (nbRealisees === nbPrevues) {
-                          return <span style={{color:'#43a047'}}>✅ Toutes les séances prévues sont réalisées !</span>;
+                          return (
+                            <>
+                              <span style={{color:'#43a047'}}>✅ Toutes les séances prévues sont réalisées !</span>
+                              <div style={{marginTop:12}}>
+                                <button
+                                  style={{
+                                    background:'#1976d2', color:'#fff', border:'none', borderRadius:8, padding:'10px 28px', fontWeight:700, fontSize:16, cursor:'pointer', boxShadow:'0 1px 6px #00bcd422', letterSpacing:'0.5px'
+                                  }}
+                                  onClick={() => {
+                                    setMessage('🎉 Palier validé ! Félicitations, tu peux passer au palier suivant.');
+                                    // Ici, tu peux ajouter toute logique métier (déblocage palier suivant, animation, etc.)
+                                  }}
+                                >Valider le palier</button>
+                              </div>
+                            </>
+                          );
                         }
                         if (nbRealisees > nbPrevues) {
                           return <span style={{color:'#ffa726'}}>🔥 Tu as dépassé l'objectif de la semaine !</span>;

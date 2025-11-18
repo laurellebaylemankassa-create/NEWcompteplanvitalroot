@@ -506,6 +506,24 @@ export default function PlanActionPage() {
             </div>
           ))}
 
+          {/* Bouton manuel Valider le palier */}
+          {(() => {
+            const semaine = reel[selectedSemaine] || [];
+            const toutesCochees = semaine.length > 0 && semaine.every(s => s.fait === true || s === true);
+            if (toutesCochees) {
+              return (
+                <div style={{ textAlign: 'center', marginTop: 24 }}>
+                  <button
+                    style={{
+                      background:'#1976d2', color:'#fff', border:'none', borderRadius:8, padding:'12px 32px', fontWeight:700, fontSize:17, cursor:'pointer', boxShadow:'0 2px 8px #00bcd455', marginBottom:12
+                    }}
+                    onClick={() => setMessage('🎉 Palier validé ! Félicitations, tu peux passer au palier suivant.')}
+                  >Valider le palier</button>
+                </div>
+              );
+            }
+            return null;
+          })()}
           {/* Bouton ajouter séance bonus */}
           <div style={{ textAlign: 'center', marginTop: 20 }}>
             <button onClick={handleAddSeanceBonus} style={{ background: '#ffa726', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 20px', fontWeight: 700, fontSize: 15, cursor: 'pointer', boxShadow: '0 2px 8px #ffa72655' }}>

@@ -16,6 +16,7 @@ _Décrire exactement ce qui est attendu (fonctionnalité, écran, comportement, 
 
 ## **Audit des risques préalable**
 - _Lister tous les risques : technique, UX, sécurité, conflit, régression, perte de données, robustesse, accessibilité, etc._
+- Identifier l’ordre de tous les hooks React (useState, useEffect, etc.) afin de s’assurer qu’ils sont déclarés uniquement en haut du corps du composant fonctionnel, et jamais dans une fonction, une boucle, un map, un if, etc. (respect strict des règles officielles des hooks)
 - documenter ces risque en point de vigilance et a integrer dans la cheklist du controle qualité
 
 **Sous-checklist à valider systématiquement :**
@@ -23,7 +24,8 @@ _Décrire exactement ce qui est attendu (fonctionnalité, écran, comportement, 
 
 ## **Checklist stricte sécurité & qualité (à cocher AVANT toute modification)**
 - [ ] Lecture complète du code concerné (dépendances, hooks, variables, fonctions…)
-- [ ] Initialisation systématique avant usage (hooks, variables, handlers)  
+- [ ] Initialisation systématique avant usage (hooks, variables, handlers) 
+ - [ ] Tous les hooks React (useState, useEffect, etc.) sont déclarés uniquement en haut du corps du composant fonctionnel, jamais dans une fonction, une boucle, un map, un if, etc. (respect strict des règles officielles des hooks) 
 - [ ] **Séparation stricte des étapes** : d’abord initialisation (useState, useEffect…), puis logique calculée, puis handlers/fonctions, puis rendu
 - [ ] Vérification : toute fonction ou handler utilisé dans le rendu est présent et initialisé avant usage  
 - [ ] Ordre et portée logiques stricts (jamais déclaration, appel ou usage prématuré)  
@@ -37,8 +39,9 @@ _Décrire exactement ce qui est attendu (fonctionnalité, écran, comportement, 
 - [ ] Validation utilisateur OBLIGATOIRE avant toute implémentation
 - [ ] Toutes les cases ci-dessus doivent être cochées et documentées avant de poursuivre.
 
-## **Contrôles qualité à prévoir**  
+## **Contrôles conformité à réaliser en suivant les etapes suivantes**  
 _Ex : tests de sauvegarde/restauration, accessibilité, non-régression, performance, multi-device, compatibilité, échappement, robustesse, cas limites_
+- Lire toutes les entrées d'anomalies enregistrées dans le fichier anomalies Roll back afin d identifier les points de vigilance pour anticiper le risque d'erreur similaire lors du codage de cette modification, suite à cette analyse créer une checklist de contrôle a appliquer avant le codage pour s'assurer d'un codage conforme a ajouter dans la section Point de vigilance.
 ici ajouter analyse de l audit des risque et s assurer qu il n a aucune anomalie pour garantir la conformité de la modification
  _ si a ce stade anoamie bug identifié alors proposition immédiate de rollback a l endroit ou l'anomalie a ete detecté ( pour revenir a l etat ou il n yavait pas de bug) a confirmé avec utilisateur ou revenir a l etat initial du code avant  modification , tjr documenter les anomalies rencontres dans le fichier Anomalie roll back avec date et heure_
 
@@ -47,6 +50,8 @@ ici ajouter analyse de l audit des risque et s assurer qu il n a aucune anomalie
 - Avancement précis/Pourcentage réel (**à MAJ à chaque étape**) : ____ %
 - Historique des mises à jour : ___
 
+## **Point de vigilance**  
+ici mettre le rapport lié a la lecture des entrées du fichier anomalie roll back adapté a la maj actuelle il s agit ici d'identifier les erreurs similaire que la modification de ce code pourrait generer suit au retour experience documenté dans le fichier afin de permettre de les eviter dans cette section en créant la cheklist de verification point de vigilance, informer l utilisateur quand cette etape a ete realisé et informer de l impact de cette action 
 ## **Proposition de rollback**  
 - Tout risque ou anomalie détecté :  
   - Décrire l’action de rollback, son contexte (fichier, modification en cause), l’alternative sûre proposée.

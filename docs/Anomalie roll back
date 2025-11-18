@@ -1,3 +1,12 @@
+
+# [2025-11-18] Anomalie React : Invalid hook call dans /pages/ideaux.js
+- Problème : Erreur "Invalid hook call. Hooks can only be called inside of the body of a function component." lors de l’ajout du feedback UX palier validé.
+- Cause : Déclaration d’un hook React (useState/useEffect) en dehors du corps principal du composant fonctionnel (ex : dans une fonction de mapping ou un bloc conditionnel).
+- Étape de la checklist non respectée : contrôle explicite de l’emplacement des hooks React (voir mise à jour du template).
+- Action immédiate : correction du template pour ajouter ce contrôle, déplacement des hooks en haut du composant, test du rendu.
+- Date/heure : 2025-11-18, détection et documentation.
+
+
 # [2025-11-17] Anomalies liées à la correction de l’expérience défi dynamique dans /pages/suivi.js
 - Problème 1 : Appel à la fonction inexistante `getWeeklyPalier`, provoquant une erreur ReferenceError lors du calcul du palier hebdomadaire.
 - Problème 2 : Retour de la variable `palier` non définie dans la fonction `getWeeklyExtrasHistory`, générant une erreur ReferenceError.
@@ -21,4 +30,7 @@
 - Cause : Incohérence entre le nom de colonne utilisé dans le code (planData) et le schéma Supabase (plan_data).
 - Étape de la checklist non respectée : relecture de la cohérence des noms de colonnes entre le code et la base.
 - Correction à faire : harmoniser tous les accès à la colonne en snake_case (plan_data) et vérifier la présence de la colonne dans la base.
+
+
+
 
