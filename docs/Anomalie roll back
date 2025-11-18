@@ -1,3 +1,37 @@
+═══════════════════════════════════════════════════════════════════════════════
+🛑 ANOMALIE 18/11/2025 — AUDIT RIGOUREUX POST-CORRECTION
+═══════════════════════════════════════════════════════════════════════════════
+Fichier : /pages/preparation-jeune.js
+1. Hooks React (`useState`, `useEffect`) déclarés hors du composant principal (lignes 2-7)
+	- Non conforme à la règle des hooks et au plan strict copilot
+	- Risque : erreur « Invalid hook call » ou comportement inattendu
+2. Import React en double (lignes 1 et 52)
+	- Non conforme, source potentielle de confusion ou conflit
+
+Cause de l’erreur d’audit précédente :
+	- L’audit initial s’est basé sur le contrôle d’erreur automatique (compilation, get_errors) qui n’a pas détecté l’anomalie car le code du composant principal était conforme et compilait sans erreur.
+	- La lecture manuelle complète du fichier a révélé la présence de hooks hors composant et d’un import en double, non détectés par l’outil automatique.
+	- Cette subtilité montre l’importance de croiser audit automatique et relecture manuelle stricte, comme rappelé dans le plan métier.
+
+Procédure corrective à suivre :
+	- Supprimer tout hook hors du composant principal
+	- Supprimer l’import React en double
+	- Ré-auditer le fichier après correction
+	- Documenter l’action dans le rapport d’audit et la section amélioration continue
+═══════════════════════════════════════════════════════════════════════════════
+🛑 ANOMALIE 18/11/2025 — VIOLATION RÈGLE DES HOOKS REACT
+═══════════════════════════════════════════════════════════════════════════════
+Fichier : /pages/preparation-jeune.js
+Erreur : Hook useState déclaré hors du composant principal (voir stacktrace)
+Conséquence : Runtime Error « Invalid hook call »
+Cause : Non-respect du plan strict copilot (portée des hooks, checklist)
+Procédure corrective :
+	1. Lecture complète du code et de l’historique des anomalies
+	2. Correction : déplacer tous les hooks dans le corps du composant principal
+	3. Mise à jour du rapport d’audit et de la section amélioration continue
+	4. Validation utilisateur avant toute modification
+Lien vers la stacktrace : pages/preparation-jeune.js:2:43
+Action requise : Correction stricte, traçabilité, validation
 # [2025-11-18] Anomalie React : Invalid hook call dans /pages/ideaux.js
 - Problème : Erreur "Invalid hook call. Hooks can only be called inside of the body of a function component." lors de l’ajout du feedback UX palier validé.
 - Cause : Déclaration d’un hook React (useState/useEffect) en dehors du corps principal du composant fonctionnel (ex : dans une fonction de mapping ou un bloc conditionnel).

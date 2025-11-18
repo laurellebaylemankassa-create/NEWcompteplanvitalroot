@@ -1,3 +1,92 @@
+  // ...existing code...
+
+  // === PHASES MÉTIER STRICTES ===
+  const phasesMetier = [
+    {
+      nom: "Fondations",
+      debut: 30,
+      fin: 18,
+      explication: "Objectif : installer les bases, réapprendre les quantités, commencer à alléger la digestion.",
+      criteres: [
+        {
+          id: "quantites",
+          titre: "Respect strict des quantités à chaque repas",
+          conseil: "Réapprends à ton corps ce qu'est une vraie portion. Une portion = ce qui tient dans ta main fermée.",
+          jalon: 30
+        },
+        {
+          id: "feculent_soir",
+          titre: "Supprimer les féculents le soir (lun-dim)",
+          conseil: "Les féculents le soir ralentissent ta digestion. Prépare tes dîners sans féculents.",
+          jalon: 17
+        },
+        {
+          id: "action_post_repas",
+          titre: "Action immédiate après le repas (marche/ménage)",
+          conseil: "Bouge après chaque repas pour activer la digestion.",
+          jalon: 17
+        },
+        {
+          id: "produits_transformes",
+          titre: "Éliminer tous produits transformés",
+          conseil: "Privilégie le fait maison, évite les plats industriels.",
+          jalon: 14
+        },
+        {
+          id: "sucreries",
+          titre: "Éliminer toutes sucreries",
+          conseil: "Remplace les desserts sucrés par des fruits ou yaourts nature.",
+          jalon: 14
+        }
+      ]
+    },
+    {
+      nom: "Intensification",
+      debut: 12,
+      fin: 1,
+      explication: "Objectif : préparer le métabolisme, tester le jeûne, renforcer l’hydratation et la discipline horaire.",
+      criteres: [
+        {
+          id: "jeune_plein",
+          titre: "2 jours de jeûne plein (préparation métabolique)",
+          conseil: "Aucun aliment solide pendant 48h. Hydratation : eau, thé, café (sans sucre). Repos si besoin.",
+          jalon: 12
+        },
+        {
+          id: "eau",
+          titre: "2 litres d'eau par jour (suivi automatique)",
+          conseil: "Pense à t’hydrater régulièrement, répartis sur la journée.",
+          jalon: 7
+        },
+        {
+          id: "repas_avant_19h",
+          titre: "Pas de repas après 19h00",
+          conseil: "Anticipe progressivement l’heure du dîner.",
+          jalon: 7
+        },
+        {
+          id: "plage_45min",
+          titre: "Plage alimentaire limitée à 45 minutes par repas",
+          conseil: "Prends le temps de manger, mais limite la durée pour habituer ton corps.",
+          jalon: 7
+        }
+      ]
+    },
+    {
+      nom: "Jour J",
+      debut: 0,
+      fin: 0,
+      explication: "Objectif : lancer le jeûne, célébrer la préparation, se reconnecter à l’essentiel.",
+      criteres: [
+        {
+          id: "lancement_jeune",
+          titre: "Lancement de ton jeûne de 5 jours",
+          conseil: "Tu as validé tous les critères, tu es prêt(e) !",
+          jalon: 0
+        }
+      ]
+    }
+  ];
 import Link from "next/link";
 import React, { useEffect, useState } from 'react';
 import StartPreparationModal from '../components/StartPreparationModal';
@@ -11,6 +100,15 @@ export default function PreparationJeune() {
   const [dureeJeune, setDureeJeune] = useState(null);
   const [aujourdhui, setAujourdhui] = useState(new Date());
   const [jCourant, setJCourant] = useState(null);
+  useEffect(() => {
+    if (dateJeune) {
+      const dateJeuneObj = new Date(dateJeune);
+      const dateAuj = new Date();
+      const diffTime = dateJeuneObj.getTime() - dateAuj.getTime();
+      const diffJours = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      setJCourant(diffJours);
+    }
+  }, [dateJeune]);
 
   // Critères de préparation (statut dynamique)
   // État de démarrage du suivi de préparation (workflow interactif)
@@ -218,13 +316,50 @@ export default function PreparationJeune() {
           </>
         )}
       </div>
-      {/* Timeline de préparation dynamique */}
+      {/* Timeline de préparation dynamique conforme fiche métier */}
       {preparationActive && (
-        <TimelineProgressionPreparation
-          criteres={criteres}
-          progression={progression}
-          onValider={validerCritere}
-        />
+        <div style={{ background: '#fff', borderRadius: 14, boxShadow: '0 2px 8px #0001', padding: '1.2rem 1.1rem', marginBottom: '2rem' }}>
+          <h2 style={{ color: '#1976d2', fontWeight: 800, fontSize: '1.3rem', marginBottom: 8 }}>Timeline de préparation</h2>
+          <div style={{ color: '#388e3c', fontWeight: 700, fontSize: '1.08rem', marginBottom: 8 }}>
+            Progression globale : {progression}/9 critères validés
+          </div>
+          <div style={{ height: 8, background: '#e3f2fd', borderRadius: 6, marginBottom: 18 }}>
+            <div style={{ width: `${(progression/9)*100}%`, height: '100%', background: '#1976d2', borderRadius: 6 }}></div>
+          </div>
+          {phasesMetier.map(phase => (
+            <div key={phase.nom} style={{ marginBottom: 24 }}>
+              <div style={{ fontWeight: 700, color: '#1976d2', fontSize: '1.12rem', marginBottom: 4 }}>
+                ═══ PHASE {phase.nom.toUpperCase()} ({phase.debut === phase.fin ? `J-${phase.debut}` : `J-${phase.debut} à J-${phase.fin}`}) ═══
+              </div>
+              <div style={{ color: '#444', fontSize: '1.01rem', marginBottom: 10 }}>{phase.explication}</div>
+              {phase.criteres.map(critere => {
+                const estDebloque = jCourant !== null && jCourant <= critere.jalon;
+                return (
+                  <div key={critere.id} style={{ borderBottom: '1px solid #e0e0e0', paddingBottom: 12, marginBottom: 12 }}>
+                    <div style={{ fontWeight: 700, color: estDebloque ? '#1976d2' : '#888', fontSize: '1.07rem' }}>{critere.titre}</div>
+                    <div style={{ color: '#555', fontSize: '0.99rem', marginBottom: 4 }}>{critere.conseil}</div>
+                    <div style={{ color: '#888', fontSize: '0.97rem', marginBottom: 4 }}>Jalon : J-{critere.jalon}</div>
+                    {!estDebloque ? (
+                      <div style={{ color: '#f44336', fontWeight: 600, fontSize: '0.98rem', display: 'flex', alignItems: 'center', gap: '0.5em' }}>
+                        <span aria-hidden="true" style={{ fontSize: '1.2em' }}>🔒</span>
+                        Critère verrouillé — Débloquage automatique le J-{critere.jalon}
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => validerCritere(critere.id)}
+                        style={{ background: '#1976d2', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 22px', fontWeight: 700, fontSize: 16, cursor: 'pointer', marginTop: 6 }}
+                        disabled={criteres.find(c => c.id === critere.id)?.valide}
+                        aria-label={`Valider le critère ${critere.titre}`}
+                      >
+                        {criteres.find(c => c.id === critere.id)?.valide ? 'Critère validé' : 'Valider ce critère'}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
       )}
       {/* Message personnel */}
       <div style={{ background: '#f8f8fc', borderRadius: 12, boxShadow: '0 1px 6px #e0e0e0', padding: '1.2rem 1.1rem', marginBottom: 18 }}>

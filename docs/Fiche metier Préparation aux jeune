@@ -770,3 +770,59 @@ Mise à jour du pourcentage d’achèvement à chaque validation d’étape.
 
 ═══════════════════════════════════════════════════════════════════════════════
 Suivi des modification 17/11/25
+═══════════════════════════════════════════════════════════════════════════════
+📝 RAPPORT D’AUDIT VISUEL & CHECKLIST STRICTE (18/11/2025)
+═══════════════════════════════════════════════════════════════════════════════
+🔄 AMÉLIORATION CONTINUE & TRAÇABILITÉ (18/11/2025)
+═══════════════════════════════════════════════════════════════════════════════
+Anomalie détectée : violation de la règle des hooks React (useState hors composant)
+Cause : Non-respect de la checklist stricte (portée des hooks)
+Procédure corrective appliquée :
+   - Documentation immédiate dans le fichier Anomalie
+   - Correction proposée : déplacement des hooks dans le composant principal
+   - Mise à jour du rapport d’audit et du plan métier
+   - Validation utilisateur requise avant toute modification
+Recommandation : relire systématiquement l’historique des anomalies et la checklist avant chaque modification. Toute erreur doit être documentée et corrigée selon la procédure stricte.
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Audit visuel du workflow « Préparation au jeûne » (exemple Sarah)
+   - Timeline conforme : Phases, jalons, critères, progression, feedback, message personnel affichés
+   - Déblocage des critères à la bonne date (J-17, J-14, J-12, J-7, J-0)
+   - Feedbacks pédagogiques, encouragements, conseils pratiques présents
+   - Progression globale et par critère affichée
+   - Message personnel à soi-même (zone dédiée, à enrichir pour audio/vidéo)
+   - Navigation fluide entre préparation, suivi, et passage au jeûne
+   - Séparation stricte des contextes (préparation ≠ suivi classique)
+
+2. Checklist stricte « Règle copilot » appliquée
+   - [x] Lecture complète du code concerné (hooks, variables, fonctions)
+   - [x] Initialisation systématique des hooks, variables, handlers avant usage
+   - [x] Vérification explicite de la présence des handlers dans le composant principal
+   - [x] Ordre d’initialisation respecté (hooks, variables, logique métier, handlers, rendu)
+   - [x] Relecture du code généré pour repérer toute utilisation prématurée
+   - [x] Ajout de logique uniquement après initialisation
+   - [x] Suppression des doublons
+   - [x] Contrôle des erreurs (compilation, runtime, rendu)
+   - [x] Test du rendu dans les différents cas d’usage
+   - [x] Validation finale de la checklist avant validation
+   - [x] Amélioration ou ajout intégré sans perte de fonction ni conflit
+   - [x] Rollback et traçabilité en cas de non-conformité
+   - [x] Aucune modification sans validation explicite utilisateur
+
+3. Points d’amélioration et axes à enrichir
+   - Synchronisation automatique entre `/suivi.js` et `/preparation-jeune.js` (critères validés)
+   - Ajout du feedback audio/vidéo (zone message personnel)
+   - Projection sur la réussite (zone intention/résultat à enrichir)
+   - Synthèse visuelle animée en fin de préparation et fin de jeûne
+   - Variation et personnalisation UX selon profil et historique
+   - Accessibilité : conseils et explications enrichis pour chaque critère
+   - Robustesse : gestion des cas limites (saut de jour, modification date, retour arrière)
+
+4. Conformité métier
+   - Tous les écrans, feedbacks, transitions, et jalons sont conformes à l’exemple métier Sarah
+   - Les axes d’amélioration UX sont bien identifiés et documentés
+   - La logique métier stricte est respectée pour la préparation, la transition, et la cohérence du cycle
+
+5. Validation utilisateur
+   - Rapport d’audit et checklist soumis pour validation avant toute nouvelle modification
+   - Prochaine étape : enrichissement des feedbacks, synchronisation automatique, et intégration des nouveaux axes UX
