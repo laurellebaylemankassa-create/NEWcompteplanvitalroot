@@ -89,7 +89,7 @@
   ];
 import Link from "next/link";
 import React, { useEffect, useState } from 'react';
-import { getCriteresPreparation } from "../lib/validerCriterePreparation";
+import { getCriteresPreparation, isPeriodeActive, validerCriterePreparation, calculerJourRelatif } from "../lib/validerCriterePreparation";
 import StartPreparationModal from '../components/StartPreparationModal';
 import TimelineProgressionPreparation from '../components/TimelineProgressionPreparation';
 
@@ -110,10 +110,7 @@ export default function PreparationJeune() {
   const [jCourant, setJCourant] = useState(null);
   useEffect(() => {
     if (dateJeune) {
-      const dateJeuneObj = new Date(dateJeune);
-      const dateAuj = new Date();
-      const diffTime = dateJeuneObj.getTime() - dateAuj.getTime();
-      const diffJours = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      const diffJours = calculerJourRelatif(dateJeune, new Date());
       setJCourant(diffJours);
     }
   }, [dateJeune]);
@@ -197,9 +194,20 @@ export default function PreparationJeune() {
 
   // Handler de validation d’un critère (manuel, à améliorer avec auto-validation plus tard)
   function validerCritere(id) {
+    const critere = criteresMetier.find(c => c.id === id);
+    if (!critere) {
+      setFeedbackMessage("❌ Critère introuvable.");
+      return;
+    }
+    // Vérification de la période active
+    if (!isPeriodeActive(critere.jalon, jCourant)) {
+      setFeedbackMessage("⛔ Validation impossible : la période pour ce critère n'est pas encore active ou est verrouillée. Veuillez respecter le calendrier de préparation.");
+      return;
+    }
     const dateValidation = new Date().toISOString();
     validerCriterePreparation(id, dateValidation);
     setCriteres(prev => prev.map(c => c.id === id ? { ...c, valide: true, dateValidation } : c));
+    setFeedbackMessage("✅ Critère validé avec succès.");
   }
 
   // Handler de modification du message personnel

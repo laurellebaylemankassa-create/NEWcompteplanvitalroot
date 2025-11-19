@@ -26,6 +26,7 @@ function RetourAccueil() {
 import React, { useState, useEffect, useRef } from 'react';
 import BandeauDefiActif from '../components/BandeauDefiActif';
 import { supabase } from '../lib/supabaseClient';
+import { calculerJourRelatif, isPeriodeActive, validerCriterePreparation } from '../lib/validerCriterePreparation';
 import Link from 'next/link';
 import RepasBloc from "../components/RepasBloc";
 import TimelineProgression from "../components/TimelineProgression";
@@ -366,10 +367,11 @@ export default function Suivi() {
   // Calcul du critère actif du jour (en phase préparation)
   let critereActif = null;
   let jRelatif = null;
+  // Calcul cohérent du jour relatif : J-XX = dateJeune - selectedDate (en jours)
   if (dateJeune && selectedDate) {
     const dJeune = new Date(dateJeune);
     const dSel = new Date(selectedDate);
-    jRelatif = Math.floor((dJeune - dSel) / (1000*60*60*24));
+    jRelatif = Math.ceil((dJeune.setHours(0,0,0,0) - dSel.setHours(0,0,0,0)) / (1000*60*60*24));
     // Trouver le critère actif (le plus proche <= jRelatif)
     critereActif = criteresPreparation.find((c, idx) => {
       const next = criteresPreparation[idx+1];
@@ -386,6 +388,11 @@ export default function Suivi() {
   // Handler validation manuelle
   const handleValiderCriterePrep = () => {
     if (typeof window !== 'undefined' && selectedDate && critereActif) {
+      // Vérification de la période active
+      if (!isPeriodeActive(Math.abs(critereActif.jour), Math.abs(jRelatif))) {
+        setSnackbar({ open: true, message: "⛔ Validation impossible : la période pour ce critère n'est pas encore active ou est verrouillée. Veuillez respecter le calendrier de préparation.", type: "error" });
+        return;
+      }
       validerCriterePreparation(critereActif.label, new Date().toISOString());
       setPrepValid(true);
       setSnackbar({ open: true, message: "Critère de préparation validé pour aujourd'hui !", type: "success" });
