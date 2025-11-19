@@ -50,6 +50,29 @@
 - Tester le rendu et valider la correction.
 - Continuer la documentation et la validation utilisateur.
 
+# Rapport Markdown Copilot — Correction conforme repas_reels (suppression champ planifié)
+
+**Date : 2025-11-19 — Heure : 09:00**
+
+## État initial avant correction
+- Le code frontend envoyait le champ `planifie` lors de l’insertion dans la table `repas_reels`.
+- La colonne `planifie` n’existait pas dans le schéma Supabase ➔ erreur Supabase systématique.
+- Risque d’incohérence métier : mélange entre repas réels et planifiés dans la même table.
+
+## Modifications apportées
+- Suppression du champ `planifie` dans toutes les insertions et mises à jour de la table `repas_reels`.
+- Audit du code pour garantir la conformité au schéma existant.
+- Respect du template strict et des consignes du fichier `Anomalie roll back`.
+- Rappel : la comparaison entre repas planifiés et repas réels doit se faire côté code ou via une table dédiée, jamais dans la table des repas réels.
+
+## État final après correction
+- Plus aucune erreur Supabase liée au champ `planifie`.
+- Conformité totale au schéma de la table `repas_reels`.
+- Logique métier préservée : la gestion des défis et de la planification reste possible via une structure dédiée ou une comparaison côté code.
+- Documentation et traçabilité assurées dans le rapport Markdown et le fichier d’anomalies.
+
+**Validation utilisateur obtenue.**
+
 *Rapport généré automatiquement par Copilot le 18/11/2025.*
 
 

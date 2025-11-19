@@ -363,3 +363,68 @@ Connexion dynamique au référentiel alimentaire et correction du schéma d’en
 - [ ] Plan validé par l’utilisateur à la date : ___
 
 ---
+
+
+
+
+🟢 PLAN D’IMPLÉMENTATION COPILOT (Mission : Amélioration des composants de saisie de défis avec logique référentiel alimentaire)
+⚠️ AUCUNE modification de code ne doit être produite tant que l’utilisateur n’a pas validé explicitement ce plan d’implémentation rempli par Copilot.
+
+─────────────────────────────────────────────────────────────
+
+Titre de la tâche
+Intégration du référentiel alimentaire et du pré-remplissage automatique (aliments, portions, kcal, catégories) dans tous les composants de saisie de défis
+
+Description précise de la modification attendue
+Ajouter dans tous les formulaires de saisie de défis :
+Suggestions dynamiques d’aliments et catégories depuis le référentiel alimentaire
+Gestion des types de portions (CS, tranche, unité, etc.)
+Pré-remplissage automatique des valeurs nutritionnelles (kcal, portion) selon l’aliment choisi
+Harmoniser l’UX et la logique avec celle du suivi alimentaire
+Conserver toutes les fonctions existantes, ajout en complément
+Documentation et rapport d’anomalie à chaque étape
+Fichiers concernés
+SaisieDefiAlimentaire.js
+SaisieDefisDynamiques.js
+referentiel.js
+/docs/Anomalie roll back
+(À compléter selon audit final : autres composants de saisie de défi)
+Audit des risques préalable
+Lire toutes les entrées du fichier docs/Anomalie roll back
+Identifier les zones de risques récurrentes ou critiques (erreurs passées, conflits, régressions, problèmes de conformité)
+Intégrer ces points dans la checklist de vigilance et dans l’audit des risques avant toute modification
+Risque de conflit avec la logique métier existante
+Risque de régression sur la validation des défis
+Risque d’erreur sur la gestion des hooks React (respect strict des règles)
+Risque d’incohérence UX si l’intégration n’est pas homogène
+Risque de doublons ou de perte de données si la logique d’ajout n’est pas bien séparée
+Risque d’erreur sur la synchronisation du référentiel alimentaire
+Risque d’accessibilité (suggestions, navigation clavier)
+Point de vigilance : bien vérifier l’ordre et la portée des hooks, et la préservation des fonctionnalités existantes
+Checklist stricte sécurité & qualité (à cocher AVANT toute modification)
+ Lecture complète du code concerné (dépendances, hooks, variables, fonctions…)
+ Lecture et analyse des entrées du fichier docs/Anomalie roll back
+ Initialisation systématique avant usage (hooks, variables, handlers)
+ Tous les hooks React sont déclarés uniquement en haut du corps du composant fonctionnel
+ Séparation stricte des étapes : initialisation, logique calculée, handlers, rendu
+ Vérification de la présence/import de toutes les fonctions, hooks et variables utilisées
+ Ordre et portée logiques stricts
+ Pas de doublons ni de déclarations superflues
+ Contrôle d’erreur systématique (compilation, runtime, SSR, rendu, accessibilité)
+ Test du rendu sur tous les cas d’usage et cas limites
+ Préservation stricte des fonctionnalités existantes (aucune suppression destructrice)
+ Mise à jour précise et justifiée du pourcentage d’avancement
+ Rollback immédiat et rapport d’anomalie en cas d’erreur (docs/Anomalie roll back)
+ Documentation claire de chaque étape et validation utilisateur OBLIGATOIRE
+Pourcentage d’avancement estimé
+Audit des composants : 100 %
+Lecture et analyse du rollback : 0 % (à faire en priorité)
+Rédaction du plan : 100 %
+Implémentation : 0 % (en attente de validation)
+Documentation et rapport d’anomalie : à compléter à chaque étape
+Rollback et rapport d’anomalie
+Toute anomalie ou erreur ➔ rollback immédiat, rapport d’anomalie avec contexte, date et heure (cf. fichier docs/Anomalie roll back)
+Documentation claire de chaque étape, chaque validation, et toute action automatisée (Copilot/IA)
+Documentation et validation utilisateur
+Documentation de chaque étape dans le Markdown et le fichier d’anomalie
+Validation utilisateur OBLIGATOIRE avant toute implémentation

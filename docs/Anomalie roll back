@@ -18,7 +18,7 @@ Procédure corrective à suivre :
 	- Supprimer l’import React en double
 	- Ré-auditer le fichier après correction
 	- Documenter l’action dans le rapport d’audit et la section amélioration continue
-═══════════════════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════════════
 🛑 ANOMALIE 18/11/2025 — VIOLATION RÈGLE DES HOOKS REACT
 ═══════════════════════════════════════════════════════════════════════════════
 Fichier : /pages/preparation-jeune.js
@@ -77,6 +77,21 @@ Action requise : Correction stricte, traçabilité, validation
 
 
 
+---
+19/11/2025, 12h00 — Anomalie : Échec d’application automatique du patch d’amélioration sur le composant DefiFauxAllie (SaisieDefisDynamiques.js).
+Problème : Le patch n’a pas pu être inséré automatiquement à cause d’un contexte non reconnu (structure du composant, position des hooks, complexité du code).
+Impact : Blocage de l’ajout de la logique référentiel alimentaire (suggestions, portions, kcal, catégories) dans le formulaire du défi dynamique.
+Cause probable : Emplacement des hooks et logique métier existante non compatible avec l’insertion automatique.
+Étape du plan non respectée : relecture complète du code avant modification, adaptation du patch à la structure réelle du composant.
+Action immédiate : lecture complète du composant, adaptation manuelle du patch, respect strict de la checklist et du template avant nouvelle tentative.
+Aucune suppression effectuée sur le fichier.
 
 
 
+19/11/2025, 12:19 - Anomalie application patch DefiFauxAllie (SaisieDefisDynamiques.js)
+Problème : Échec d’application automatique puis manuelle du patch d’amélioration sur le composant DefiFauxAllie.
+Cause : Contexte non reconnu par l’outil (structure du composant, position des hooks, complexité du code), incompatibilité avec l’insertion automatique ou manuelle.
+Impact : Blocage persistant de l’ajout de la logique référentiel alimentaire (suggestions, portions, kcal, catégories) dans le formulaire du défi dynamique.
+Étape du plan non respectée : adaptation fine du patch à la structure réelle du composant, découpage du patch pour insertion progressive.
+Action immédiate : découper le patch en sous-parties, insérer chaque bloc séparément, re-tester à chaque étape, documenter toute anomalie.
+Aucune suppression effectuée sur le fichier.
