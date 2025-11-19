@@ -71,7 +71,17 @@ Action requise : Correction stricte, traçabilité, validation
 - Étape du plan non respectée : synchronisation dynamique des listes à partir du référentiel alimentaire, initialisation des variables avant usage.
 - Action immédiate : audit du code modifié, proposition d’un plan de correction conforme, contrôle qualité rigoureux.
 
----
+═══════════════════════════════════════════════════════════════════════════════
+🛑 ANOMALIE 19/11/2025 — ÉCHEC PATCH AUTOMATIQUE (CONTEXT)
+═══════════════════════════════════════════════════════════════════════════════
+Fichier : /docs/Fiche metier Préparation aux jeune
+Erreur : Échec d’application du patch automatique (context non reconnu)
+Cause : Formatage du contexte non conforme à l’attendu par l’outil de patch (section Points d’attention non identifiée comme bloc unique)
+Procédure corrective :
+	1. Lecture manuelle du fichier pour identifier la section exacte
+	2. Proposition d’insertion manuelle du bloc métier
+	3. Recommandation : privilégier l’insertion manuelle ou adapter le format du contexte pour les prochaines modifications
+Action requise : Traçabilité, adaptation du workflow, validation utilisateur
 
 
 

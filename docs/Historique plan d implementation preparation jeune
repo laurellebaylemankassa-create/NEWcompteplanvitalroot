@@ -509,7 +509,18 @@ Point de vigilance
 Vérifier la cohérence du référentiel des portions recommandées
 S’assurer que la validation automatique n’écrase pas la validation manuelle existante
 Contrôler la traçabilité métier et la synchronisation réelle
-Documenter toute anomalie et proposer un rollback immédiat si bug
+═══════════════════════════════════════════════════════════════════════════════
+🟢 Points de vigilance métier (MAJ 19/11/2025)
+═══════════════════════════════════════════════════════════════════════════════
+
+Impossibilité de valider un critère hors période de préparation :
+Avant la période : critère verrouillé, action non proposée, feedback informatif uniquement.
+Après la période : critère masqué, accès et actions impossibles, transition automatique vers la phase suivante.
+Affichage et accès aux actions strictement contrôlés par la date et l’état du cycle :
+Bandeau, feedbacks et UI adaptés à chaque phase.
+Notification/rappel uniquement avant la période, sans action possible.
+Transition automatique vers la phase suivante (jeûne ou reprise) dès la fin de la préparation.
+Contrôle qualité : tests sur l’accessibilité des actions selon la date, vérification de la non-régression UX.
 Proposition de rollback
 Si la validation automatique génère une régression ou un bug, rollback à la validation manuelle précédente
 Documenter l’action dans le fichier Anomalie roll back (date, heure, contexte)
@@ -527,3 +538,6 @@ Générer un rapport structuré avant et après modification (structure, fonctio
 Rapport à valider par l’utilisateur avant toute implémentation
 Validation explicite de l’utilisateur (OBLIGATOIRE)
  Plan validé par l’utilisateur à la date : ___
+
+
+
