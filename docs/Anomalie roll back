@@ -72,7 +72,10 @@ Action requise : Correction stricte, traçabilité, validation
 - Action immédiate : audit du code modifié, proposition d’un plan de correction conforme, contrôle qualité rigoureux.
 
 ---
-18/11/2025, 22h10 — Anomalie : La synchronisation des états métier (activation, affichage de la timeline, critères, bouton de réinitialisation) n’a pas été réalisée après validation de la modale dans `/pages/preparation-jeune.js`. Impact : le workflow métier n’est pas déclenché, la timeline et les critères ne s’affichent pas, le bouton de réinitialisation n’est pas fonctionnel. Cause probable : le handler de validation n’active pas l’état global ni n’initialise les critères. Correction recommandée : relier l’enregistrement de la modale à l’activation de la préparation et à l’initialisation des critères, conformément au plan validé.
+
+
+
+
 
 
 

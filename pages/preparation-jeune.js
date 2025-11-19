@@ -89,6 +89,7 @@
   ];
 import Link from "next/link";
 import React, { useEffect, useState } from 'react';
+import { getCriteresPreparation } from "../lib/validerCriterePreparation";
 import StartPreparationModal from '../components/StartPreparationModal';
 import TimelineProgressionPreparation from '../components/TimelineProgressionPreparation';
 
@@ -160,14 +161,12 @@ export default function PreparationJeune() {
     // Initialisation des critères (localStorage ou valeurs métier)
     let criteresInit = criteresMetier.map(c => ({ ...c, valide: false, dateValidation: null }));
     if (typeof window !== 'undefined') {
-      const saved = window.localStorage.getItem('criteresPreparation');
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length === criteresMetier.length) {
-            criteresInit = parsed;
-          }
-        } catch {}
+      const saved = getCriteresPreparation();
+      if (saved && Object.keys(saved).length === criteresMetier.length) {
+        criteresInit = criteresMetier.map(c => {
+          const crit = saved[c.id];
+          return crit ? { ...c, valide: !!crit.validé, dateValidation: crit.dateValidation } : { ...c, valide: false, dateValidation: null };
+        });
       }
       const msg = window.localStorage.getItem('messagePersoPreparation');
       if (msg) setMessagePerso(msg);
@@ -198,7 +197,9 @@ export default function PreparationJeune() {
 
   // Handler de validation d’un critère (manuel, à améliorer avec auto-validation plus tard)
   function validerCritere(id) {
-    setCriteres(prev => prev.map(c => c.id === id ? { ...c, valide: true, dateValidation: new Date().toISOString() } : c));
+    const dateValidation = new Date().toISOString();
+    validerCriterePreparation(id, dateValidation);
+    setCriteres(prev => prev.map(c => c.id === id ? { ...c, valide: true, dateValidation } : c));
   }
 
   // Handler de modification du message personnel

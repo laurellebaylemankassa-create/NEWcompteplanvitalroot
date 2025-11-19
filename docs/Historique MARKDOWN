@@ -53,6 +53,29 @@
 *Rapport généré automatiquement par Copilot le 18/11/2025.*
 
 
+Rapport Markdown Copilot — Initialisation synchronisation critères préparation
+Date : 2025-11-19 — Heure : 9:00
+
+État initial avant modification
+Absence de fonction utilitaire partagée pour la validation des critères de préparation.
+Logique de validation du critère dupliquée dans preparation-jeune.js et suivi.js.
+Risque de désynchronisation, de régression et de non-respect du template strict (séparation initialisation/logique/handler/rendu).
+Historique d’anomalies sur l’emplacement des hooks, la duplication de logique, et l’absence de rapport Markdown avant/après.
+Points de vigilance issus de l’audit et des anomalies
+Vérifier que tous les hooks React sont déclarés uniquement en haut du composant principal.
+S’assurer que la fonction utilitaire est importée et utilisée dans les deux pages, sans duplication de logique métier.
+Contrôler la synchronisation réelle de l’état métier entre les deux pages (test manuel et console).
+Générer un rapport Markdown avant/après modification et documenter toute anomalie ou rollback.
+Respecter la checklist stricte du template à chaque étape.
+Plan d’action
+Création de /lib/validerCriterePreparation.js (fonction utilitaire centralisée).
+Modification stricte des appels dans preparation-jeune.js et suivi.js pour utiliser cette fonction.
+Audit, documentation, et contrôle qualité systématique.
+Prochaine étape
+Création du fichier utilitaire et modification des pages concernées, en respectant la checklist et la traçabilité.
+Rapport Markdown final après modification.
+
+Rapport généré automatiquement par Copilot le 19/11/2025.
 
 
 

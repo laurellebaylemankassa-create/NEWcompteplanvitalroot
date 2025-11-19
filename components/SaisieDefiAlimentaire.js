@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { validerCriterePreparation } from '../lib/validerCriterePreparation';
 import { useDefis } from './DefisContext';
 import { supabase } from '../lib/supabaseClient';
 import referentielAliments from '../data/referentiel';
@@ -76,6 +77,29 @@ export default function SaisieDefiAlimentaire() {
             setErreur('Merci de confirmer que tu as respecté une seule portion de chaque aliment.');
             return;
         }
+        // Validation automatique du critère « Respect des quantités »
+        let critereValide = false;
+        if (!isJeune) {
+            // Recherche de l'aliment dans le référentiel
+            const found = (referentielAliments || []).find(a => a.nom.toLowerCase() === aliment.trim().toLowerCase());
+            if (!found) {
+                setErreur('Aliment non reconnu dans le référentiel.');
+                return;
+            }
+            // Extraction et conversion de la portion maximale
+            let portionMax = 1;
+            if (found.portionMax) {
+                const match = String(found.portionMax).match(/([0-9]+([.,][0-9]+)?)/);
+                portionMax = match ? parseFloat(match[1].replace(',', '.')) : 1;
+            }
+            // Conversion de la quantité saisie
+            const quantiteNum = quantite === '' ? 0 : isNaN(Number(quantite)) ? 0 : Number(quantite);
+            if (quantiteNum <= portionMax) {
+                critereValide = true;
+            }
+        } else {
+            critereValide = true;
+        }
         // Correction : envoyer null pour quantite et kcal si Jeûne
         const quantiteToSend = isJeune ? null : (quantite === '' ? null : isNaN(Number(quantite)) ? quantite : Number(quantite));
         const kcalToSend = isJeune ? null : (kcal === '' ? null : isNaN(Number(kcal)) ? kcal : Number(kcal));
@@ -104,11 +128,18 @@ export default function SaisieDefiAlimentaire() {
             setErreur("Erreur Supabase : " + error.message);
             return;
         }
+        // Validation du critère métier
+        if (critereValide) {
+            validerCriterePreparation('quantites', new Date().toISOString());
+            setMessage('Bravo ! Repas enregistré et critère « Respect des quantités » validé.');
+        } else {
+            setErreur('Attention, tu as dépassé la portion recommandée pour cet aliment. Critère non validé.');
+            return;
+        }
         // 2. Valider l’étape du défi (progression + badge)
         const { validerEtapeDefi } = await import('../lib/defisUtils');
         const res = await validerEtapeDefi(defi);
         if (res.success) {
-            setMessage('Bravo ! Repas enregistré et étape du défi validée.');
             refreshDefis();
             setAliment('');
             setCategorie('');
@@ -187,8 +218,8 @@ export default function SaisieDefiAlimentaire() {
                         /> J’ai respecté une seule portion de chaque aliment pour ce repas.
                     </label>
                 </div>
-                {erreur && <p style={{ color: 'red' }}>{erreur}</p>}
-                {message && <p style={{ color: 'green' }}>{message}</p>}
+                {erreur && <p style={{ color: 'red' }} aria-live="assertive">{erreur}</p>}
+                {message && <p style={{ color: 'green' }} aria-live="polite">{message}</p>}
                 <button type="submit" style={{ marginTop: 16 }}>Valider l’étape du défi et enregistrer le repas</button>
             </form>
         </div>

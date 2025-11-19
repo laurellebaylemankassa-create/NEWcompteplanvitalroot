@@ -385,8 +385,8 @@ export default function Suivi() {
   });
   // Handler validation manuelle
   const handleValiderCriterePrep = () => {
-    if (typeof window !== 'undefined' && selectedDate) {
-      localStorage.setItem('prep_valid_' + selectedDate, '1');
+    if (typeof window !== 'undefined' && selectedDate && critereActif) {
+      validerCriterePreparation(critereActif.label, new Date().toISOString());
       setPrepValid(true);
       setSnackbar({ open: true, message: "Critère de préparation validé pour aujourd'hui !", type: "success" });
     }

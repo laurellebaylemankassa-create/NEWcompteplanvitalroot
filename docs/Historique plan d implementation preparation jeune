@@ -459,3 +459,71 @@ Adaptation dynamique des critères selon la date réelle	⏳ À faire	Affichage 
 Tests multi-device et accessibilité	⏳ À faire	À compléter
 Documentation et audit	⏳ À faire	Mise à jour continue
 Souhaitez-vous que je tente à nouveau l’insertion automatique dans le fichier, ou souhaitez-vous le copier manuellement ?
+
+
+Titre de la tâche
+
+Validation automatique du critère « Respect strict des quantités à chaque repas » via la saisie alimentaire 19/11/2025
+Description précise de la modification attendue
+Permettre la validation automatique du critère métier « Respect strict des quantités à chaque repas » lors de la saisie alimentaire sur suivi.js.
+Si l’utilisateur saisit une quantité supérieure à la portion recommandée pour un aliment, le critère n’est pas validé.
+Si toutes les quantités saisies sont conformes à la portion recommandée, le critère est validé automatiquement.
+Affichage d’un feedback visuel immédiat (message, icône, animation) selon le respect ou non du critère.
+Synchronisation de la progression sur preparation-jeune.js.
+Fichiers concernés
+suivi.js
+validerCriterePreparation.js
+preparation-jeune.js
+FeedbackSynthétique.js (si feedback visuel dédié)
+Audit des risques préalable
+Risque de mauvaise interprétation des portions recommandées (vérifier référentiel).
+Risque de non-synchronisation entre la saisie et la validation du critère.
+Risque de régression sur la logique existante de validation manuelle.
+Risque d’erreur d’accessibilité (feedback non visible, message non vocalisé).
+Risque de perte de données si la saisie est incomplète ou mal enregistrée.
+Vérification stricte de l’ordre des hooks React (aucun hook dans une fonction, boucle, map, if).
+Vérification de la présence/import de toutes les fonctions utilisées.
+
+Checklist stricte sécurité & qualité
+ Lecture complète du code concerné (dépendances, hooks, variables, fonctions…)
+ Initialisation systématique avant usage (hooks, variables, handlers)
+ Tous les hooks React sont déclarés uniquement en haut du corps du composant fonctionnel
+ Séparation stricte des étapes : initialisation ➔ logique ➔ handler ➔ rendu
+ Vérification de la présence/import de toutes les fonctions utilisées
+ Contrôle d’erreur systématique (compilation, runtime, SSR, rendu, accessibilité)
+ Test du rendu sur tous les cas d’usage et cas limites (quantité > portion, quantité = portion, quantité < portion)
+ Préservation stricte des fonctionnalités existantes
+ Documentation claire de chaque étape et rapport Markdown avant/après
+ Validation utilisateur OBLIGATOIRE avant toute implémentation
+Contrôles conformité à réaliser
+Test de validation automatique sur plusieurs aliments et portions
+Test d’accessibilité (feedback visuel et vocal)
+Test de synchronisation entre suivi.js et preparation-jeune.js
+Test multi-device et compatibilité navigateur
+Lecture des anomalies roll back pour anticiper les erreurs similaires
+Mise à jour de l’avancement
+ Non commencé | [ ] En cours | [ ] Terminé
+Avancement précis/Pourcentage réel : 0 %
+Historique des mises à jour : 19/11/2025, plan soumis à validation
+Point de vigilance
+Vérifier la cohérence du référentiel des portions recommandées
+S’assurer que la validation automatique n’écrase pas la validation manuelle existante
+Contrôler la traçabilité métier et la synchronisation réelle
+Documenter toute anomalie et proposer un rollback immédiat si bug
+Proposition de rollback
+Si la validation automatique génère une régression ou un bug, rollback à la validation manuelle précédente
+Documenter l’action dans le fichier Anomalie roll back (date, heure, contexte)
+🟢 Amélioration continue (Copilot)
+Relier explicitement chaque saisie alimentaire à la validation automatique du critère métier (activation, feedback, synchronisation).
+Vérifier systématiquement que la logique de validation automatique est testée dans le workflow réel (affichage, feedback, synchronisation).
+Après chaque modification, tester le parcours complet utilisateur et documenter le résultat (capture, rapport d’exécution).
+Ne jamais supposer qu’un critère est validé sans vérification concrète (affichage, console, tests).
+Ajouter un contrôle visuel ou un feedback à chaque action clé pour garantir la conformité UX et métier.
+Documenter toute anomalie ou écart dans le fichier dédié et proposer immédiatement une correction ou un rollback.
+Relire le plan et le template avant chaque implémentation pour s’assurer que toutes les étapes sont respectées.
+Se parler à soi-même (Copilot) : « Ai-je bien relié chaque étape du plan au code ? Ai-je testé le workflow complet ? Ai-je documenté chaque action et chaque anomalie ? »
+Rapport Markdown Copilot
+Générer un rapport structuré avant et après modification (structure, fonctions, hooks, changements, feedback)
+Rapport à valider par l’utilisateur avant toute implémentation
+Validation explicite de l’utilisateur (OBLIGATOIRE)
+ Plan validé par l’utilisateur à la date : ___
