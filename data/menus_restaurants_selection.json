@@ -1,0 +1,69 @@
+[
+  {
+    "marque": "Pitaya",
+    "type": "restaurant asiatique street food",
+    "plats": [
+      {"nom": "Pad Thaï poulet", "portion": "bol", "kcal": 650},
+      {"nom": "Bo Bun bœuf", "portion": "bol", "kcal": 600},
+      {"nom": "Nasi Goreng", "portion": "bol", "kcal": 700},
+      {"nom": "Curry vert poulet", "portion": "bol", "kcal": 550},
+      {"nom": "Wok légumes", "portion": "bol", "kcal": 350},
+      {"nom": "Riz cantonais", "portion": "bol", "kcal": 400},
+      {"nom": "Nouilles sautées", "portion": "bol", "kcal": 450}
+    ]
+  },
+  {
+    "marque": "Subway",
+    "type": "sandwicherie internationale",
+    "plats": [
+      {"nom": "Sub Poulet Teriyaki", "portion": "30cm", "kcal": 480},
+      {"nom": "Sub Steak & Cheese", "portion": "30cm", "kcal": 600},
+      {"nom": "Sub Végétarien", "portion": "30cm", "kcal": 420},
+      {"nom": "Cookie Subway", "portion": "1 pièce", "kcal": 210},
+      {"nom": "Chips Lay's Subway", "portion": "sachet", "kcal": 140}
+    ]
+  },
+  {
+    "marque": "Starbucks",
+    "type": "café international",
+    "plats": [
+      {"nom": "Cappuccino", "portion": "Tall (35cl)", "kcal": 120},
+      {"nom": "Frappuccino Caramel", "portion": "Grande (47cl)", "kcal": 320},
+      {"nom": "Muffin myrtille", "portion": "1 pièce", "kcal": 420},
+      {"nom": "Cookie chocolat", "portion": "1 pièce", "kcal": 390},
+      {"nom": "Cheesecake", "portion": "part", "kcal": 350}
+    ]
+  },
+  {
+    "marque": "Class'Croute",
+    "type": "sandwicherie française",
+    "plats": [
+      {"nom": "Salade César", "portion": "barquette", "kcal": 350},
+      {"nom": "Wrap poulet curry", "portion": "1 pièce", "kcal": 320},
+      {"nom": "Tarte tomate chèvre", "portion": "part", "kcal": 280},
+      {"nom": "Brownie", "portion": "1 pièce", "kcal": 370}
+    ]
+  },
+  {
+    "marque": "Bamboo Sushi",
+    "type": "restaurant japonais",
+    "plats": [
+      {"nom": "Sushi saumon Bamboo", "portion": "pièce", "kcal": 40},
+      {"nom": "Maki avocat Bamboo", "portion": "pièce", "kcal": 30},
+      {"nom": "California crevette Bamboo", "portion": "pièce", "kcal": 45},
+      {"nom": "Gyoza Bamboo", "portion": "pièce", "kcal": 60},
+      {"nom": "Soupe miso Bamboo", "portion": "bol", "kcal": 60}
+    ]
+  },
+  {
+    "marque": "Royal Buffet Tours",
+    "type": "buffet asiatique",
+    "plats": [
+      {"nom": "Nems au porc Royal Buffet", "portion": "pièce", "kcal": 90},
+      {"nom": "Samoussa Royal Buffet", "portion": "pièce", "kcal": 80},
+      {"nom": "Poulet caramel Royal Buffet", "portion": "100g", "kcal": 180},
+      {"nom": "Riz cantonais Royal Buffet", "portion": "100g", "kcal": 140},
+      {"nom": "Nouilles sautées Royal Buffet", "portion": "100g", "kcal": 150}
+    ]
+  }
+]

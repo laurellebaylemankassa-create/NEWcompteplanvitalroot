@@ -1,29 +1,96 @@
+const referentielAliments = [
+            // Bonbons et confiseries
+            { nom: "Maltesers", categorie: "confiserie", sousCategorie: "Chocolat", marque: "Maltesers", kcal: 150, qn: 1, portionDefaut: "25g", unite: "g", alternatives: ["M&M’s", "Smarties"] },
+            { nom: "M&M’s", categorie: "confiserie", sousCategorie: "Chocolat", marque: "M&M’s", kcal: 140, qn: 1, portionDefaut: "25g", unite: "g", alternatives: ["Maltesers", "Smarties"] },
+            { nom: "Smarties", categorie: "confiserie", sousCategorie: "Chocolat", marque: "Smarties", kcal: 135, qn: 1, portionDefaut: "25g", unite: "g", alternatives: ["M&M’s", "Maltesers"] },
+            { nom: "Dragibus Haribo", categorie: "confiserie", sousCategorie: "Bonbon gélifié", marque: "Haribo", kcal: 90, qn: 1, portionDefaut: "20g", unite: "g", alternatives: ["Tagada Haribo", "Carambar"] },
+            { nom: "Tagada Haribo", categorie: "confiserie", sousCategorie: "Bonbon gélifié", marque: "Haribo", kcal: 85, qn: 1, portionDefaut: "20g", unite: "g", alternatives: ["Dragibus Haribo", "Carambar"] },
+            { nom: "Carambar", categorie: "confiserie", sousCategorie: "Caramel", marque: "Carambar", kcal: 40, qn: 1, portionDefaut: "1 pièce", unite: "piece", alternatives: ["Dragibus Haribo", "Tagada Haribo"] },
+            { nom: "Fraise Pik Haribo", categorie: "confiserie", sousCategorie: "Bonbon acidulé", marque: "Haribo", kcal: 80, qn: 1, portionDefaut: "20g", unite: "g", alternatives: ["Dragibus Haribo", "Tagada Haribo"] },
+            { nom: "Bonbons gélifiés", categorie: "confiserie", sousCategorie: "Bonbon gélifié", marque: null, kcal: 90, qn: 1, portionDefaut: "20g", unite: "g", alternatives: ["Dragibus Haribo", "Tagada Haribo"] },
+            { nom: "Sucette Chupa Chups", categorie: "confiserie", sousCategorie: "Sucette", marque: "Chupa Chups", kcal: 45, qn: 1, portionDefaut: "1 pièce", unite: "piece", alternatives: ["Carambar", "Bonbons gélifiés"] },
+            { nom: "Bonbons acidulés", categorie: "confiserie", sousCategorie: "Bonbon acidulé", marque: null, kcal: 85, qn: 1, portionDefaut: "20g", unite: "g", alternatives: ["Fraise Pik Haribo", "Dragibus Haribo"] },
+            { nom: "Bonbons réglisse", categorie: "confiserie", sousCategorie: "Bonbon réglisse", marque: null, kcal: 80, qn: 1, portionDefaut: "20g", unite: "g", alternatives: ["Bonbons gélifiés", "Carambar"] },
+            { nom: "Bonbons menthe", categorie: "confiserie", sousCategorie: "Bonbon menthe", marque: null, kcal: 70, qn: 1, portionDefaut: "20g", unite: "g", alternatives: ["Bonbons gélifiés", "Bonbons réglisse"] },
+          // Brochettes japonaises (Yakitori)
+          { nom: "Yakitori poulet", categorie: "asiatique", sousCategorie: "Brochette japonaise", marque: null, kcal: 80, qn: 1, portionDefaut: "1 brochette", unite: "piece", alternatives: ["Yakitori bœuf", "Yakitori fromage"] },
+          { nom: "Yakitori bœuf", categorie: "asiatique", sousCategorie: "Brochette japonaise", marque: null, kcal: 90, qn: 2, portionDefaut: "1 brochette", unite: "piece", alternatives: ["Yakitori poulet", "Yakitori fromage"] },
+          { nom: "Yakitori fromage", categorie: "asiatique", sousCategorie: "Brochette japonaise", marque: null, kcal: 110, qn: 3, portionDefaut: "1 brochette", unite: "piece", alternatives: ["Yakitori poulet", "Yakitori légumes"] },
+          { nom: "Yakitori légumes", categorie: "asiatique", sousCategorie: "Brochette japonaise", marque: null, kcal: 60, qn: 1, portionDefaut: "1 brochette", unite: "piece", alternatives: ["Yakitori poulet", "Yakitori crevette"] },
+          { nom: "Yakitori crevette", categorie: "asiatique", sousCategorie: "Brochette japonaise", marque: null, kcal: 70, qn: 1, portionDefaut: "1 brochette", unite: "piece", alternatives: ["Yakitori légumes", "Yakitori saumon"] },
+          { nom: "Yakitori saumon", categorie: "asiatique", sousCategorie: "Brochette japonaise", marque: null, kcal: 85, qn: 2, portionDefaut: "1 brochette", unite: "piece", alternatives: ["Yakitori crevette", "Yakitori poulet"] },
+          { nom: "Yakitori porc", categorie: "asiatique", sousCategorie: "Brochette japonaise", marque: null, kcal: 95, qn: 2, portionDefaut: "1 brochette", unite: "piece", alternatives: ["Yakitori poulet", "Yakitori bœuf"] },
+          { nom: "Yakitori tsukune (boulette)", categorie: "asiatique", sousCategorie: "Brochette japonaise", marque: null, kcal: 100, qn: 3, portionDefaut: "1 brochette", unite: "piece", alternatives: ["Yakitori poulet", "Yakitori bœuf"] },
+        // Pitaya
+        { nom: "Pad Thaï poulet", categorie: "asiatique", sousCategorie: "Pitaya", marque: "Pitaya", kcal: 650, qn: 3, portionDefaut: "bol", unite: "bol", alternatives: ["Bo Bun bœuf", "Nasi Goreng"] },
+        { nom: "Bo Bun bœuf", categorie: "asiatique", sousCategorie: "Pitaya", marque: "Pitaya", kcal: 600, qn: 2, portionDefaut: "bol", unite: "bol", alternatives: ["Pad Thaï poulet", "Nasi Goreng"] },
+        { nom: "Nasi Goreng", categorie: "asiatique", sousCategorie: "Pitaya", marque: "Pitaya", kcal: 700, qn: 3, portionDefaut: "bol", unite: "bol", alternatives: ["Pad Thaï poulet", "Bo Bun bœuf"] },
+        { nom: "Curry vert poulet", categorie: "asiatique", sousCategorie: "Pitaya", marque: "Pitaya", kcal: 550, qn: 2, portionDefaut: "bol", unite: "bol", alternatives: ["Pad Thaï poulet", "Wok légumes"] },
+        { nom: "Wok légumes", categorie: "asiatique", sousCategorie: "Pitaya", marque: "Pitaya", kcal: 350, qn: 1, portionDefaut: "bol", unite: "bol", alternatives: ["Curry vert poulet", "Riz cantonais"] },
+        { nom: "Riz cantonais", categorie: "asiatique", sousCategorie: "Pitaya", marque: "Pitaya", kcal: 400, qn: 2, portionDefaut: "bol", unite: "bol", alternatives: ["Nouilles sautées", "Wok légumes"] },
+        { nom: "Nouilles sautées", categorie: "asiatique", sousCategorie: "Pitaya", marque: "Pitaya", kcal: 450, qn: 2, portionDefaut: "bol", unite: "bol", alternatives: ["Riz cantonais", "Pad Thaï poulet"] },
+
+        // Subway
+        { nom: "Sub Poulet Teriyaki", categorie: "sandwich", sousCategorie: "Subway", marque: "Subway", kcal: 480, qn: 2, portionDefaut: "30cm", unite: "sandwich", alternatives: ["Sub Steak & Cheese", "Sub Végétarien"] },
+        { nom: "Sub Steak & Cheese", categorie: "sandwich", sousCategorie: "Subway", marque: "Subway", kcal: 600, qn: 3, portionDefaut: "30cm", unite: "sandwich", alternatives: ["Sub Poulet Teriyaki", "Sub Végétarien"] },
+        { nom: "Sub Végétarien", categorie: "sandwich", sousCategorie: "Subway", marque: "Subway", kcal: 420, qn: 2, portionDefaut: "30cm", unite: "sandwich", alternatives: ["Sub Poulet Teriyaki", "Sub Steak & Cheese"] },
+        { nom: "Cookie Subway", categorie: "snack", sousCategorie: "Subway", marque: "Subway", kcal: 210, qn: 4, portionDefaut: "1 pièce", unite: "piece", alternatives: ["Chips Lay's Subway"] },
+        { nom: "Chips Lay's Subway", categorie: "snack", sousCategorie: "Subway", marque: "Subway", kcal: 140, qn: 1, portionDefaut: "sachet", unite: "sachet", alternatives: ["Cookie Subway"] },
+
+        // Starbucks
+        { nom: "Cappuccino", categorie: "boisson", sousCategorie: "Starbucks", marque: "Starbucks", kcal: 120, qn: 1, portionDefaut: "Tall (35cl)", unite: "cl", alternatives: ["Frappuccino Caramel"] },
+        { nom: "Frappuccino Caramel", categorie: "boisson", sousCategorie: "Starbucks", marque: "Starbucks", kcal: 320, qn: 4, portionDefaut: "Grande (47cl)", unite: "cl", alternatives: ["Cappuccino"] },
+        { nom: "Muffin myrtille", categorie: "snack", sousCategorie: "Starbucks", marque: "Starbucks", kcal: 420, qn: 4, portionDefaut: "1 pièce", unite: "piece", alternatives: ["Cookie chocolat", "Cheesecake"] },
+        { nom: "Cookie chocolat", categorie: "snack", sousCategorie: "Starbucks", marque: "Starbucks", kcal: 390, qn: 4, portionDefaut: "1 pièce", unite: "piece", alternatives: ["Muffin myrtille", "Cheesecake"] },
+        { nom: "Cheesecake", categorie: "dessert", sousCategorie: "Starbucks", marque: "Starbucks", kcal: 350, qn: 4, portionDefaut: "part", unite: "part", alternatives: ["Cookie chocolat", "Muffin myrtille"] },
+
+        // Class'Croute
+        { nom: "Salade César", categorie: "salade", sousCategorie: "Class'Croute", marque: "Class'Croute", kcal: 350, qn: 1, portionDefaut: "barquette", unite: "barquette", alternatives: ["Wrap poulet curry"] },
+        { nom: "Wrap poulet curry", categorie: "sandwich", sousCategorie: "Class'Croute", marque: "Class'Croute", kcal: 320, qn: 2, portionDefaut: "1 pièce", unite: "piece", alternatives: ["Salade César"] },
+        { nom: "Tarte tomate chèvre", categorie: "tarte", sousCategorie: "Class'Croute", marque: "Class'Croute", kcal: 280, qn: 3, portionDefaut: "part", unite: "part", alternatives: ["Brownie"] },
+        { nom: "Brownie", categorie: "snack", sousCategorie: "Class'Croute", marque: "Class'Croute", kcal: 370, qn: 4, portionDefaut: "1 pièce", unite: "piece", alternatives: ["Tarte tomate chèvre"] },
+
+        // Bamboo Sushi
+        { nom: "Sushi saumon Bamboo", categorie: "asiatique", sousCategorie: "Bamboo Sushi", marque: "Bamboo Sushi", kcal: 40, qn: 1, portionDefaut: "pièce", unite: "piece", alternatives: ["Maki avocat Bamboo"] },
+        { nom: "Maki avocat Bamboo", categorie: "asiatique", sousCategorie: "Bamboo Sushi", marque: "Bamboo Sushi", kcal: 30, qn: 1, portionDefaut: "pièce", unite: "piece", alternatives: ["Sushi saumon Bamboo"] },
+        { nom: "California crevette Bamboo", categorie: "asiatique", sousCategorie: "Bamboo Sushi", marque: "Bamboo Sushi", kcal: 45, qn: 1, portionDefaut: "pièce", unite: "piece", alternatives: ["Gyoza Bamboo"] },
+        { nom: "Gyoza Bamboo", categorie: "asiatique", sousCategorie: "Bamboo Sushi", marque: "Bamboo Sushi", kcal: 60, qn: 2, portionDefaut: "pièce", unite: "piece", alternatives: ["California crevette Bamboo"] },
+        { nom: "Soupe miso Bamboo", categorie: "asiatique", sousCategorie: "Bamboo Sushi", marque: "Bamboo Sushi", kcal: 60, qn: 1, portionDefaut: "bol", unite: "bol", alternatives: ["Gyoza Bamboo"] },
+
+        // Royal Buffet Tours
+        { nom: "Nems au porc Royal Buffet", categorie: "asiatique", sousCategorie: "Royal Buffet Tours", marque: "Royal Buffet Tours", kcal: 90, qn: 2, portionDefaut: "pièce", unite: "piece", alternatives: ["Samoussa Royal Buffet"] },
+        { nom: "Samoussa Royal Buffet", categorie: "asiatique", sousCategorie: "Royal Buffet Tours", marque: "Royal Buffet Tours", kcal: 80, qn: 2, portionDefaut: "pièce", unite: "piece", alternatives: ["Nems au porc Royal Buffet"] },
+        { nom: "Poulet caramel Royal Buffet", categorie: "asiatique", sousCategorie: "Royal Buffet Tours", marque: "Royal Buffet Tours", kcal: 180, qn: 2, portionDefaut: "100g", unite: "g", alternatives: ["Riz cantonais Royal Buffet"] },
+        { nom: "Riz cantonais Royal Buffet", categorie: "asiatique", sousCategorie: "Royal Buffet Tours", marque: "Royal Buffet Tours", kcal: 140, qn: 2, portionDefaut: "100g", unite: "g", alternatives: ["Nouilles sautées Royal Buffet"] },
+        { nom: "Nouilles sautées Royal Buffet", categorie: "asiatique", sousCategorie: "Royal Buffet Tours", marque: "Royal Buffet Tours", kcal: 150, qn: 2, portionDefaut: "100g", unite: "g", alternatives: ["Riz cantonais Royal Buffet"] },
+      // Snacks / Cinéma
+      { nom: "Popcorn sucré", categorie: "snack", sousCategorie: "Cinéma", marque: null, kcal: 120, qn: 1, portionDefaut: "30g", unite: "g", alternatives: ["Popcorn salé", "Chips", "Bonbons"] },
+    // Buffet japonais
+    { nom: "Sushi saumon", categorie: "asiatique", sousCategorie: "Buffet japonais", marque: null, kcal: 40, qn: 1, portionDefaut: "1 pièce", unite: "piece", alternatives: ["Sushi thon", "Sashimi"] },
+    { nom: "Sashimi thon", categorie: "asiatique", sousCategorie: "Buffet japonais", marque: null, kcal: 35, qn: 1, portionDefaut: "1 pièce", unite: "piece", alternatives: ["Sushi saumon", "Sashimi saumon"] },
+    { nom: "Maki concombre", categorie: "asiatique", sousCategorie: "Buffet japonais", marque: null, kcal: 30, qn: 1, portionDefaut: "1 pièce", unite: "piece", alternatives: ["Maki avocat", "Maki saumon"] },
+    { nom: "Tempura crevette", categorie: "asiatique", sousCategorie: "Buffet japonais", marque: null, kcal: 60, qn: 1, portionDefaut: "1 pièce", unite: "piece", alternatives: ["Tempura légumes", "Gyoza"] },
+    { nom: "Yakitori poulet", categorie: "asiatique", sousCategorie: "Buffet japonais", marque: null, kcal: 80, qn: 1, portionDefaut: "1 brochette", unite: "piece", alternatives: ["Yakitori bœuf", "Yakitori légumes"] },
+
+    // Buffet coréen
+    { nom: "Bibimbap", categorie: "asiatique", sousCategorie: "Buffet coréen", marque: null, kcal: 420, qn: 2, portionDefaut: "1 bol", unite: "bol", alternatives: ["Japchae", "Bulgogi"] },
+    { nom: "Japchae", categorie: "asiatique", sousCategorie: "Buffet coréen", marque: null, kcal: 350, qn: 2, portionDefaut: "1 assiette", unite: "assiette", alternatives: ["Bibimbap", "Bulgogi"] },
+    { nom: "Bulgogi", categorie: "asiatique", sousCategorie: "Buffet coréen", marque: null, kcal: 400, qn: 2, portionDefaut: "100g", unite: "g", alternatives: ["Bibimbap", "Japchae"] },
+    { nom: "Kimchi", categorie: "asiatique", sousCategorie: "Buffet coréen", marque: null, kcal: 25, qn: 1, portionDefaut: "50g", unite: "g", alternatives: ["Banchan", "Japchae"] },
+
+    // Buffet africain (Sénégal, Congo, Côte d’Ivoire)
+    { nom: "Poulet yassa", categorie: "africain", sousCategorie: "Buffet sénégalais", marque: null, kcal: 220, qn: 2, portionDefaut: "100g", unite: "g", alternatives: ["Poisson yassa", "Thieboudienne"] },
+    { nom: "Thieboudienne", categorie: "africain", sousCategorie: "Buffet sénégalais", marque: null, kcal: 250, qn: 2, portionDefaut: "150g", unite: "g", alternatives: ["Poulet yassa", "Mafé"] },
+    { nom: "Mafé", categorie: "africain", sousCategorie: "Buffet congolais", marque: null, kcal: 300, qn: 2, portionDefaut: "150g", unite: "g", alternatives: ["Poulet yassa", "Thieboudienne"] },
+    { nom: "Foufou", categorie: "africain", sousCategorie: "Buffet congolais", marque: null, kcal: 180, qn: 2, portionDefaut: "100g", unite: "g", alternatives: ["Mafé", "Attiéké"] },
+    { nom: "Attiéké", categorie: "africain", sousCategorie: "Buffet ivoirien", marque: null, kcal: 160, qn: 2, portionDefaut: "100g", unite: "g", alternatives: ["Foufou", "Alloco"] },
+    { nom: "Alloco", categorie: "africain", sousCategorie: "Buffet ivoirien", marque: null, kcal: 220, qn: 2, portionDefaut: "100g", unite: "g", alternatives: ["Attiéké", "Foufou"] },
+
     // Fromages industriels
     { nom: "Kiri", categorie: "laitier", sousCategorie: "Fromage industriel", marque: "Kiri", kcal: 45, qn: 1, portionDefaut: "1 portion", unite: "piece", alternatives: ["Vache qui rit", "Babybel"] },
     { nom: "Babybel", categorie: "laitier", sousCategorie: "Fromage industriel", marque: "Babybel", kcal: 65, qn: 1, portionDefaut: "1 portion", unite: "piece", alternatives: ["Kiri", "Vache qui rit"] },
     { nom: "Vache qui rit", categorie: "laitier", sousCategorie: "Fromage industriel", marque: "Vache qui rit", kcal: 35, qn: 1, portionDefaut: "1 portion", unite: "piece", alternatives: ["Kiri", "Babybel"] },
     { nom: "Apéricube", categorie: "laitier", sousCategorie: "Fromage industriel", marque: "Apéricube", kcal: 12, qn: 1, portionDefaut: "1 cube", unite: "piece", alternatives: ["Kiri", "Vache qui rit"] },
-  // Buffet japonais
-  { nom: "Sushi saumon", categorie: "asiatique", sousCategorie: "Buffet japonais", marque: null, kcal: 40, qn: 1, portionDefaut: "1 pièce", unite: "piece", alternatives: ["Sushi thon", "Sashimi"] },
-  { nom: "Sashimi thon", categorie: "asiatique", sousCategorie: "Buffet japonais", marque: null, kcal: 35, qn: 1, portionDefaut: "1 pièce", unite: "piece", alternatives: ["Sushi saumon", "Sashimi saumon"] },
-  { nom: "Maki concombre", categorie: "asiatique", sousCategorie: "Buffet japonais", marque: null, kcal: 30, qn: 1, portionDefaut: "1 pièce", unite: "piece", alternatives: ["Maki avocat", "Maki saumon"] },
-  { nom: "Tempura crevette", categorie: "asiatique", sousCategorie: "Buffet japonais", marque: null, kcal: 60, qn: 1, portionDefaut: "1 pièce", unite: "piece", alternatives: ["Tempura légumes", "Gyoza"] },
-  { nom: "Yakitori poulet", categorie: "asiatique", sousCategorie: "Buffet japonais", marque: null, kcal: 80, qn: 1, portionDefaut: "1 brochette", unite: "piece", alternatives: ["Yakitori bœuf", "Yakitori légumes"] },
-
-  // Buffet coréen
-  { nom: "Bibimbap", categorie: "asiatique", sousCategorie: "Buffet coréen", marque: null, kcal: 420, qn: 2, portionDefaut: "1 bol", unite: "bol", alternatives: ["Japchae", "Bulgogi"] },
-  { nom: "Japchae", categorie: "asiatique", sousCategorie: "Buffet coréen", marque: null, kcal: 350, qn: 2, portionDefaut: "1 assiette", unite: "assiette", alternatives: ["Bibimbap", "Bulgogi"] },
-  { nom: "Bulgogi", categorie: "asiatique", sousCategorie: "Buffet coréen", marque: null, kcal: 400, qn: 2, portionDefaut: "100g", unite: "g", alternatives: ["Bibimbap", "Japchae"] },
-  { nom: "Kimchi", categorie: "asiatique", sousCategorie: "Buffet coréen", marque: null, kcal: 25, qn: 1, portionDefaut: "50g", unite: "g", alternatives: ["Banchan", "Japchae"] },
-
-  // Buffet africain (Sénégal, Congo, Côte d’Ivoire)
-  { nom: "Poulet yassa", categorie: "africain", sousCategorie: "Buffet sénégalais", marque: null, kcal: 220, qn: 2, portionDefaut: "100g", unite: "g", alternatives: ["Poisson yassa", "Thieboudienne"] },
-  { nom: "Thieboudienne", categorie: "africain", sousCategorie: "Buffet sénégalais", marque: null, kcal: 250, qn: 2, portionDefaut: "150g", unite: "g", alternatives: ["Poulet yassa", "Mafé"] },
-  { nom: "Mafé", categorie: "africain", sousCategorie: "Buffet congolais", marque: null, kcal: 300, qn: 2, portionDefaut: "150g", unite: "g", alternatives: ["Poulet yassa", "Thieboudienne"] },
-  { nom: "Foufou", categorie: "africain", sousCategorie: "Buffet congolais", marque: null, kcal: 180, qn: 2, portionDefaut: "100g", unite: "g", alternatives: ["Mafé", "Attiéké"] },
-  { nom: "Attiéké", categorie: "africain", sousCategorie: "Buffet ivoirien", marque: null, kcal: 160, qn: 2, portionDefaut: "100g", unite: "g", alternatives: ["Foufou", "Alloco"] },
-  { nom: "Alloco", categorie: "africain", sousCategorie: "Buffet ivoirien", marque: null, kcal: 220, qn: 2, portionDefaut: "100g", unite: "g", alternatives: ["Attiéké", "Foufou"] },
-const referentielAliments = [
   // ═══════════════════════════════════════════════════════════
   // 🍚 FÉCULENTS
   // ═══════════════════════════════════════════════════════════
