@@ -11,6 +11,7 @@ function formatDateFr(dateString) {
 }
 
 export default function SuiviPoids() {
+    const [masquerInfos, setMasquerInfos] = useState(true)
   const [poids, setPoids] = useState('')
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10))
   const [historique, setHistorique] = useState([])
@@ -312,6 +313,9 @@ export default function SuiviPoids() {
     <div style={styles.container}>
       <h1 style={styles.title}>Suivi de mon poids réel</h1>
       <div style={styles.subtitle}>Chaque évolution compte, même les plus petites.</div>
+      <button style={{...styles.button, marginBottom: '1rem'}} onClick={() => setMasquerInfos(v => !v)}>
+        {masquerInfos ? 'Afficher les informations sensibles' : 'Masquer les informations sensibles'}
+      </button>
 
       {/* Formulaire d'enregistrement */}
       <form style={styles.form} onSubmit={handleSubmit}>
@@ -361,7 +365,7 @@ export default function SuiviPoids() {
       {/* Poids actuel */}
       {poidsActuel !== null && (
         <div style={styles.poidsActuel}>
-          Poids actuel : {poidsActuel.toFixed(1)} kg
+          Poids actuel : {masquerInfos ? '••••' : `${poidsActuel.toFixed(1)} kg`}
         </div>
       )}
 
@@ -417,6 +421,13 @@ export default function SuiviPoids() {
 
       {/* Historique */}
       <div style={styles.historiqueBlock}>
+        <div style={styles.historiqueTitle}>Informations de suivi</div>
+        <ul style={{ listStyle: 'none', padding: 0 }}>
+          <li><b>Poids de départ :</b> {masquerInfos ? '••••' : `${poidsDepart} kg`}</li>
+          <li><b>Objectif :</b> {masquerInfos ? '••••' : `${objectif} kg`}</li>
+          <li><b>Délai :</b> {masquerInfos ? '••••' : (reste !== null ? `${reste.toFixed(1)} kg à perdre` : '') + (delai ? ` (${delai} mois)` : '')}</li>
+          <li><b>Pourquoi :</b> {pourquoi}</li>
+        </ul>
         <div style={styles.historiqueTitle}>Historique des pesées</div>
         <ul style={styles.historiqueList}>
           {historique.map((item) => (

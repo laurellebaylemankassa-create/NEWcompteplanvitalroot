@@ -19,6 +19,7 @@ export default function ProfilPage() {
   const [objectif, setObjectif] = useState('')
   const [pourquoi, setPourquoi] = useState('')
   const [delai, setDelai] = useState('')
+  const [masquerInfos, setMasquerInfos] = useState(true)
   const [message, setMessage] = useState('')
   const [poidsActuel, setPoidsActuel] = useState(null)
   const [afficherPoidsActuel, setAfficherPoidsActuel] = useState(false)
@@ -350,23 +351,26 @@ export default function ProfilPage() {
       {dernierProfil && !editMode && (
         <div style={styles.recapBlock}>
           <div style={styles.recapTitle}>Dernier profil enregistré</div>
+          <button style={{...styles.button, marginBottom: '1rem'}} onClick={() => setMasquerInfos(v => !v)}>
+            {masquerInfos ? 'Afficher les informations sensibles' : 'Masquer les informations sensibles'}
+          </button>
           <ul style={styles.recapList}>
-            <li><span style={styles.recapLabel}>Poids de départ :</span> {dernierProfil.poids_de_depart} kg</li>
-            <li><span style={styles.recapLabel}>Taille :</span> {dernierProfil.taille} cm</li>
-            <li><span style={styles.recapLabel}>Âge :</span> {dernierProfil.age} ans</li>
-            <li><span style={styles.recapLabel}>Objectif :</span> {dernierProfil.objectif} kg</li>
-            <li><span style={styles.recapLabel}>Délai :</span> {dernierProfil.delai} mois</li>
+            <li><span style={styles.recapLabel}>Poids de départ :</span> {masquerInfos ? '••••' : `${dernierProfil.poids_de_depart} kg`}</li>
+            <li><span style={styles.recapLabel}>Taille :</span> {masquerInfos ? '••••' : `${dernierProfil.taille} cm`}</li>
+            <li><span style={styles.recapLabel}>Âge :</span> {masquerInfos ? '••••' : `${dernierProfil.age} ans`}</li>
+            <li><span style={styles.recapLabel}>Objectif :</span> {masquerInfos ? '••••' : `${dernierProfil.objectif} kg`}</li>
+            <li><span style={styles.recapLabel}>Délai :</span> {masquerInfos ? '••••' : `${dernierProfil.delai} mois`}</li>
             <li><span style={styles.recapLabel}>Pourquoi :</span> {dernierProfil.pourquoi}</li>
-            <li><span style={styles.recapLabel}>Besoin calorique :</span> {dernierProfil.besoin_calorique} kcal</li>
+            <li><span style={styles.recapLabel}>Besoin calorique :</span> {masquerInfos ? '••••' : `${dernierProfil.besoin_calorique} kcal`}</li>
             {typeof dernierProfil.besoin_objectif === "number" && dernierProfil.besoin_objectif > 0 && (
-              <li><span style={styles.recapLabel}>Objectif calorique (perte de poids) :</span> {dernierProfil.besoin_objectif} kcal</li>
+              <li><span style={styles.recapLabel}>Objectif calorique (perte de poids) :</span> {masquerInfos ? '••••' : `${dernierProfil.besoin_objectif} kcal`}</li>
             )}
           </ul>
           <div style={styles.recapDate}>
             Profil créé le {formatDateTime(dernierProfil.created_at)}
           </div>
           <div style={styles.motivation}>
-            Courage ! En respectant ce plan, tu atteindras ton objectif de {dernierProfil.objectif} kg en {dernierProfil.delai} mois.
+            Courage ! En respectant ce plan, tu atteindras ton objectif de {masquerInfos ? '••••' : dernierProfil.objectif} kg en {masquerInfos ? '••••' : dernierProfil.delai} mois.
           </div>
           <button style={styles.editButton} onClick={() => setEditMode(true)}>
             Modifier mon profil
