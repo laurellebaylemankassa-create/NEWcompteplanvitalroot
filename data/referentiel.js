@@ -1,3 +1,28 @@
+    // Fromages industriels
+    { nom: "Kiri", categorie: "laitier", sousCategorie: "Fromage industriel", marque: "Kiri", kcal: 45, qn: 1, portionDefaut: "1 portion", unite: "piece", alternatives: ["Vache qui rit", "Babybel"] },
+    { nom: "Babybel", categorie: "laitier", sousCategorie: "Fromage industriel", marque: "Babybel", kcal: 65, qn: 1, portionDefaut: "1 portion", unite: "piece", alternatives: ["Kiri", "Vache qui rit"] },
+    { nom: "Vache qui rit", categorie: "laitier", sousCategorie: "Fromage industriel", marque: "Vache qui rit", kcal: 35, qn: 1, portionDefaut: "1 portion", unite: "piece", alternatives: ["Kiri", "Babybel"] },
+    { nom: "Apéricube", categorie: "laitier", sousCategorie: "Fromage industriel", marque: "Apéricube", kcal: 12, qn: 1, portionDefaut: "1 cube", unite: "piece", alternatives: ["Kiri", "Vache qui rit"] },
+  // Buffet japonais
+  { nom: "Sushi saumon", categorie: "asiatique", sousCategorie: "Buffet japonais", marque: null, kcal: 40, qn: 1, portionDefaut: "1 pièce", unite: "piece", alternatives: ["Sushi thon", "Sashimi"] },
+  { nom: "Sashimi thon", categorie: "asiatique", sousCategorie: "Buffet japonais", marque: null, kcal: 35, qn: 1, portionDefaut: "1 pièce", unite: "piece", alternatives: ["Sushi saumon", "Sashimi saumon"] },
+  { nom: "Maki concombre", categorie: "asiatique", sousCategorie: "Buffet japonais", marque: null, kcal: 30, qn: 1, portionDefaut: "1 pièce", unite: "piece", alternatives: ["Maki avocat", "Maki saumon"] },
+  { nom: "Tempura crevette", categorie: "asiatique", sousCategorie: "Buffet japonais", marque: null, kcal: 60, qn: 1, portionDefaut: "1 pièce", unite: "piece", alternatives: ["Tempura légumes", "Gyoza"] },
+  { nom: "Yakitori poulet", categorie: "asiatique", sousCategorie: "Buffet japonais", marque: null, kcal: 80, qn: 1, portionDefaut: "1 brochette", unite: "piece", alternatives: ["Yakitori bœuf", "Yakitori légumes"] },
+
+  // Buffet coréen
+  { nom: "Bibimbap", categorie: "asiatique", sousCategorie: "Buffet coréen", marque: null, kcal: 420, qn: 2, portionDefaut: "1 bol", unite: "bol", alternatives: ["Japchae", "Bulgogi"] },
+  { nom: "Japchae", categorie: "asiatique", sousCategorie: "Buffet coréen", marque: null, kcal: 350, qn: 2, portionDefaut: "1 assiette", unite: "assiette", alternatives: ["Bibimbap", "Bulgogi"] },
+  { nom: "Bulgogi", categorie: "asiatique", sousCategorie: "Buffet coréen", marque: null, kcal: 400, qn: 2, portionDefaut: "100g", unite: "g", alternatives: ["Bibimbap", "Japchae"] },
+  { nom: "Kimchi", categorie: "asiatique", sousCategorie: "Buffet coréen", marque: null, kcal: 25, qn: 1, portionDefaut: "50g", unite: "g", alternatives: ["Banchan", "Japchae"] },
+
+  // Buffet africain (Sénégal, Congo, Côte d’Ivoire)
+  { nom: "Poulet yassa", categorie: "africain", sousCategorie: "Buffet sénégalais", marque: null, kcal: 220, qn: 2, portionDefaut: "100g", unite: "g", alternatives: ["Poisson yassa", "Thieboudienne"] },
+  { nom: "Thieboudienne", categorie: "africain", sousCategorie: "Buffet sénégalais", marque: null, kcal: 250, qn: 2, portionDefaut: "150g", unite: "g", alternatives: ["Poulet yassa", "Mafé"] },
+  { nom: "Mafé", categorie: "africain", sousCategorie: "Buffet congolais", marque: null, kcal: 300, qn: 2, portionDefaut: "150g", unite: "g", alternatives: ["Poulet yassa", "Thieboudienne"] },
+  { nom: "Foufou", categorie: "africain", sousCategorie: "Buffet congolais", marque: null, kcal: 180, qn: 2, portionDefaut: "100g", unite: "g", alternatives: ["Mafé", "Attiéké"] },
+  { nom: "Attiéké", categorie: "africain", sousCategorie: "Buffet ivoirien", marque: null, kcal: 160, qn: 2, portionDefaut: "100g", unite: "g", alternatives: ["Foufou", "Alloco"] },
+  { nom: "Alloco", categorie: "africain", sousCategorie: "Buffet ivoirien", marque: null, kcal: 220, qn: 2, portionDefaut: "100g", unite: "g", alternatives: ["Attiéké", "Foufou"] },
 const referentielAliments = [
   // ═══════════════════════════════════════════════════════════
   // 🍚 FÉCULENTS
@@ -2872,5 +2897,60 @@ const referentielAliments = [
     alternatives: ["Confiture maison", "Compote sans sucre"] 
   },
 ];
+
+// ENRICHISSEMENT 2025-11-20 : Ajout des aliments manquants et chaînes
+const correctifsAliments = [
+  // Boissons
+  { nom: "Coca-Cola", categorie: "boisson", sousCategorie: "Soda", marque: "Coca-Cola", kcal: 42, qn: 1, portionDefaut: "100ml", unite: "ml", alternatives: ["Pepsi", "Fanta"] },
+  { nom: "Pepsi", categorie: "boisson", sousCategorie: "Soda", marque: "Pepsi", kcal: 41, qn: 1, portionDefaut: "100ml", unite: "ml", alternatives: ["Coca-Cola", "Fanta"] },
+  { nom: "Fanta", categorie: "boisson", sousCategorie: "Soda", marque: "Fanta", kcal: 40, qn: 1, portionDefaut: "100ml", unite: "ml", alternatives: ["Coca-Cola", "Pepsi"] },
+  { nom: "Fuze Tea", categorie: "boisson", sousCategorie: "Thé glacé", marque: "Fuze Tea", kcal: 19, qn: 1, portionDefaut: "100ml", unite: "ml", alternatives: ["Ice Tea", "Freeze"] },
+  { nom: "Freeze", categorie: "boisson", sousCategorie: "Soda", marque: "Freeze", kcal: 40, qn: 1, portionDefaut: "100ml", unite: "ml", alternatives: ["Fanta", "Pepsi"] },
+
+  // Snacks cinéma
+  { nom: "Popcorn sucré cinéma", categorie: "snack", sousCategorie: "Popcorn", marque: null, kcal: 420, qn: 2, portionDefaut: "100g", unite: "g", alternatives: ["Popcorn salé", "Nachos"] },
+
+  // Glaces
+  { nom: "Glace vanille Häagen-Dazs", categorie: "snack", sousCategorie: "Glace", marque: "Häagen-Dazs", kcal: 210, qn: 2, portionDefaut: "100ml", unite: "ml", alternatives: ["Glace chocolat Häagen-Dazs", "Glace Ben & Jerry’s"] },
+  { nom: "Glace chocolat Häagen-Dazs", categorie: "snack", sousCategorie: "Glace", marque: "Häagen-Dazs", kcal: 220, qn: 2, portionDefaut: "100ml", unite: "ml", alternatives: ["Glace vanille Häagen-Dazs", "Glace Ben & Jerry’s"] },
+  { nom: "Glace fraise Magnum", categorie: "snack", sousCategorie: "Glace", marque: "Magnum", kcal: 230, qn: 2, portionDefaut: "100ml", unite: "ml", alternatives: ["Glace vanille Magnum", "Glace Ben & Jerry’s"] },
+
+  // Cuisine asiatique et chaînes
+  { nom: "Bibimbap", categorie: "asiatique", sousCategorie: "Coréen", marque: null, kcal: 420, qn: 2, portionDefaut: "1 bol", unite: "bol", alternatives: ["Bulgogi", "Japchae"] },
+  { nom: "Bo Bun", categorie: "asiatique", sousCategorie: "Vietnamien", marque: null, kcal: 480, qn: 2, portionDefaut: "1 bol", unite: "bol", alternatives: ["Pho", "Nem"] },
+  { nom: "Pho", categorie: "asiatique", sousCategorie: "Vietnamien", marque: null, kcal: 350, qn: 2, portionDefaut: "1 bol", unite: "bol", alternatives: ["Bo Bun", "Nem"] },
+  { nom: "Pad Thaï", categorie: "asiatique", sousCategorie: "Thaï", marque: null, kcal: 550, qn: 2, portionDefaut: "1 assiette", unite: "assiette", alternatives: ["Bo Bun", "Nouilles sautées"] },
+  { nom: "Gyoza", categorie: "asiatique", sousCategorie: "Entrée", marque: null, kcal: 50, qn: 1, portionDefaut: "1 pièce", unite: "piece", alternatives: ["Tempura", "Spring roll"] },
+  { nom: "Tempura", categorie: "asiatique", sousCategorie: "Entrée", marque: null, kcal: 60, qn: 1, portionDefaut: "1 pièce", unite: "piece", alternatives: ["Gyoza", "Spring roll"] },
+
+  // Chaînes de restauration rapide
+  { nom: "Big Mac", categorie: "fast-food", sousCategorie: "Burger", marque: "McDonald’s", kcal: 503, qn: 1, portionDefaut: "1 burger", unite: "piece", alternatives: ["McChicken", "Whopper"] },
+  { nom: "Subway Sub", categorie: "fast-food", sousCategorie: "Sandwich", marque: "Subway", kcal: 350, qn: 1, portionDefaut: "1 sandwich", unite: "piece", alternatives: ["Wrap Subway", "Salade Subway"] },
+  { nom: "Pitaya wok", categorie: "fast-food", sousCategorie: "Wok asiatique", marque: "Pitaya", kcal: 600, qn: 2, portionDefaut: "1 box", unite: "box", alternatives: ["Pad Thaï", "Bo Bun"] },
+  { nom: "Class’Croute sandwich", categorie: "fast-food", sousCategorie: "Sandwich", marque: "Class’Croute", kcal: 320, qn: 1, portionDefaut: "1 sandwich", unite: "piece", alternatives: ["Salade Class’Croute", "Wrap Class’Croute"] },
+  { nom: "Wrap KFC", categorie: "fast-food", sousCategorie: "Wrap", marque: "KFC", kcal: 420, qn: 1, portionDefaut: "1 wrap", unite: "piece", alternatives: ["Tacos O’Tacos", "Subway Sub"] },
+  { nom: "Pizza Domino’s", categorie: "fast-food", sousCategorie: "Pizza", marque: "Domino’s Pizza", kcal: 250, qn: 1, portionDefaut: "1 part", unite: "part", alternatives: ["Pizza Hut Pepperoni", "Pizza 4 fromages"] },
+
+  // Buffet chinois
+  { nom: "Nems au porc", categorie: "asiatique", sousCategorie: "Buffet chinois", marque: null, kcal: 90, qn: 1, portionDefaut: "1 pièce", unite: "piece", alternatives: ["Nems aux crevettes", "Samoussa"] },
+  { nom: "Nems aux crevettes", categorie: "asiatique", sousCategorie: "Buffet chinois", marque: null, kcal: 85, qn: 1, portionDefaut: "1 pièce", unite: "piece", alternatives: ["Nems au porc", "Samoussa"] },
+  { nom: "Samoussa", categorie: "asiatique", sousCategorie: "Buffet chinois", marque: null, kcal: 80, qn: 1, portionDefaut: "1 pièce", unite: "piece", alternatives: ["Nems", "Raviolis vapeur"] },
+  { nom: "Raviolis vapeur", categorie: "asiatique", sousCategorie: "Buffet chinois", marque: null, kcal: 60, qn: 1, portionDefaut: "1 pièce", unite: "piece", alternatives: ["Dim sum", "Brioche vapeur"] },
+  { nom: "Brioche vapeur au porc", categorie: "asiatique", sousCategorie: "Buffet chinois", marque: null, kcal: 120, qn: 1, portionDefaut: "1 pièce", unite: "piece", alternatives: ["Brioche vapeur végétarienne", "Raviolis vapeur"] },
+  { nom: "Poulet caramel", categorie: "asiatique", sousCategorie: "Buffet chinois", marque: null, kcal: 180, qn: 2, portionDefaut: "100g", unite: "g", alternatives: ["Poulet citron", "Porc au caramel"] },
+  { nom: "Porc au caramel", categorie: "asiatique", sousCategorie: "Buffet chinois", marque: null, kcal: 200, qn: 2, portionDefaut: "100g", unite: "g", alternatives: ["Poulet caramel", "Canard laqué"] },
+  { nom: "Canard laqué", categorie: "asiatique", sousCategorie: "Buffet chinois", marque: null, kcal: 220, qn: 2, portionDefaut: "100g", unite: "g", alternatives: ["Porc au caramel", "Poulet caramel"] },
+  { nom: "Nouilles sautées", categorie: "asiatique", sousCategorie: "Buffet chinois", marque: null, kcal: 150, qn: 2, portionDefaut: "100g", unite: "g", alternatives: ["Riz cantonais", "Riz nature"] },
+  { nom: "Riz cantonais", categorie: "asiatique", sousCategorie: "Buffet chinois", marque: null, kcal: 140, qn: 2, portionDefaut: "100g", unite: "g", alternatives: ["Nouilles sautées", "Riz nature"] },
+  { nom: "Crevettes sauce piquante", categorie: "asiatique", sousCategorie: "Buffet chinois", marque: null, kcal: 90, qn: 1, portionDefaut: "50g", unite: "g", alternatives: ["Crevettes sautées", "Poulet piquant"] },
+];
+correctifsAliments.forEach(nouveau => {
+  const doublon = referentielAliments.some(existant =>
+    existant.nom === nouveau.nom &&
+    existant.categorie === nouveau.categorie &&
+    (existant.marque === nouveau.marque || (!existant.marque && !nouveau.marque))
+  );
+  if (!doublon) referentielAliments.push(nouveau);
+});
 
 export default referentielAliments;

@@ -433,7 +433,7 @@ export default function SuiviPoids() {
           {historique.map((item) => (
             <li key={item.id || item.date} style={styles.historiqueItem}>
               <span>{formatDateFr(item.date)}</span>
-              <span>{parseFloat(item.poids).toFixed(1)} kg</span>
+              <span>{masquerInfos ? '••••' : `${parseFloat(item.poids).toFixed(1)} kg`}</span>
               <button
                 style={{ ...styles.actionButton, background: '#f39c12', fontSize: '0.9rem', padding: '0.3rem 0.8rem' }}
                 onClick={() => handleEdit(item)}

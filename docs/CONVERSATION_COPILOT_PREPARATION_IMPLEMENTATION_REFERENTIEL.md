@@ -965,3 +965,34 @@ setKcal((quantiteNum * found.kcalParUnite).toFixed(0))  // ✅ Multiplie quantit
 - Se concentrer sur Phase 5 pour avoir une app **fonctionnelle à 100%**
 
 ═══════════════════════════════════════════════════════════════════════════════
+
+
+16:17 20/11/2025
+
+PLAN D’IMPLÉMENTATION – Enrichissement du référentiel alimentaire
+1. Audit initial
+Analyse complète du fichier referentiel.js : structure, catégories existantes, champs utilisés.
+Identification des manques : absence de plats asiatiques, fast-food, sodas, marques, confiseries, snacks cinéma, légumes/poêlées, plats préparés, etc.
+2. Checklist des ajouts
+Catégories : Cuisine asiatique, Fast-food, Sodas/Boissons, Yaourts, Bonbons, Biscuits, Confiseries cinéma, Légumes/poêlées, Plats préparés, Marques diverses.
+Pour chaque catégorie : ajout d’aliments variés, spécialités régionales, produits phares, alternatives, marques connues.
+Format : nom, catégorie, sous-catégorie, marque, kcal, portion, alternatives.
+3. Points de vigilance
+Contrôle anti-doublon : vérification par nom, catégorie, sous-catégorie, marque avant insertion.
+Cohérence des portions et unités.
+Respect de la structure du référentiel.
+Documentation systématique des ajouts.
+4. Procédure de rollback
+Sauvegarde du fichier original avant modification.
+Possibilité de restaurer la version précédente en cas d’anomalie.
+Documentation des changements et rollback dans le Markdown.
+5. Rapport Markdown
+Liste détaillée des catégories et marques ajoutées.
+Détail des entrées (sans doublon).
+Pourcentage d’enrichissement : objectif dépassé (>80 % de contenu supplémentaire).
+Historique des opérations et points de vigilance.
+6. Amélioration continue
+Veille sur les tendances alimentaires et nouvelles marques.
+Ajout régulier de nouveaux produits ou spécialités.
+Synchronisation avec la logique de saisie des repas/défis.
+Si tu veux des détails sur chaque catégorie ou la liste complète des entrées ajoutées, je peux te lister tout le contenu sur demande.
