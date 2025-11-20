@@ -369,9 +369,7 @@ export default function Suivi() {
   let jRelatif = null;
   // Calcul cohérent du jour relatif : J-XX = dateJeune - selectedDate (en jours)
   if (dateJeune && selectedDate) {
-    const dJeune = new Date(dateJeune);
-    const dSel = new Date(selectedDate);
-    jRelatif = Math.ceil((dJeune.setHours(0,0,0,0) - dSel.setHours(0,0,0,0)) / (1000*60*60*24));
+    jRelatif = calculerJourRelatif(dateJeune, selectedDate);
     // Trouver le critère actif (le plus proche <= jRelatif)
     critereActif = criteresPreparation.find((c, idx) => {
       const next = criteresPreparation[idx+1];

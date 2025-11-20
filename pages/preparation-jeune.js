@@ -1,4 +1,4 @@
-  // ...existing code...
+// ...existing code...
 
   // === PHASES MÉTIER STRICTES ===
   const phasesMetier = [
@@ -152,8 +152,13 @@ export default function PreparationJeune() {
     setAujourdhui(new Date());
     // Calcul du J-XX courant
     if (dateStr) {
-      const diff = Math.ceil((new Date(dateStr).setHours(0,0,0,0) - new Date().setHours(0,0,0,0)) / (1000*60*60*24));
+      const diff = calculerJourRelatif(dateStr, new Date());
       setJCourant(diff);
+      // Déclenchement automatique de la modale de validation métier si la date change
+      setIsModalOpen(true);
+    } else {
+      setFeedbackMessage("⛔ Veuillez renseigner la date de début de jeûne pour activer le suivi et la progression.");
+      setPreparationActive(false);
     }
     // Initialisation des critères (localStorage ou valeurs métier)
     let criteresInit = criteresMetier.map(c => ({ ...c, valide: false, dateValidation: null }));
@@ -279,9 +284,64 @@ export default function PreparationJeune() {
     // Feedback visuel (console)
     console.log('Préparation réinitialisée. Source : action utilisateur, bouton réinitialisation.');
   };
+  // === FIN DEBUG PANEL ===
+  // Ajoute ceci dans le corps du composant PreparationJeune (avant le return)
+React.useEffect(() => {
+  console.log('[DEBUG] Date lue (state):', dateJeune);
+  if (typeof window !== 'undefined') {
+    console.log('[DEBUG] Date lue (localStorage):', window.localStorage.getItem('dateJeune'));
+  }
+  console.log('[DEBUG] Jour courant (jCourant):', jCourant);
+  console.log('[DEBUG] Progression:', progression);
+  console.log('[DEBUG] preparationActive:', preparationActive);
+  console.log('[DEBUG] Feedback:', feedbackMessage);
+  console.log('[DEBUG] Critères:', criteres);
+}, [dateJeune, jCourant, progression, preparationActive, feedbackMessage, criteres]);
+
+const DebugPanel = () => (
+  <div style={{background:'#ffe',border:'2px solid #fc0',padding:'12px',marginBottom:'18px',fontSize:'15px'}}>
+    <strong>DEBUG PANEL</strong><br/>
+    Date lue (state): {dateJeune ? dateJeune.toString() : 'null'}<br/>
+    Date lue (localStorage): {typeof window !== 'undefined' ? window.localStorage.getItem('dateJeune') : 'n/a'}<br/>
+    Jour courant (jCourant): {jCourant !== null ? jCourant : 'null'}<br/>
+    Progression: {progression}<br/>
+    preparationActive: {preparationActive ? 'true' : 'false'}<br/>
+    Feedback: {feedbackMessage}<br/>
+    Critères: <pre style={{fontSize:'13px',background:'#fff',padding:'6px',border:'1px solid #ccc'}}>{JSON.stringify(criteres, null, 2)}</pre>
+  </div>
+);
+
+  // Fonction utilitaire pour calculer la date réelle d'un jalon
+  function getDateFromJalon(jalon) {
+    if (!dateJeune) return null;
+    const d = new Date(dateJeune);
+    d.setDate(d.getDate() - (jCourant - jalon));
+    return d;
+  }
+
+  // Fonction pour formater une date
+  function formatDateAffichage(date) {
+    if (!date) return '';
+    return date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+  }
 
   return (
-    <div style={{ maxWidth: 600, margin: "0 auto", padding: "2.5rem 1rem", fontFamily: "system-ui, Arial, sans-serif" }}>
+    <div className="container-preparation">
+      {/* Affichage de la date de début de jeûne */}
+      <div style={{background:'#e3f2fd',borderRadius:8,padding:'10px 18px',marginBottom:18,fontWeight:600,fontSize:'1.08em',color:'#1976d2'}}>
+        Date de début de jeûne : {dateJeune ? formatDateAffichage(dateJeune) : <span style={{color:'#f00'}}>Non renseignée</span>}
+      </div>
+      {/* Affichage dynamique des périodes pour chaque phase */}
+      {phasesMetier.map((phase, idx) => {
+        const dateDebut = getDateFromJalon(phase.debut);
+        const dateFin = getDateFromJalon(phase.fin);
+        return (
+          <div key={phase.nom} style={{background:'#f9fbe7',borderRadius:8,padding:'8px 14px',marginBottom:10}}>
+            <strong>{phase.nom}</strong> — {phase.explication}<br/>
+            <span style={{color:'#388e3c',fontWeight:500}}>Période : {dateDebut ? formatDateAffichage(dateDebut) : '...'} à {dateFin ? formatDateAffichage(dateFin) : '...'}</span>
+          </div>
+        );
+      })}
       <h1 style={{ color: "#1976d2", fontWeight: 800, fontSize: "2.2rem", marginBottom: 18 }}>
         Préparation à mon jeûne
       </h1>

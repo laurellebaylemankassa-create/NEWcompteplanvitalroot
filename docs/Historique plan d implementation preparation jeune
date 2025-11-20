@@ -432,7 +432,7 @@ Restaurer et fiabiliser le workflow métier de la préparation au jeûne (timeli
 - Ajouter un contrôle visuel ou un feedback à chaque action clé pour garantir la conformité UX et métier.
 - Documenter toute anomalie ou écart dans le fichier dédié et proposer immédiatement une correction ou un rollback.
 - Relire le plan et le template avant chaque implémentation pour s’assurer que toutes les étapes sont respectées.
-- Se parler à soi-même (Copilot) : « Ai-je bien relié chaque étape du plan au code ? Ai-je testé le workflow complet ? Ai-je documenté chaque action et chaque anomalie ? »
+- Se parler à soi-même (Copilot) : « Ai-je bien relié chaque étape du plan au code ? Ai-je testé le workflow complet ? Ai-je documenté chaque action et chaque anomalie ? »
 
 ## Validation explicite de l’utilisateur (OBLIGATOIRE)
 - [ ] Plan validé par l’utilisateur à la date : ___
@@ -560,7 +560,7 @@ Restaurer et fiabiliser le workflow métier de la préparation au jeûne (timeli
 - Ajouter un contrôle visuel ou un feedback à chaque action clé pour garantir la conformité UX et métier.
 - Documenter toute anomalie ou écart dans le fichier dédié et proposer immédiatement une correction ou un rollback.
 - Relire le plan et le template avant chaque implémentation pour s’assurer que toutes les étapes sont respectées.
-- Se parler à soi-même (Copilot) : « Ai-je bien relié chaque étape du plan au code ? Ai-je testé le workflow complet ? Ai-je documenté chaque action et chaque anomalie ? »
+- Se parler à soi-même (Copilot) : « Ai-je bien relié chaque étape du plan au code ? Ai-je testé le workflow complet ? Ai-je documenté chaque action et chaque anomalie ? »
 
 ## Validation explicite de l’utilisateur (OBLIGATOIRE)
 - [ ] Plan validé par l’utilisateur à la date : ___
@@ -688,7 +688,263 @@ Restaurer et fiabiliser le workflow métier de la préparation au jeûne (timeli
 - Ajouter un contrôle visuel ou un feedback à chaque action clé pour garantir la conformité UX et métier.
 - Documenter toute anomalie ou écart dans le fichier dédié et proposer immédiatement une correction ou un rollback.
 - Relire le plan et le template avant chaque implémentation pour s’assurer que toutes les étapes sont respectées.
-- Se parler à soi-même (Copilot) : « Ai-je bien relié chaque étape du plan au code ? Ai-je testé le workflow complet ? Ai-je documenté chaque action et chaque anomalie ? »
+- Se parler à soi-même (Copilot) : « Ai-je bien relié chaque étape du plan au code ? Ai-je testé le workflow complet ? Ai-je documenté chaque action et chaque anomalie ? »
+
+## Validation explicite de l’utilisateur (OBLIGATOIRE)
+- [ ] Plan validé par l’utilisateur à la date : ___
+
+---
+# 🟢 RAPPORT D'AUDIT — ÉCARTS ET AMÉLIORATIONS (18/11/2025)
+
+## Synthèse des écarts constatés
+1. La timeline de préparation et les critères de validation ne s’affichent plus ou ne sont plus mis à jour après saisie.
+2. L’enregistrement de la période de jeûne ne déclenche pas le démarrage du suivi ni l’affichage de la progression.
+3. Le bouton de réinitialisation n’apparaît plus ou ne fonctionne pas correctement.
+
+## Analyse des causes
+- Mauvaise synchronisation des états React (`preparationActive`, critères, timeline) après la saisie des infos de préparation.
+- La logique d’affichage et de gestion des critères n’est plus correctement reliée à l’état global.
+- Le feedback visuel et la réinitialisation ne sont pas systématiquement gérés.
+
+## Recommandations d’amélioration
+- Restaurer l’affichage dynamique de la timeline et des critères, synchroniser l’état `preparationActive` et la liste des critères après saisie des infos
+- Créer/adapter des composants dédiés pour la timeline et les critères
+- S’assurer que le bouton « Réinitialiser ma préparation » est toujours visible et fonctionnel dès que la préparation est active
+- Ajouter un feedback visuel après chaque action clé (démarrage, validation, réinitialisation)
+- Séparer clairement la logique d’initialisation, de gestion des critères, et du rendu
+- Tester le workflow complet pour garantir la conformité UX et métier
+
+---
+# 🟢 PLAN D’IMPLÉMENTATION — RESTAURATION DU WORKFLOW MÉTIER PRÉPARATION JEÛNE (18/11/2025) 19:22
+## Mise à jour de l’avancement
+- [ ] Non commencé | [ ] En cours | [ ] Terminé
+- Avancement précis/Pourcentage réel : 0 %
+- Historique des mises à jour :
+  - 18/11/2025 : Plan d’implémentation rédigé et soumis pour validation
+
+## Titre de la tâche
+Restaurer et fiabiliser le workflow métier de la préparation au jeûne (timeline, critères, validation, réinitialisation, feedback)
+
+## Description précise de la modification attendue
+- Réafficher la timeline dynamique avec tous les critères métier (statut, validation, conseils)
+- Synchroniser l’état de préparation (`preparationActive`) et la liste des critères après saisie des infos
+- Permettre la validation quotidienne des critères (manuelle ou automatique)
+- Afficher la progression globale et le message personnel
+- Rendre le bouton « Réinitialiser ma préparation » toujours accessible et fonctionnel
+- Ajouter un feedback visuel après chaque action clé (démarrage, validation, réinitialisation)
+- Séparer clairement la logique d’initialisation, de gestion des critères, et du rendu
+- Tester le workflow complet pour garantir la conformité UX et métier
+
+## Fichiers concernés
+- `/pages/preparation-jeune.js`
+- `/components/StartPreparationModal.js`
+- `/components/TimelineProgressionPreparation.js` (à créer ou adapter)
+- `/components/CriterePreparationCard.js` (à créer ou adapter)
+
+## Audit des risques préalable
+- Perte de la logique métier (critères, progression, feedback)
+- Mauvaise synchronisation des états React
+- Régression sur l’affichage ou la validation des critères
+- Problème d’accessibilité (navigation clavier, ARIA)
+- Perte de données utilisateur (progression, message)
+- Conflit avec hooks ou logique existante
+- Risque de doublon ou d’initialisation incorrecte
+- Mauvaise gestion de l’état local vs. persistance (localStorage/Supabase)
+- [En cas de risque] : rollback immédiat, rapport dans `ANOMALIE roll back`
+
+**Sous-checklist à valider systématiquement**
+- [ ] Vérification de la présence/import de toutes les fonctions, hooks et variables utilisées dans le code modifié
+- [ ] Identifier l’ordre de tous les hooks React (useState, useEffect, etc.) afin de s’assurer qu’ils sont déclarés uniquement en haut du corps du composant fonctionnel
+
+## Checklist stricte sécurité & qualité (à cocher AVANT toute modification)
+- [ ] Lecture complète du code concerné (dépendances, hooks, variables, fonctions…)
+- [ ] Initialisation systématique avant usage (hooks, variables, handlers)
+- [ ] Tous les hooks React (useState, useEffect, etc.) sont déclarés uniquement en haut du corps du composant fonctionnel
+- [ ] Séparation stricte des étapes : initialisation, logique calculée, handlers/fonctions, rendu
+- [ ] Vérification de la présence/import de toutes les fonctions, hooks et variables utilisées dans le code modifié
+- [ ] Pas de doublons ni de déclarations superflues
+- [ ] Contrôle d’erreur systématique (compilation, runtime, SSR, rendu, accessibilité)
+- [ ] Test du rendu sur tous les cas d’usage et cas limites
+- [ ] Préservation stricte des fonctionnalités existantes
+- [ ] Documentation claire de chaque étape, chaque validation, et toute action automatisée
+- [ ] Validation utilisateur OBLIGATOIRE avant toute implémentation
+
+## Contrôles conformité à réaliser
+- Tests de sauvegarde/restauration des données saisies
+- Vérification de l’accessibilité (navigation clavier, ARIA)
+- Tests de non-régression sur la page `/preparation-jeune.js`
+- Tests multi-device (desktop, mobile, tablette)
+- Gestion des cas limites (ex. : fermeture de la modale sans sauvegarde)
+- Contrôle de cohérence entre la date de début de préparation et la date du jeûne : calcul automatique des jalons, affichage des critères non réalisables, adaptation du plan et des conseils.
+- Affichage d’un message d’encouragement et de recommandation positive en cas de préparation courte ou tardive (valorisation de la démarche, conseils pour la prochaine fois).
+- Lire toutes les entrées d’anomalies enregistrées dans le fichier `ANOMALIE roll back` afin d’identifier les points de vigilance pour anticiper le risque d’erreur similaire lors du codage de cette modification
+
+## Mise à jour de l’avancement
+- [ ] Non commencé | [ ] En cours | [ ] Terminé
+- Avancement précis/Pourcentage réel : 0 %
+- Historique des mises à jour :
+  - 18/11/2025 : Plan d’implémentation rédigé et soumis pour validation
+
+## Point de vigilance
+- Vérifier les entrées du fichier `ANOMALIE roll back` pour identifier les erreurs similaires rencontrées par le passé
+- Ajouter des tests spécifiques pour éviter les régressions identifiées
+- Documenter toute anomalie détectée dans le fichier `ANOMALIE roll back` avec date, heure, et détail complet
+
+## Proposition de rollback
+- En cas de problème, revenir à la version précédente de `/pages/preparation-jeune.js`
+- Documenter toute anomalie dans le fichier `ANOMALIE roll back` avec date, heure, et détail complet
+
+## Rapport Markdown Copilot
+- **Avant modification** :
+  - La page `/preparation-jeune.js` n’affiche plus la timeline ni les critères métier
+  - Le bouton de réinitialisation n’est pas fonctionnel
+  - La progression et le message personnel ne sont pas visibles
+- **Après modification** :
+  - Timeline dynamique restaurée avec tous les critères métier
+  - Synchronisation des états et affichage correct
+  - Validation quotidienne et progression globale visibles
+  - Bouton de réinitialisation accessible et fonctionnel
+  - Feedback visuel ajouté
+  - Contrôle automatique de la cohérence des phases (préparation/jeûne), adaptation dynamique des critères et feedbacks selon la date réelle de préparation
+  - Message d’encouragement et de recommandation positive affiché si la préparation est courte ou tardive
+
+## 🟢 Amélioration continue (Copilot)
+- Toujours relier explicitement chaque action utilisateur (ex : validation de la modale) à la mise à jour des états métier (activation, initialisation des critères, affichage dynamique).
+- Vérifier systématiquement que chaque étape du plan est traduite en code et testée dans le workflow réel (affichage, activation, réinitialisation, feedback).
+- Après chaque modification, tester le parcours complet utilisateur et documenter le résultat (capture, rapport d’exécution).
+- Ne jamais supposer qu’un état est synchronisé sans vérification concrète (affichage, console, tests).
+- Ajouter un contrôle visuel ou un feedback à chaque action clé pour garantir la conformité UX et métier.
+- Documenter toute anomalie ou écart dans le fichier dédié et proposer immédiatement une correction ou un rollback.
+- Relire le plan et le template avant chaque implémentation pour s’assurer que toutes les étapes sont respectées.
+- Se parler à soi-même (Copilot) : « Ai-je bien relié chaque étape du plan au code ? Ai-je testé le workflow complet ? Ai-je documenté chaque action et chaque anomalie ? »
+
+## Validation explicite de l’utilisateur (OBLIGATOIRE)
+- [ ] Plan validé par l’utilisateur à la date : ___
+
+---
+# 🟢 RAPPORT D'AUDIT — ÉCARTS ET AMÉLIORATIONS (18/11/2025)
+
+## Synthèse des écarts constatés
+1. La timeline de préparation et les critères de validation ne s’affichent plus ou ne sont plus mis à jour après saisie.
+2. L’enregistrement de la période de jeûne ne déclenche pas le démarrage du suivi ni l’affichage de la progression.
+3. Le bouton de réinitialisation n’apparaît plus ou ne fonctionne pas correctement.
+
+## Analyse des causes
+- Mauvaise synchronisation des états React (`preparationActive`, critères, timeline) après la saisie des infos de préparation.
+- La logique d’affichage et de gestion des critères n’est plus correctement reliée à l’état global.
+- Le feedback visuel et la réinitialisation ne sont pas systématiquement gérés.
+
+## Recommandations d’amélioration
+- Restaurer l’affichage dynamique de la timeline et des critères, synchroniser l’état `preparationActive` et la liste des critères après saisie des infos
+- Créer/adapter des composants dédiés pour la timeline et les critères
+- S’assurer que le bouton « Réinitialiser ma préparation » est toujours visible et fonctionnel dès que la préparation est active
+- Ajouter un feedback visuel après chaque action clé (démarrage, validation, réinitialisation)
+- Séparer clairement la logique d’initialisation, de gestion des critères, et du rendu
+- Tester le workflow complet pour garantir la conformité UX et métier
+
+---
+# 🟢 PLAN D’IMPLÉMENTATION — RESTAURATION DU WORKFLOW MÉTIER PRÉPARATION JEÛNE (18/11/2025) 19:22
+## Mise à jour de l’avancement
+- [ ] Non commencé | [ ] En cours | [ ] Terminé
+- Avancement précis/Pourcentage réel : 0 %
+- Historique des mises à jour :
+  - 18/11/2025 : Plan d’implémentation rédigé et soumis pour validation
+
+## Titre de la tâche
+Restaurer et fiabiliser le workflow métier de la préparation au jeûne (timeline, critères, validation, réinitialisation, feedback)
+
+## Description précise de la modification attendue
+- Réafficher la timeline dynamique avec tous les critères métier (statut, validation, conseils)
+- Synchroniser l’état de préparation (`preparationActive`) et la liste des critères après saisie des infos
+- Permettre la validation quotidienne des critères (manuelle ou automatique)
+- Afficher la progression globale et le message personnel
+- Rendre le bouton « Réinitialiser ma préparation » toujours accessible et fonctionnel
+- Ajouter un feedback visuel après chaque action clé (démarrage, validation, réinitialisation)
+- Séparer clairement la logique d’initialisation, de gestion des critères, et du rendu
+- Tester le workflow complet pour garantir la conformité UX et métier
+
+## Fichiers concernés
+- `/pages/preparation-jeune.js`
+- `/components/StartPreparationModal.js`
+- `/components/TimelineProgressionPreparation.js` (à créer ou adapter)
+- `/components/CriterePreparationCard.js` (à créer ou adapter)
+
+## Audit des risques préalable
+- Perte de la logique métier (critères, progression, feedback)
+- Mauvaise synchronisation des états React
+- Régression sur l’affichage ou la validation des critères
+- Problème d’accessibilité (navigation clavier, ARIA)
+- Perte de données utilisateur (progression, message)
+- Conflit avec hooks ou logique existante
+- Risque de doublon ou d’initialisation incorrecte
+- Mauvaise gestion de l’état local vs. persistance (localStorage/Supabase)
+- [En cas de risque] : rollback immédiat, rapport dans `ANOMALIE roll back`
+
+**Sous-checklist à valider systématiquement**
+- [ ] Vérification de la présence/import de toutes les fonctions, hooks et variables utilisées dans le code modifié
+- [ ] Identifier l’ordre de tous les hooks React (useState, useEffect, etc.) afin de s’assurer qu’ils sont déclarés uniquement en haut du corps du composant fonctionnel
+
+## Checklist stricte sécurité & qualité (à cocher AVANT toute modification)
+- [ ] Lecture complète du code concerné (dépendances, hooks, variables, fonctions…)
+- [ ] Initialisation systématique avant usage (hooks, variables, handlers)
+- [ ] Tous les hooks React (useState, useEffect, etc.) sont déclarés uniquement en haut du corps du composant fonctionnel
+- [ ] Séparation stricte des étapes : initialisation, logique calculée, handlers/fonctions, rendu
+- [ ] Vérification de la présence/import de toutes les fonctions, hooks et variables utilisées dans le code modifié
+- [ ] Pas de doublons ni de déclarations superflues
+- [ ] Contrôle d’erreur systématique (compilation, runtime, SSR, rendu, accessibilité)
+- [ ] Test du rendu sur tous les cas d’usage et cas limites
+- [ ] Préservation stricte des fonctionnalités existantes
+- [ ] Documentation claire de chaque étape, chaque validation, et toute action automatisée
+- [ ] Validation utilisateur OBLIGATOIRE avant toute implémentation
+
+## Contrôles conformité à réaliser
+- Tests de sauvegarde/restauration des données saisies
+- Vérification de l’accessibilité (navigation clavier, ARIA)
+- Tests de non-régression sur la page `/preparation-jeune.js`
+- Tests multi-device (desktop, mobile, tablette)
+- Gestion des cas limites (ex. : fermeture de la modale sans sauvegarde)
+- Contrôle de cohérence entre la date de début de préparation et la date du jeûne : calcul automatique des jalons, affichage des critères non réalisables, adaptation du plan et des conseils.
+- Affichage d’un message d’encouragement et de recommandation positive en cas de préparation courte ou tardive (valorisation de la démarche, conseils pour la prochaine fois).
+- Lire toutes les entrées d’anomalies enregistrées dans le fichier `ANOMALIE roll back` afin d’identifier les points de vigilance pour anticiper le risque d’erreur similaire lors du codage de cette modification
+
+## Mise à jour de l’avancement
+- [ ] Non commencé | [ ] En cours | [ ] Terminé
+- Avancement précis/Pourcentage réel : 0 %
+- Historique des mises à jour :
+  - 18/11/2025 : Plan d’implémentation rédigé et soumis pour validation
+
+## Point de vigilance
+- Vérifier les entrées du fichier `ANOMALIE roll back` pour identifier les erreurs similaires rencontrées par le passé
+- Ajouter des tests spécifiques pour éviter les régressions identifiées
+- Documenter toute anomalie détectée dans le fichier `ANOMALIE roll back` avec date, heure, et détail complet
+
+## Proposition de rollback
+- En cas de problème, revenir à la version précédente de `/pages/preparation-jeune.js`
+- Documenter toute anomalie dans le fichier `ANOMALIE roll back` avec date, heure, et détail complet
+
+## Rapport Markdown Copilot
+- **Avant modification** :
+  - La page `/preparation-jeune.js` n’affiche plus la timeline ni les critères métier
+  - Le bouton de réinitialisation n’est pas fonctionnel
+  - La progression et le message personnel ne sont pas visibles
+- **Après modification** :
+  - Timeline dynamique restaurée avec tous les critères métier
+  - Synchronisation des états et affichage correct
+  - Validation quotidienne et progression globale visibles
+  - Bouton de réinitialisation accessible et fonctionnel
+  - Feedback visuel ajouté
+  - Contrôle automatique de la cohérence des phases (préparation/jeûne), adaptation dynamique des critères et feedbacks selon la date réelle de préparation
+  - Message d’encouragement et de recommandation positive affiché si la préparation est courte ou tardive
+
+## 🟢 Amélioration continue (Copilot)
+- Toujours relier explicitement chaque action utilisateur (ex : validation de la modale) à la mise à jour des états métier (activation, initialisation des critères, affichage dynamique).
+- Vérifier systématiquement que chaque étape du plan est traduite en code et testée dans le workflow réel (affichage, activation, réinitialisation, feedback).
+- Après chaque modification, tester le parcours complet utilisateur et documenter le résultat (capture, rapport d’exécution).
+- Ne jamais supposer qu’un état est synchronisé sans vérification concrète (affichage, console, tests).
+- Ajouter un contrôle visuel ou un feedback à chaque action clé pour garantir la conformité UX et métier.
+- Documenter toute anomalie ou écart dans le fichier dédié et proposer immédiatement une correction ou un rollback.
+- Relire le plan et le template avant chaque implémentation pour s’assurer que toutes les étapes sont respectées.
+- Se parler à soi-même (Copilot) : « Ai-je bien relié chaque étape du plan au code ? Ai-je testé le workflow complet ? Ai-je documenté chaque action et chaque anomalie ? »
 
 ## Validation explicite de l’utilisateur (OBLIGATOIRE)
 - [ ] Plan validé par l’utilisateur à la date : ___
@@ -796,3 +1052,94 @@ Implémenter la logique de branchement dynamique et contrôle métier strict de 
 - [x] Non commencé | [x] En cours | [ ] Terminé
 - Progression : 90 %
 - Historique des mises à jour : 19/11/2025, harmonisation du calcul du jour relatif et synchronisation métier
+
+
+20/11/25 9:00
+ PLAN D’IMPLÉMENTATION COPILOT — Synchronisation métier après saisie de la date de début de jeûne
+Titre de la tâche
+Corriger la synchronisation et l’activation métier après saisie de la date de début de jeûne dans preparation-jeune.js
+
+Description précise de la modification attendue
+Garantir que la date saisie est bien lue et utilisée pour le calcul du jour courant (J-xx).
+Forcer le recalcul de la progression et l’activation des critères après saisie ou modification de la date.
+Bloquer la validation des critères hors période et afficher un feedback explicite.
+Ajouter un contrôle et un feedback si la date est absente ou mal lue.
+Fichiers concernés
+preparation-jeune.js
+validerCriterePreparation.js
+FeedbackSynthétique.js
+/docs/Historique plan d implementation preparation jeune
+/docs/Anomalie roll back
+Etape 1 — Audit des risques préalable
+Risque technique : mauvaise lecture ou synchronisation de la date, calcul du jour courant incorrect, hooks non déclenchés.
+Risque UX : feedback absent ou trompeur, progression non mise à jour, critères activés hors période.
+Risque robustesse : cas limites (date modifiée, reset, multi-device), incohérence entre localStorage et état React.
+Risque accessibilité : feedback
+
+
+
+20/11/25 10:12 PLAN D’IMPLÉMENTATION COPILOT — Affichage dynamique des périodes et validation métier
+Titre de la tâche
+Corriger l’affichage de la date de début de jeûne, des périodes de chaque phase, et le déclenchement de la modale de validation métier dans preparation-jeune.js.
+
+Description précise de la modification attendue
+Afficher la date de début de jeûne en haut de la page et dans chaque phase.
+Calculer et afficher dynamiquement les périodes réelles (dates de début/fin) pour chaque phase selon la date de début de jeûne.
+Déclencher la modale de validation métier à chaque saisie ou modification de la date.
+Ajouter un feedback métier clair à chaque étape (activation, validation, blocage).
+Fichiers concernés
+preparation-jeune.js
+StartPreparationModal.js
+validerCriterePreparation.js
+/docs/Historique plan d implementation preparation jeune
+Etape 1 — Audit des risques préalable
+Risque technique : mauvaise synchronisation de la date, calcul incorrect des périodes, hooks non déclenchés.
+Risque UX : absence d’affichage des dates réelles, modale non déclenchée, feedback absent ou trompeur.
+Risque robustesse : cas limites (date modifiée, reset, multi-device), incohérence entre localStorage et état React.
+Risque accessibilité : feedback non vocalisé, absence d’alerte en cas d’erreur.
+Etape 2 — Sous-checklist à valider systématiquement
+ Vérification de la présence/import de toutes les fonctions, hooks et variables utilisées dans le code modifié
+Etape 3 — Checklist stricte sécurité & qualité
+ Lecture complète du code concerné (dépendances, hooks, variables, fonctions…)
+ Initialisation systématique avant usage (hooks, variables, handlers)
+ Hooks React uniquement en haut du composant fonctionnel
+ Séparation stricte des étapes : initialisation ➔ logique ➔ handlers ➔ rendu
+ Vérification de la présence et initialisation de chaque fonction/handler utilisé dans le rendu
+ Ordre et portée logiques stricts
+ Pas de doublons ni de déclarations superflues
+ Contrôle d’erreur systématique (compilation, runtime, SSR, rendu, accessibilité)
+ Test du rendu sur tous les cas d’usage et cas limites
+ Préservation stricte des fonctionnalités existantes
+ Documentation claire de chaque étape, chaque validation, et toute action automatisée
+ Validation utilisateur OBLIGATOIRE avant toute implémentation
+Etape 4 — Contrôles conformité à réaliser
+Lecture des entrées du fichier Anomalie roll back pour anticiper les risques similaires.
+Création d’une checklist de contrôle adaptée à la modification.
+Analyse de l’audit des risques : s’assurer qu’aucune anomalie n’est présente.
+Si anomalie détectée, proposition immédiate de rollback à l’état antérieur, documentation dans le fichier dédié.
+Etape 5 — Mise à jour de l’avancement
+ Non commencé | [ ] En cours | [ ] Terminé
+Avancement précis/Pourcentage réel : 0 %
+Historique des mises à jour : 20/11/2025, plan rédigé
+Etape 6 — Point de vigilance
+Rapport lié à la lecture du fichier Anomalie roll back : vigilance sur la gestion de la date, synchronisation multi-device, feedback utilisateur, accessibilité.
+Checklist : tester tous les cas limites (date non initialisée, modification, reset, navigation rapide).
+Informer l’utilisateur de la réalisation de cette étape et de son impact.
+Etape 7 — Proposition de rollback
+Pour tout risque ou anomalie détecté : rollback du code modifié, retour à l’état antérieur, documentation dans Anomalie roll back (date, heure, détail complet).
+Etape 8 — Rapport Markdown Copilot
+Rapport structuré AVANT et APRÈS modification (structure, fonctions, hooks, changements…).
+Permet une validation claire et synthétique.
+À valider par l’utilisateur avant code.
+Etape 9 — Validation explicite de l’utilisateur (OBLIGATOIRE)
+ Plan validé par l’utilisateur à la date : ___
+🟢 Amélioration continue (Copilot)
+Relier explicitement chaque action utilisateur à la mise à jour des états métier et de la période.
+Vérifier que chaque étape du plan est traduite en code et testée dans le workflow réel.
+Tester le parcours complet utilisateur après modification et documenter le résultat.
+Ne jamais supposer qu’un état est synchronisé sans vérification concrète.
+Ajouter un feedback visuel et vocal à chaque action clé.
+Documenter toute anomalie ou écart dans le fichier dédié et proposer une correction ou un rollback immédiat.
+Relire le plan et le template avant chaque implémentation pour s’assurer que toutes les étapes sont respectées.
+Merci de valider ce plan ou d’indiquer les points à corriger.
+Aucune modification de code ne sera produite avant validation explicite.
