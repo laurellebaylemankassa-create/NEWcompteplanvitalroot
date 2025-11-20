@@ -127,13 +127,6 @@ Permettre à l’utilisateur de suivre sa progression, valider chaque critère, 
 **Rapport Markdown Copilot** specifiant date et heure 
 - Rapport initial, et rapport après modif, détaillant changements dans chaque section (initialisation, logique, handlers, rendu)
 
-**Validation**
-- [ ] Plan validé par l’utilisateur à la date : ___
-
----
-
-
-
 - Toujours relier explicitement chaque action utilisateur (ex : validation de la modale) à la mise à jour des états métier (activation, initialisation des critères, affichage dynamique).
 - Vérifier systématiquement que chaque étape du plan est traduite en code et testée dans le workflow réel (affichage, activation, réinitialisation, feedback).
 - Après chaque modification, tester le parcours complet utilisateur et documenter le résultat (capture, rapport d’exécution).
@@ -143,6 +136,8 @@ Permettre à l’utilisateur de suivre sa progression, valider chaque critère, 
 - Relire le plan et le template avant chaque implémentation pour s’assurer que toutes les étapes sont respectées.
 - Se parler à soi-même (Copilot) : « Ai-je bien relié chaque étape du plan au code ? Ai-je testé le workflow complet ? Ai-je documenté chaque action et chaque anomalie ? »
 
----
+---**Validation**
+- [ ] Plan validé par l’utilisateur à la date : ___
+
 
 **⚠️ Copilot NE PEUT PAS générer de code avant validation explicite du plan, et doit se conformer à cette checklist/detail à CHAQUE tâche.**

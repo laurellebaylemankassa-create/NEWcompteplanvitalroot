@@ -428,3 +428,84 @@ Documentation claire de chaque étape, chaque validation, et toute action automa
 Documentation et validation utilisateur
 Documentation de chaque étape dans le Markdown et le fichier d’anomalie
 Validation utilisateur OBLIGATOIRE avant toute implémentation
+
+
+
+
+20/11/25 9:48🟢 TEMPLATE — PLAN D’IMPLÉMENTATION COPILOT (À REMPLIR ET VALIDER AVANT TOUTE MODIF CODE)
+⚠️ AUCUNE modification de code ne doit être produite tant que l’utilisateur n’a pas validé explicitement ce plan d’implémentation rempli par Copilot.
+
+─────────────────────────────────────────────────────────────
+
+Titre de la tâche
+Masquage par défaut des informations sensibles dans les encadrés « dernier profil enregistré » (page profil) et « suivre mon poids » (page suivi/saisie repas), affichables uniquement sur demande
+
+Description précise de la modification attendue
+À l’ouverture de la page profil, toutes les infos de l’encadré « dernier profil enregistré » (taille, poids, âge, etc.) sont masquées (•••• ou floutées).
+Un bouton « Afficher mes données » permet de révéler l’ensemble des infos de cet encadré.
+Sur la page de suivi/saisie repas, l’encadré « suivre mon poids » est masqué par défaut.
+Un bouton « Afficher mon poids » permet de révéler cette information.
+L’état d’affichage est géré localement, sans impact sur la base de données.
+Les autres parties des pages restent inchangées.
+Fichiers concernés
+profil.js (ou le composant profil concerné)
+suivi.js ou RepasBloc.js (ou le composant qui gère l’encadré « suivre mon poids »)
+(À compléter selon structure réelle du projet)
+Audit des risques préalable
+Risque d’affichage involontaire des données sensibles si le bouton est mal géré.
+Risque de confusion UX si le bouton n’est pas assez visible ou explicite.
+Risque de non-initialisation de l’état local (showSensitive/showWeight).
+Risque d’oubli de masquer les données lors d’un refresh ou d’un retour sur la page.
+Vérification de la robustesse du code et de la portée des hooks.
+Contrôle de l’accessibilité (navigation clavier, lisibilité des boutons).
+Risque de régression sur l’affichage des autres données du profil ou du suivi.
+Identifier l’ordre de tous les hooks React (useState, useEffect, etc.) afin de s’assurer qu’ils sont déclarés uniquement en haut du corps du composant fonctionnel, et jamais dans une fonction, une boucle, un map, un if, etc. (respect strict des règles officielles des hooks)
+Documenter ces risques en point de vigilance et à intégrer dans la checklist du contrôle qualité.
+Sous-checklist à valider systématiquement :
+ Vérification de la présence/import de toutes les fonctions, hooks et variables utilisées dans le code modifié
+Checklist stricte sécurité & qualité (à cocher AVANT toute modification)
+ Lecture complète du code concerné (dépendances, hooks, variables, fonctions…)
+ Initialisation systématique avant usage (hooks, variables, handlers)
+ Tous les hooks React (useState, useEffect, etc.) sont déclarés uniquement en haut du corps du composant fonctionnel, jamais dans une fonction, une boucle, un map, un if, etc. (respect strict des règles officielles des hooks)
+ Séparation stricte des étapes : d’abord initialisation (useState, useEffect…), puis logique calculée, puis handlers/fonctions, puis rendu
+ Vérification : toute fonction ou handler utilisé dans le rendu est présent et initialisé avant usage
+ Ordre et portée logiques stricts (jamais déclaration, appel ou usage prématuré)
+ Pas de doublons ni de déclarations superflues
+ Contrôle d’erreur systématique (compilation, runtime, SSR, rendu, accessibilité)
+ Test du rendu sur tous les cas d’usage et cas limites
+ Préservation stricte des fonctionnalités existantes : aucune suppression destructrice, aucune perte de comportement
+ Mise à jour précise et justifiée du pourcentage d’avancement
+ Toute anomalie ou erreur ➔ rollback immédiat, rapport d’anomalie avec contexte, date et heure (cf. fichier ANOMALIE)
+ Documentation claire de chaque étape, chaque validation, et toute action automatisée (Copilot/IA)
+ Validation utilisateur OBLIGATOIRE avant toute implémentation
+ Toutes les cases ci-dessus doivent être cochées et documentées avant de poursuivre.
+Contrôles conformité à réaliser en suivant les étapes suivantes
+Lire toutes les entrées d'anomalies enregistrées dans le fichier anomalies Roll back afin d’identifier les points de vigilance pour anticiper le risque d’erreur similaire lors du codage de cette modification.
+Suite à cette analyse, créer une checklist de contrôle à appliquer avant le codage pour s’assurer d’un codage conforme à ajouter dans la section Point de vigilance.
+Ajouter analyse de l’audit des risques et s’assurer qu’il n’y a aucune anomalie pour garantir la conformité de la modification.
+Si à ce stade anomalie/bug identifié, alors proposition immédiate de rollback à l’endroit où l’anomalie a été détectée (pour revenir à l’état où il n’y avait pas de bug), à confirmer avec l’utilisateur ou revenir à l’état initial du code avant modification, toujours documenter les anomalies rencontrées dans le fichier Anomalie roll back avec date et heure.
+Mise à jour de l’avancement
+ Non commencé | [ ] En cours | [ ] Terminé
+Avancement précis/Pourcentage réel (à MAJ à chaque étape) : ____ %
+Historique des mises à jour : ___
+Point de vigilance
+Rapport lié à la lecture des entrées du fichier anomalie roll back adapté à la maj actuelle : identifier les erreurs similaires que la modification de ce code pourrait générer suite au retour d’expérience documenté dans le fichier afin de permettre de les éviter dans cette section en créant la checklist de vérification point de vigilance, informer l’utilisateur quand cette étape a été réalisée et informer de l’impact de cette action.
+Proposition de rollback
+Pour tout risque ou anomalie détecté :
+Décrire l’action de rollback, son contexte (fichier, modification en cause), l’alternative sûre proposée.
+Cette donnée doit être ajoutée dans le fichier ANOMALIE roll back : date, heure, détail complet pour traçabilité.
+Rapport Markdown Copilot
+Générer un rapport structuré AVANT et APRÈS toute modification (structure, fonctions, hooks, changements, etc.).
+Ce rapport doit permettre une validation éclairée, claire et synthétique.
+À valider par l’utilisateur avant code.
+🟢 Amélioration continue (Copilot)
+Toujours relier explicitement chaque action utilisateur (ex : affichage des données sensibles) à la mise à jour des états métier (activation, affichage dynamique).
+Vérifier systématiquement que chaque étape du plan est traduite en code et testée dans le workflow réel (affichage, activation, masquage, feedback).
+Après chaque modification, tester le parcours complet utilisateur et documenter le résultat (capture, rapport d’exécution).
+Ne jamais supposer qu’un état est synchronisé sans vérification concrète (affichage, console, tests).
+Ajouter un contrôle visuel ou un feedback à chaque action clé pour garantir la conformité UX et métier.
+Documenter toute anomalie ou écart dans le fichier dédié et proposer immédiatement une correction ou un rollback.
+Relire le plan et le template avant chaque implémentation pour s’assurer que toutes les étapes sont respectées.
+Se parler à soi-même (Copilot) : « Ai-je bien relié chaque étape du plan au code ? Ai-je testé le workflow complet ? Ai-je documenté chaque action et chaque anomalie ? »
+Validation explicite de l’utilisateur (OBLIGATOIRE)
+ Plan validé par l’utilisateur à la date : ___
