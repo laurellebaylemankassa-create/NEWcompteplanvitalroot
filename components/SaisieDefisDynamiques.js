@@ -76,10 +76,31 @@ function DefiFauxAllie({ defi, refreshDefis }) {
         return now.toTimeString().slice(0,5);
     };
     const [heureRepas, setHeureRepas] = useState(getDefaultHeure());
+    const [aliment, setAliment] = useState('');
+    const [categorie, setCategorie] = useState('');
+    const [kcal, setKcal] = useState('');
+    // Import du référentiel alimentaire
+    const referentielAliments = require('../data/referentiel.js').default || [];
+    // Suggestions d’aliments
+    const alimentsFromReferentiel = Array.from(new Set(referentielAliments.map(a => a.nom).filter(Boolean)));
+    // Auto-remplissage catégorie/kcal/portion
+    React.useEffect(() => {
+        if (!aliment || aliment.trim() === '') return;
+        const found = referentielAliments.find(a => a.nom.toLowerCase() === aliment.trim().toLowerCase());
+        if (found) {
+            if (found.categorie) setCategorie(found.categorie);
+            if (found.kcal !== undefined && found.kcal !== null) setKcal(String(found.kcal));
+            if (found.portionDefaut) setQuantite(found.portionDefaut);
+        }
+    }, [aliment]);
     if (!defi) return null;
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage(''); setErreur('');
+        if (!aliment.trim()) {
+            setErreur('Merci de saisir un aliment.');
+            return;
+        }
         if (!confirmation) {
             setErreur('Merci de confirmer qu’aucun aliment gras n’a été pris pour compenser un extra.');
             return;
@@ -90,6 +111,9 @@ function DefiFauxAllie({ defi, refreshDefis }) {
             setMessage('Bravo ! Étape validée.');
             refreshDefis();
             setConfirmation(false);
+            setAliment('');
+            setCategorie('');
+            setKcal('');
         } else {
             setErreur(res.error || 'Erreur lors de la validation.');
         }
@@ -98,10 +122,22 @@ function DefiFauxAllie({ defi, refreshDefis }) {
         <form onSubmit={handleSubmit} style={{marginBottom:24, background:'#ffebee', borderRadius:10, padding:18}}>
             <h3>{defi.nom}</h3>
             <p>{defi.description}</p>
-            <div>
-                <label>
-                    <input type="checkbox" checked={confirmation} onChange={e => setConfirmation(e.target.checked)} />
-                    Aucun aliment gras n’a été pris pour compenser un extra aujourd’hui
+            <div style={{ marginBottom: 10 }}>
+                <label>Aliment :
+                    <input list="alimentOptions" type="text" value={aliment} onChange={e => setAliment(e.target.value)} style={{ marginLeft: 8 }} />
+                    <datalist id="alimentOptions">
+                        {alimentsFromReferentiel.map(opt => <option key={opt} value={opt} />)}
+                    </datalist>
+                </label>
+            </div>
+            <div style={{ marginBottom: 10 }}>
+                <label>Catégorie :
+                    <input type="text" value={categorie} onChange={e => setCategorie(e.target.value)} style={{ marginLeft: 8 }} />
+                </label>
+            </div>
+            <div style={{ marginBottom: 10 }}>
+                <label>Kcal :
+                    <input type="number" value={kcal} onChange={e => setKcal(e.target.value)} style={{ marginLeft: 8, width: 80 }} />
                 </label>
             </div>
             <div style={{ margin: '8px 0' }}>
@@ -113,6 +149,12 @@ function DefiFauxAllie({ defi, refreshDefis }) {
                     style={{ marginLeft: 8, width: 110 }}
                 />
                 <span style={{ color: '#888', fontSize: 13, marginLeft: 8 }}>(pré-rempli à l'heure actuelle, modifiable)</span>
+            </div>
+            <div style={{marginTop:8}}>
+                <label>
+                    <input type="checkbox" checked={confirmation} onChange={e => setConfirmation(e.target.checked)} />
+                    Aucun aliment gras n’a été pris pour compenser un extra aujourd’hui
+                </label>
             </div>
             {erreur && <p style={{color:'red'}}>{erreur}</p>}
             {message && <p style={{color:'green'}}>{message}</p>}
@@ -132,10 +174,29 @@ function DefiBriseChaine({ defi, refreshDefis }) {
         return now.toTimeString().slice(0,5);
     };
     const [heureRepas, setHeureRepas] = useState(getDefaultHeure());
+    const [aliment, setAliment] = useState('');
+    const [categorie, setCategorie] = useState('');
+    const [kcal, setKcal] = useState('');
+    // Import du référentiel alimentaire
+    const referentielAliments = require('../data/referentiel.js').default || [];
+    const alimentsFromReferentiel = Array.from(new Set(referentielAliments.map(a => a.nom).filter(Boolean)));
+    React.useEffect(() => {
+        if (!aliment || aliment.trim() === '') return;
+        const found = referentielAliments.find(a => a.nom.toLowerCase() === aliment.trim().toLowerCase());
+        if (found) {
+            if (found.categorie) setCategorie(found.categorie);
+            if (found.kcal !== undefined && found.kcal !== null) setKcal(String(found.kcal));
+            if (found.portionDefaut) setQuantite(found.portionDefaut);
+        }
+    }, [aliment]);
     if (!defi) return null;
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage(''); setErreur('');
+        if (!aliment.trim()) {
+            setErreur('Merci de saisir un aliment.');
+            return;
+        }
         if (!confirmation) {
             setErreur('Merci de confirmer qu’aucun enchaînement sucre-gras n’a eu lieu aujourd’hui.');
             return;
@@ -146,6 +207,9 @@ function DefiBriseChaine({ defi, refreshDefis }) {
             setMessage('Bravo ! Étape validée.');
             refreshDefis();
             setConfirmation(false);
+            setAliment('');
+            setCategorie('');
+            setKcal('');
         } else {
             setErreur(res.error || 'Erreur lors de la validation.');
         }
@@ -154,6 +218,24 @@ function DefiBriseChaine({ defi, refreshDefis }) {
         <form onSubmit={handleSubmit} style={{marginBottom:24, background:'#e1f5fe', borderRadius:10, padding:18}}>
             <h3>{defi.nom}</h3>
             <p>{defi.description}</p>
+            <div style={{ marginBottom: 10 }}>
+                <label>Aliment :
+                    <input list="alimentOptionsChaine" type="text" value={aliment} onChange={e => setAliment(e.target.value)} style={{ marginLeft: 8 }} />
+                    <datalist id="alimentOptionsChaine">
+                        {alimentsFromReferentiel.map(opt => <option key={opt} value={opt} />)}
+                    </datalist>
+                </label>
+            </div>
+            <div style={{ marginBottom: 10 }}>
+                <label>Catégorie :
+                    <input type="text" value={categorie} onChange={e => setCategorie(e.target.value)} style={{ marginLeft: 8 }} />
+                </label>
+            </div>
+            <div style={{ marginBottom: 10 }}>
+                <label>Kcal :
+                    <input type="number" value={kcal} onChange={e => setKcal(e.target.value)} style={{ marginLeft: 8, width: 80 }} />
+                </label>
+            </div>
             <div>
                 <label>
                     <input type="checkbox" checked={confirmation} onChange={e => setConfirmation(e.target.checked)} />
@@ -263,6 +345,20 @@ function DefiUnCru({ defi, refreshDefis }) {
     const [message, setMessage] = useState('');
     const [erreur, setErreur] = useState('');
     const [aliment, setAliment] = useState('');
+    const [categorie, setCategorie] = useState('');
+    const [kcal, setKcal] = useState('');
+    // Import du référentiel alimentaire
+    const referentielAliments = require('../data/referentiel.js').default || [];
+    const alimentsFromReferentiel = Array.from(new Set(referentielAliments.map(a => a.nom).filter(Boolean)));
+    React.useEffect(() => {
+        if (!aliment || aliment.trim() === '') return;
+        const found = referentielAliments.find(a => a.nom.toLowerCase() === aliment.trim().toLowerCase());
+        if (found) {
+            if (found.categorie) setCategorie(found.categorie);
+            if (found.kcal !== undefined && found.kcal !== null) setKcal(String(found.kcal));
+            if (found.portionDefaut) setQuantite(found.portionDefaut);
+        }
+    }, [aliment]);
     if (!defi) return null;
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -282,6 +378,8 @@ function DefiUnCru({ defi, refreshDefis }) {
             refreshDefis();
             setConfirmation(false);
             setAliment('');
+            setCategorie('');
+            setKcal('');
         } else {
             setErreur(res.error || 'Erreur lors de la validation.');
         }
@@ -290,8 +388,25 @@ function DefiUnCru({ defi, refreshDefis }) {
         <form onSubmit={handleSubmit} style={{marginBottom:24, background:'#e0f7fa', borderRadius:10, padding:18}}>
             <h3>{defi.nom}</h3>
             <p>{defi.description}</p>
+            <div style={{ marginBottom: 10 }}>
+                <label>Aliment :
+                    <input list="alimentOptionsCru" type="text" value={aliment} onChange={e => setAliment(e.target.value)} style={{marginRight:8}} />
+                    <datalist id="alimentOptionsCru">
+                        {alimentsFromReferentiel.map(opt => <option key={opt} value={opt} />)}
+                    </datalist>
+                </label>
+            </div>
+            <div style={{ marginBottom: 10 }}>
+                <label>Catégorie :
+                    <input type="text" value={categorie} onChange={e => setCategorie(e.target.value)} style={{ marginLeft: 8 }} />
+                </label>
+            </div>
+            <div style={{ marginBottom: 10 }}>
+                <label>Kcal :
+                    <input type="number" value={kcal} onChange={e => setKcal(e.target.value)} style={{ marginLeft: 8, width: 80 }} />
+                </label>
+            </div>
             <div>
-                <input type="text" placeholder="Aliment cru ajouté" value={aliment} onChange={e => setAliment(e.target.value)} style={{marginRight:8}} />
                 <label>
                     <input type="checkbox" checked={confirmation} onChange={e => setConfirmation(e.target.checked)} />
                     Aliment cru et non sucré ajouté aujourd’hui

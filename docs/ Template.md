@@ -141,3 +141,82 @@ Permettre à l’utilisateur de suivre sa progression, valider chaque critère, 
 
 
 **⚠️ Copilot NE PEUT PAS générer de code avant validation explicite du plan, et doit se conformer à cette checklist/detail à CHAQUE tâche.**
+
+
+Titre de la tâche
+Correction des anomalies d’ordre des hooks et d’utilisation des variables dans SaisieDefiAlimentaire.js + intégration des bonnes pratiques d’amélioration continue
+
+Description précise de la modification attendue
+Corriger l’ordre des imports et des hooks React (useState, useEffect, etc.) pour respecter les règles officielles.
+S’assurer que toutes les variables utilisées dans le rendu sont bien initialisées dans le corps du composant.
+Supprimer toute déclaration de hook ou variable en dehors du corps du composant fonctionnel.
+Vérifier la présence et l’initialisation de toutes les variables utilisées dans le rendu (ex : debugInfo).
+Garantir la robustesse SSR/Next.js et éviter tout Runtime TypeError.
+Appliquer systématiquement les principes d’amélioration continue : contrôle visuel, feedback utilisateur, documentation des anomalies, test du workflow complet, rollback immédiat en cas d’erreur.
+Fichiers concernés
+SaisieDefiAlimentaire.js
+Audit des risques préalable
+Risque technique : Runtime TypeError si hook ou variable utilisée avant import ou initialisation.
+Risque SSR : Next.js plante si un hook est appelé en dehors du composant.
+Risque UX : Formulaire non fonctionnel, debug invisible.
+Risque régression : Perte de pré-remplissage ou affichage debug.
+Risque accessibilité : Erreur bloquante, formulaire inutilisable.
+Points de vigilance
+Tous les hooks doivent être déclarés en haut du composant, jamais en dehors.
+Toutes les variables utilisées dans le rendu doivent être initialisées dans le composant.
+Vérifier la présence de debugInfo et son initialisation.
+Vérifier l’ordre strict : import React, puis déclaration du composant, puis hooks, puis logique, puis rendu.
+Contrôle visuel et feedback à chaque action clé.
+Documentation de toute anomalie ou écart dans le fichier dédié.
+Test du workflow complet utilisateur après chaque modification.
+Checklist stricte sécurité & qualité
+ Lecture complète du code concerné
+ Initialisation systématique avant usage (hooks, variables, handlers)
+ Tous les hooks React sont déclarés uniquement en haut du corps du composant fonctionnel
+ Séparation stricte des étapes : initialisation, logique, handlers, rendu
+ Vérification de la présence/import de toutes les fonctions, hooks et variables utilisées
+ Contrôle d’erreur compilation/runtime/SSR
+ Test du rendu sur tous les cas d’usage
+ Préservation stricte des fonctionnalités existantes
+ Documentation claire de chaque étape et validation utilisateur
+ Contrôle visuel ou feedback à chaque action clé
+ Test du workflow complet utilisateur et documentation du résultat
+ Rollback immédiat en cas d’anomalie
+Contrôles conformité à réaliser
+Lecture des anomalies dans le fichier rollback
+Vérification de la présence de tous les hooks et variables
+Test SSR et rendu Next.js
+Test du debug et du pré-remplissage
+Test du parcours complet utilisateur et documentation
+Mise à jour de l’avancement
+ Non commencé | [x] En cours | [ ] Terminé
+Avancement : 80 %
+Historique : 21/11/2025, audit et correction en cours
+Point de vigilance
+Les erreurs remontées sont toutes liées à l’ordre des hooks et à l’initialisation des variables.
+Correction : déplacer l’import React tout en haut, puis déclarer le composant, puis initialiser tous les hooks (dont debugInfo) en haut du composant.
+Vérifier que debugInfo est bien déclaré dans le composant et utilisé dans le rendu.
+Contrôle visuel et feedback à chaque action clé.
+Documentation de toute anomalie ou écart dans le fichier dédié.
+Test du workflow complet utilisateur après chaque modification.
+Proposition de rollback
+Si une nouvelle anomalie est détectée, revenir à la dernière version fonctionnelle avant ajout du debug.
+Documenter toute anomalie dans le fichier Anomalie roll back avec date et heure.
+Rapport Markdown Copilot
+AVANT
+Import React mal placé, hook useState utilisé avant import.
+debugInfo utilisé dans le rendu sans initialisation correcte.
+Runtime TypeError et plantage SSR Next.js.
+APRÈS
+Import React placé tout en haut.
+Tous les hooks (dont debugInfo) initialisés en haut du composant.
+debugInfo utilisé dans le rendu, toujours défini.
+Contrôle visuel et feedback à chaque action clé.
+Documentation de toute anomalie ou écart dans le fichier dédié.
+Test du workflow complet utilisateur après chaque modification.
+Plus d’erreur de compilation ou runtime.
+Validation explicite de l’utilisateur (OBLIGATOIRE)
+ Plan validé par l’utilisateur à la date : ___
+Merci de valider ce plan pour que la correction soit appliquée.
+Aucune modification de code ne sera produite tant que vous n’aurez pas validé explicitement ce plan.
+

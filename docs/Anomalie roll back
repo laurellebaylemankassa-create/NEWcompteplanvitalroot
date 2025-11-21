@@ -105,3 +105,52 @@ Impact : Blocage persistant de l’ajout de la logique référentiel alimentai
 Étape du plan non respectée : adaptation fine du patch à la structure réelle du composant, découpage du patch pour insertion progressive.
 Action immédiate : découper le patch en sous-parties, insérer chaque bloc séparément, re-tester à chaque étape, documenter toute anomalie.
 Aucune suppression effectuée sur le fichier.
+
+═══════════════════════════════════════════════════════════════════════════════
+🛑 ANOMALIE 21/11/2025 — DOUBLON HOOK debugInfo DANS SaisieDefiAlimentaire.js
+═══════════════════════════════════════════════════════════════════════════════
+Fichier : /components/SaisieDefiAlimentaire.js
+Erreur : Build Error « Identifier 'debugInfo' has already been déclaré »
+Cause : Déclaration en double du hook useState pour debugInfo dans le composant.
+Impact : Blocage du build Next.js, impossibilité d’afficher le formulaire défi alimentaire.
+Étape du plan non respectée : « Pas de doublons ni de déclarations superflues » (checklist qualité)
+Procédure corrective :
+	1. Lecture complète du code et de l’historique des anomalies
+	2. Suppression de la déclaration en double du hook debugInfo
+	3. Test du rendu et du debug
+	4. Documentation de l’action dans le rapport d’audit et la section amélioration continue
+Aucune suppression effectuée sur le fichier.
+
+═══════════════════════════════════════════════════════════════════════════════
+🛑 ANOMALIE 21/11/2025 — HOOK useState DÉCLARÉ HORS DU COMPOSANT PRINCIPAL
+═══════════════════════════════════════════════════════════════════════════════
+Fichier : /components/SaisieDefiAlimentaire.js
+Erreur : Runtime TypeError « Cannot read properties of null (reading 'useState') »
+Cause : Déclaration du hook useState en dehors du corps du composant fonctionnel (avant export default function ...).
+Impact : Plantage SSR Next.js, impossibilité d’afficher le formulaire défi alimentaire.
+Étape du plan non respectée : « Tous les hooks React sont déclarés uniquement en haut du corps du composant fonctionnel, jamais en dehors » (checklist qualité)
+Procédure corrective :
+	1. Lecture complète du code et de l’historique des anomalies
+	2. Déplacement du hook useState à l’intérieur du composant, juste après la déclaration du composant
+	3. Test du rendu et du debug
+	4. Documentation de l’action dans le rapport d’audit et la section amélioration continue
+Points de vigilance issus du rollback :
+- Vérifier systématiquement l’emplacement de tous les hooks (jamais avant, ni dans une fonction, ni dans une boucle)
+- Relire le code et le rollback avant toute modification
+- Appliquer la checklist stricte et le process d’amélioration continue
+Aucune suppression effectuée sur le fichier.
+
+═══════════════════════════════════════════════════════════════════════════════
+🛑 ANOMALIE 21/11/2025 — HOOK useState debugInfo TOUJOURS HORS DU COMPOSANT
+═══════════════════════════════════════════════════════════════════════════════
+Fichier : /components/SaisieDefiAlimentaire.js
+Erreur : Runtime TypeError « Cannot read properties of null (reading 'useState') »
+Cause : La ligne `const [debugInfo, setDebugInfo] = useState('');` est restée placée avant la déclaration du composant, malgré les corrections précédentes. Le patch n’a pas supprimé la déclaration hors composant, laissant l’erreur persister.
+Impact : Blocage du build et du rendu, perte de toutes les fonctionnalités du formulaire défi alimentaire.
+Étape du plan non respectée : « Tous les hooks React sont déclarés uniquement en haut du corps du composant fonctionnel, jamais en dehors » (checklist qualité)
+Procédure corrective stricte :
+	1. Supprimer toute déclaration de hook hors composant
+	2. Vérifier qu’il n’existe qu’une seule déclaration, à l’intérieur du composant
+	3. Test de compilation et de rendu
+	4. Documentation de l’action dans le rapport d’audit et la section amélioration continue
+Aucune suppression effectuée sur le fichier.

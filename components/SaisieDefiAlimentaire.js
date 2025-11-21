@@ -53,13 +53,18 @@ export default function SaisieDefiAlimentaire() {
         }
     }, [categorie]);
 
-    // Si l'utilisateur saisit un aliment reconnu, préremplir la catégorie et les kcal
+    // Si l'utilisateur saisit un aliment reconnu, préremplir la catégorie, les kcal et la portion recommandée
     useEffect(() => {
         if (!aliment || aliment.trim() === '') return;
         const found = (referentielAliments || []).find(a => a.nom.toLowerCase() === aliment.trim().toLowerCase());
         if (found) {
             if (found.categorie) setCategorie(found.categorie);
             if (found.kcal !== undefined && found.kcal !== null) setKcal(String(found.kcal));
+            if (found.portionDefaut !== undefined && found.portionDefaut !== null) {
+                setQuantite(String(found.portionDefaut));
+            } else if (found.portionMax !== undefined && found.portionMax !== null) {
+                setQuantite(String(found.portionMax));
+            }
         }
     }, [aliment]);
 
@@ -178,7 +183,18 @@ export default function SaisieDefiAlimentaire() {
                 </div>
                 <div style={{ marginBottom: 10 }}>
                     <label>Aliment mangé :
-                        <input type="text" value={aliment} onChange={e => setAliment(e.target.value)} placeholder="Saisissez un aliment" style={{ marginLeft: 8 }} required={categorie !== "Jeûne"} />
+                        <input
+                            list="alimentOptions"
+                            type="text"
+                            value={aliment}
+                            onChange={e => setAliment(e.target.value)}
+                            placeholder="Saisissez ou sélectionnez un aliment"
+                            style={{ marginLeft: 8 }}
+                            required={categorie !== "Jeûne"}
+                        />
+                        <datalist id="alimentOptions">
+                            {alimentsFromReferentiel.map(opt => <option key={opt} value={opt} />)}
+                        </datalist>
                     </label>
                 </div>
                 <div style={{ marginBottom: 10 }}>
