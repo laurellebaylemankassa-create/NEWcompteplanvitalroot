@@ -2,7 +2,6 @@ import BandeauDefiActif from '../components/BandeauDefiActif';
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 
-// Un composant pour le formulaire d'édition/ajout
 function RepasForm({ initial, onCancel, onSave }) {
   const [form, setForm] = useState(
     initial || {
@@ -23,7 +22,6 @@ function RepasForm({ initial, onCancel, onSave }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     onSave(form);
-    // Si fast food coché, enregistrer dans fast_food_history
     if (isFastFood) {
       const { supabase } = await import('../lib/supabaseClient');
       const { data: userData } = await supabase.auth.getUser();
@@ -33,7 +31,7 @@ function RepasForm({ initial, onCancel, onSave }) {
           user_id,
           date: form.date,
           restaurant: 'Manuel (édition)',
-            aliments: [{ nom: form.aliment, quantite: form.quantite }]
+          aliments: [{ nom: form.aliment, quantite: form.quantite }]
         }
       ]);
       if (error) {
@@ -50,70 +48,28 @@ function RepasForm({ initial, onCancel, onSave }) {
         onOpenJournal={() => {}}
       />
       <form onSubmit={handleSubmit} style={{ marginBottom: 24, background: "#f9f9f9", padding: 16, borderRadius: 10 }}>
-      <h2>{initial?.id ? "Modifier le repas" : "Ajouter un repas"}</h2>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
-        <input
-          name="date"
-          type="date"
-          value={form.date || ""}
-          onChange={handleChange}
-          required
-          style={{ flex: 1, minWidth: 120 }}
-        />
-        <input
-          name="type"
-          placeholder="Type (petit-déj, déjeuner, etc.)"
-          value={form.type || ""}
-          onChange={handleChange}
-          required
-          style={{ flex: 1, minWidth: 120 }}
-        />
-        <input
-          name="aliment"
-          placeholder="Aliment"
-          value={form.aliment || ""}
-          onChange={handleChange}
-          required
-          style={{ flex: 1, minWidth: 120 }}
-        />
-        <input
-          name="categorie"
-          placeholder="Catégorie"
-          value={form.categorie || ""}
-          onChange={handleChange}
-          required
-          style={{ flex: 1, minWidth: 120 }}
-        />
-        <input
-          name="quantite"
-          placeholder="Quantité"
-          value={form.quantite || ""}
-          onChange={handleChange}
-          required
-          style={{ flex: 1, minWidth: 80 }}
-        />
-        <input
-          name="kcal"
-          placeholder="Kcal"
-          type="number"
-          value={form.kcal || ""}
-          onChange={handleChange}
-          required
-          style={{ flex: 1, minWidth: 80 }}
-        />
-      </div>
-      <div style={{ marginTop: 16 }}>
-        <label style={{ marginRight: 16 }}>
-          <input type="checkbox" checked={isFastFood} onChange={e => setIsFastFood(e.target.checked)} /> Fast food ?
-        </label>
-        <button type="submit" style={{ marginRight: 8, background: "#4caf50", color: "#fff", border: "none", borderRadius: 6, padding: "6px 16px", cursor: "pointer" }}>
-          {initial?.id ? "Enregistrer" : "Ajouter"}
-        </button>
-        <button type="button" onClick={onCancel} style={{ background: "#ccc", border: "none", borderRadius: 6, padding: "6px 16px", cursor: "pointer" }}>
-          Annuler
-        </button>
-      </div>
-    </form>
+        <h2>{initial?.id ? "Modifier le repas" : "Ajouter un repas"}</h2>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
+          <input name="date" type="date" value={form.date || ""} onChange={handleChange} required style={{ flex: 1, minWidth: 120 }} />
+          <input name="type" placeholder="Type (petit-déj, déjeuner, etc.)" value={form.type || ""} onChange={handleChange} required style={{ flex: 1, minWidth: 120 }} />
+          <input name="aliment" placeholder="Aliment" value={form.aliment || ""} onChange={handleChange} required style={{ flex: 1, minWidth: 120 }} />
+          <input name="categorie" placeholder="Catégorie" value={form.categorie || ""} onChange={handleChange} required style={{ flex: 1, minWidth: 120 }} />
+          <input name="quantite" placeholder="Quantité" value={form.quantite || ""} onChange={handleChange} required style={{ flex: 1, minWidth: 80 }} />
+          <input name="kcal" placeholder="Kcal" type="number" value={form.kcal || ""} onChange={handleChange} required style={{ flex: 1, minWidth: 80 }} />
+        </div>
+        <div style={{ marginTop: 16 }}>
+          <label style={{ marginRight: 16 }}>
+            <input type="checkbox" checked={isFastFood} onChange={e => setIsFastFood(e.target.checked)} /> Fast food ?
+          </label>
+          <button type="submit" style={{ marginRight: 8, background: "#4caf50", color: "#fff", border: "none", borderRadius: 6, padding: "6px 16px", cursor: "pointer" }}>
+            {initial?.id ? "Enregistrer" : "Ajouter"}
+          </button>
+          <button type="button" onClick={onCancel} style={{ background: "#ccc", border: "none", borderRadius: 6, padding: "6px 16px", cursor: "pointer" }}>
+            Annuler
+          </button>
+        </div>
+      </form>
+    </>
   );
 }
 
@@ -121,18 +77,16 @@ export default function Repas() {
   const [repas, setRepas] = useState([]);
   const [fastFoodRepas, setFastFoodRepas] = useState([]);
   const [repasDebug, setRepasDebug] = useState([]);
-  // Initialisation des variables pour le calcul calorique
   const [objectifCalorique, setObjectifCalorique] = useState(null);
   const [caloriesDuJour, setCaloriesDuJour] = useState(0);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0,10));
+  const [loading, setLoading] = useState(true);
+  const [editRepas, setEditRepas] = useState(null);
 
-  // Calcul de l’objectif calorique (exemple : valeur fixe ou à récupérer du profil)
   useEffect(() => {
-    // À adapter selon la logique métier (profil, formule, etc.)
-    setObjectifCalorique(1800); // Valeur fixe pour démo
+    setObjectifCalorique(1800);
   }, []);
 
-  // Calcul dynamique des calories consommées pour la date sélectionnée
   useEffect(() => {
     async function fetchCaloriesForDay(dateRef) {
       const { data, error } = await supabase
@@ -150,11 +104,8 @@ export default function Repas() {
     }
     fetchCaloriesForDay(selectedDate);
   }, [selectedDate, repas]);
-  // Handler pour valider la semaine (dîner du dimanche)
+
   async function handleValiderSemaine(r) {
-    // Remplacer par l'appel réel à Supabase
-    // await supabase.from('semaines_validees').upsert({ weekStart: r.date, validee: true });
-    // Mettre à jour l’état local si besoin
     setRepas(repas.map(rep =>
       rep.date === r.date && rep.type === "Dîner"
         ? { ...rep, validee: true }
@@ -162,23 +113,17 @@ export default function Repas() {
     ));
   }
 
-  // Handler pour dévalider la semaine (dîner du dimanche)
   async function handleDevaliderSemaine(r) {
-    // Remplacer par l'appel réel à Supabase
-    // await supabase.from('semaines_validees').update({ validee: false }).eq('weekStart', r.date);
-    // Mettre à jour l’état local si besoin
     setRepas(repas.map(rep =>
       rep.date === r.date && rep.type === "Dîner"
         ? { ...rep, validee: false }
         : rep
     ));
   }
-  const [loading, setLoading] = useState(true);
-  const [editRepas, setEditRepas] = useState(null); // Pour le repas en cours d'édition
 
   useEffect(() => {
-  fetchRepas();
-  fetchFastFoodRepas();
+    fetchRepas();
+    fetchFastFoodRepas();
   }, []);
 
   const fetchRepas = async () => {
@@ -212,7 +157,6 @@ export default function Repas() {
 
   const handleFormSave = async (form) => {
     if (editRepas?.id) {
-      // Edition
       await supabase
         .from("repas_reels")
         .update({
@@ -266,7 +210,6 @@ export default function Repas() {
         </div>
       </div>
       {/* Debug : liste des repas du jour et leurs calories (toujours visible) */}
-      {/* Bloc debug supprimé, affichage calories uniquement dans suivi.js */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
         <button
           onClick={() => window.history.back()}
@@ -283,7 +226,6 @@ export default function Repas() {
         </a>
       </div>
       <h1 style={{ textAlign: "center", marginBottom: 24 }}>🗑️ Gérer mes repas</h1>
-
       {/* Formulaire d'édition (s'affiche uniquement si on est en mode édition) */}
       {editRepas && (
         <RepasForm
@@ -292,7 +234,6 @@ export default function Repas() {
           onSave={handleFormSave}
         />
       )}
-
       {loading ? (
         <div>Chargement…</div>
       ) : repas.length === 0 ? (
@@ -313,7 +254,6 @@ export default function Repas() {
           <tbody>
             {repas.map((r) => (
               <tr key={r.id}>
-                {/* Date + validation semaine */}
                 <td style={{ padding: 8, border: "1px solid #ddd", position: 'relative' }}>
                   {r.date || <span style={{ color: '#bbb' }}>—</span>}
                   {/* Validation semaine (dîner du dimanche) */}
@@ -346,9 +286,7 @@ export default function Repas() {
                     return null;
                   })()}
                 </td>
-                {/* Type de repas */}
                 <td style={{ padding: 8, border: "1px solid #ddd" }}>{r.type || <span style={{ color: '#bbb' }}>—</span>}</td>
-                {/* Aliment principal, indication planifié */}
                 <td style={{ padding: 8, border: "1px solid #ddd" }}>
                   {r.aliment ? (
                     <span>
@@ -359,7 +297,6 @@ export default function Repas() {
                     </span>
                   ) : <span style={{ color: '#bbb' }}>—</span>}
                 </td>
-                {/* Catégorie, icône fast-food séparée */}
                 <td style={{ padding: 8, border: "1px solid #ddd" }}>
                   {r.categorie ? r.categorie : <span style={{ color: '#bbb' }}>—</span>}
                   {fastFoodRepas.some(ff =>
@@ -371,11 +308,8 @@ export default function Repas() {
                     <span style={{ marginLeft: 6, fontSize: '1.3em' }} title="Fast food">🍔</span>
                   )}
                 </td>
-                {/* Quantité */}
                 <td style={{ padding: 8, border: "1px solid #ddd" }}>{r.quantite ? r.quantite : <span style={{ color: '#bbb' }}>—</span>}</td>
-                {/* Kcal */}
                 <td style={{ padding: 8, border: "1px solid #ddd" }}>{r.kcal ? r.kcal : <span style={{ color: '#bbb' }}>—</span>}</td>
-                {/* Actions */}
                 <td style={{ padding: 8, border: "1px solid #ddd" }}>
                   <button style={{ background: "#1976d2", color: "#fff", border: "none", borderRadius: 6, padding: "4px 12px", cursor: "pointer", marginRight: 8 }} onClick={() => handleEdit(r)}>Modifier</button>
                   <button style={{ background: "#f44336", color: "#fff", border: "none", borderRadius: 6, padding: "4px 12px", cursor: "pointer" }} onClick={() => handleDelete(r.id)}>Supprimer</button>
