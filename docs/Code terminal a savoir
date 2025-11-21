@@ -7,5 +7,5 @@ CE codespace
 git restore --source=origin/main -- "Nom exact du fichier"
 
 
-
+git pull --rebase
 add + commit → pull --rebase → push
