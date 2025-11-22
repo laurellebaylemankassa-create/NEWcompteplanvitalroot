@@ -1,11 +1,20 @@
 
 
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './StartPreparationModal.module.css';
 
 
 const StartPreparationModal = ({ isOpen, onClose, onSave, analyseComportement = [] }) => {
+  // Date et heure du jour (affichage en haut de la modale, côté client uniquement)
+  const [dateHeure, setDateHeure] = useState({ date: '', heure: '' });
+  useEffect(() => {
+    const now = new Date();
+    setDateHeure({
+      date: now.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+      heure: now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+    });
+  }, []);
   const [startDate, setStartDate] = useState('');
   const [duration, setDuration] = useState(30); // Valeur par défaut
   const [goal, setGoal] = useState('');
@@ -68,6 +77,11 @@ const StartPreparationModal = ({ isOpen, onClose, onSave, analyseComportement = 
   return (
     <div className={styles.modal}>
       <div className={styles['modal-content']}>
+        {dateHeure.date && dateHeure.heure && (
+          <div style={{textAlign:'right', fontSize:'0.98rem', color:'#64748b', marginBottom: '-1.2rem'}}>
+            {`Aujourd’hui : ${dateHeure.date} — ${dateHeure.heure}`}
+          </div>
+        )}
         <h2>🌙 Démarrer ma préparation au jeûne</h2>
         <div className={styles['modal-info']}>
           <div><b>📅 Date de début choisie :</b> <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} /></div>
@@ -103,7 +117,7 @@ const StartPreparationModal = ({ isOpen, onClose, onSave, analyseComportement = 
           {msgType === 'texte' ? (
             <textarea value={msgTexte} onChange={e => setMsgTexte(e.target.value)} placeholder="Ex : Je me prépare depuis 30 jours. Mon corps est prêt..." style={{width:'100%',marginTop:4}} />
           ) : (
-            <button type="button" style={{marginTop:4}}>🎤 Enregistrer un message vocal/vidéo</button>
+            <button type="button" style={{marginTop:4}} onClick={() => alert('Fonction d’enregistrement audio/vidéo à venir (conforme fiche métier)')}>🎤 Enregistrer un message vocal/vidéo</button>
           )}
         </section>
         {/* Zone projection sur la réussite (texte OU audio/vidéo) */}
@@ -116,7 +130,7 @@ const StartPreparationModal = ({ isOpen, onClose, onSave, analyseComportement = 
           {projType === 'texte' ? (
             <textarea value={projTexte} onChange={e => setProjTexte(e.target.value)} placeholder="Ex : Après ce jeûne, je me sentirai..." style={{width:'100%',marginTop:4}} />
           ) : (
-            <button type="button" style={{marginTop:4}}>🎤 Enregistrer un message vocal/vidéo</button>
+            <button type="button" style={{marginTop:4}} onClick={() => alert('Fonction d’enregistrement audio/vidéo à venir (conforme fiche métier)')}>🎤 Enregistrer un message vocal/vidéo</button>
           )}
         </section>
         {/* Feedback comportemental enrichi */}
@@ -128,24 +142,12 @@ const StartPreparationModal = ({ isOpen, onClose, onSave, analyseComportement = 
             </ul>
           </section>
         )}
-        {/* Critères non réalisables */}
-        {criteresNonReal.length > 0 && (
-          <div style={{ background: '#fffbe6', border: '1px solid #ffe082', borderRadius: 8, padding: '10px 14px', margin: '12px 0' }}>
-            <strong style={{ color: '#e65100' }}>Attention : certains critères ne pourront pas être validés avec cette durée de préparation :</strong>
-            <ul style={{ margin: '8px 0 0 16px', color: '#e65100', fontSize: '0.98rem' }}>
-              {criteresNonReal.map(c => (
-                <li key={c.id}>{c.label} (J-{c.jalon})</li>
-              ))}
-            </ul>
-            <div style={{ marginTop: 8, color: '#388e3c', fontWeight: 600 }}>
-              Bravo pour ton engagement ! Un jeûne mieux préparé apporte plus de bénéfices. Pour la prochaine fois, commence ta préparation plus tôt pour maximiser tes résultats et ton confort.
-            </div>
-          </div>
-        )}
+          {/* Critères non réalisables supprimés selon consigne utilisateur */}
         <div className={styles['modal-actions']}>
           <button onClick={onClose}>Annuler</button>
           <button onClick={handleSave}>Démarrer ma préparation</button>
         </div>
+
       </div>
     </div>
   );
