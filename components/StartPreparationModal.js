@@ -10,6 +10,8 @@ import styles from './StartPreparationModal.module.css';
 const StartPreparationModal = ({ isOpen, onClose, onSave, analyseComportement = [], userId }) => {
   // Date de début de préparation (doit être déclarée AVANT tout usage)
   const [startDate, setStartDate] = useState('');
+  // Durée du jeûne souhaitée (en jours)
+  const [dureeJeune, setDureeJeune] = useState('');
   // Analyse automatique des 3 derniers jours de repas
   const [analyse3Jours, setAnalyse3Jours] = useState([]);
   // Analyse synthétique métier (extras, repas tardifs, conseils...)
@@ -188,11 +190,11 @@ const StartPreparationModal = ({ isOpen, onClose, onSave, analyseComportement = 
   }
 
   const handleSave = () => {
-    if (!startDate || !goal) {
-      alert('Veuillez remplir tous les champs obligatoires.');
+    if (!startDate || !goal || !dureeJeune) {
+      alert('Veuillez remplir tous les champs obligatoires (date, durée du jeûne, objectif).');
       return;
     }
-    onSave({ startDate, duration, goal, msgType, msgTexte, msgAudio, projType, projTexte, projAudio });
+    onSave({ startDate, duration: dureeJeune, goal, msgType, msgTexte, msgAudio, projType, projTexte, projAudio });
     onClose();
   };
 
@@ -216,6 +218,10 @@ const StartPreparationModal = ({ isOpen, onClose, onSave, analyseComportement = 
             <span style={{marginLeft:8, color:'#64748b', fontSize:'0.95em'}}>
               (du {dureeReelle !== null && startDate ? (new Date(new Date(startDate).getTime() - dureeReelle*24*60*60*1000)).toLocaleDateString('fr-FR') : '—'} au {startDate ? new Date(startDate).toLocaleDateString('fr-FR') : '—'})
             </span>
+          </div>
+          <div style={{marginTop:4}}>
+            <b>🥕 Durée du jeûne souhaitée :</b> <input type="number" min="1" max="21" value={dureeJeune} onChange={e => setDureeJeune(e.target.value)} placeholder="Ex : 5" style={{width:60,marginLeft:6,marginRight:6}} /> jours
+            <span style={{marginLeft:8, color:'#64748b', fontSize:'0.95em'}}>(généralement 5 à 10 jours)</span>
           </div>
           <div><b>🎯 Objectif :</b> <input type="text" value={goal} onChange={e => setGoal(e.target.value)} placeholder="Ex : Jeûne de 5 jours le 15/12/2025" /></div>
         </div>
