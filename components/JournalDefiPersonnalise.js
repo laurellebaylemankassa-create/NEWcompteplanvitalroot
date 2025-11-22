@@ -14,6 +14,26 @@ export default function JournalDefiPersonnalise({ defi, jourActuel, onProgressio
   const [journalCharge, setJournalCharge] = useState(false);
   const [etapeValidee, setEtapeValidee] = useState(false);
   const [message, setMessage] = useState("");
+  const [heureActuelle, setHeureActuelle] = useState(new Date());
+
+  // Mise à jour de l'heure chaque minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setHeureActuelle(new Date());
+    }, 60000); // 1 minute
+    return () => clearInterval(interval);
+  }, []);
+
+  // Détection période de la journée
+  const getHeure = () => heureActuelle.getHours();
+  const estMatin = () => getHeure() >= 5 && getHeure() < 14; // 5h-14h
+  const estSoir = () => getHeure() >= 17 && getHeure() < 24; // 17h-minuit
+  const getCreneauActuel = () => {
+    const h = getHeure();
+    if (h >= 5 && h < 14) return "matin";
+    if (h >= 17 && h < 24) return "soir";
+    return "hors-créneau";
+  };
 
   // Charger le journal du jour au montage
   useEffect(() => {
@@ -60,10 +80,35 @@ export default function JournalDefiPersonnalise({ defi, jourActuel, onProgressio
       return;
     }
 
+    // Vérification créneau horaire
+    if (!estMatin()) {
+      setMessage("⏰ Les engagements ne peuvent être déclarés qu'entre 5h et 14h");
+      return;
+    }
+
     try {
-      await sauvegarderEngagements(defi.id, jourActuel, engagements, notePersonnelle);
-      setMessage("✓ Engagements sauvegardés");
-      setTimeout(() => setMessage(""), 3000);
+      const maintenant = new Date();
+      const dateJour = maintenant.toLocaleDateString('fr-FR', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+      const heureComplete = maintenant.toLocaleTimeString('fr-FR', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+      
+      const engagementsAvecDate = engagements.map(eng => ({
+        ...eng,
+        date_declaration: maintenant.toISOString(),
+        date_jour: dateJour,
+        heure_declaration: heureComplete
+      }));
+      
+      await sauvegarderEngagements(defi.id, jourActuel, engagementsAvecDate, notePersonnelle);
+      setMessage(`✓ Engagements sauvegardés le ${dateJour} à ${heureComplete}`);
+      setTimeout(() => setMessage(""), 4000);
     } catch (error) {
       console.error("Erreur sauvegarde:", error);
       setMessage("Erreur lors de la sauvegarde");
@@ -76,12 +121,44 @@ export default function JournalDefiPersonnalise({ defi, jourActuel, onProgressio
       return;
     }
 
+    // Vérification créneau horaire
+    if (!estSoir()) {
+      setMessage("⏰ La validation ne peut se faire qu'entre 17h et minuit");
+      return;
+    }
+
+    // Vérification cohérence date (validation le même jour que déclaration)
+    const maintenant = new Date();
+    const dateJourActuelle = maintenant.toLocaleDateString('fr-FR', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+    
+    // Vérifier si les engagements ont été déclarés aujourd'hui
+    const premierEngagement = engagements[0];
+    if (premierEngagement?.date_jour && premierEngagement.date_jour !== dateJourActuelle) {
+      setMessage(`⚠️ Ces engagements ont été déclarés le ${premierEngagement.date_jour}. Vous ne pouvez valider que le jour même.`);
+      return;
+    }
+
     try {
-      const result = await validerEtapeDefi(defi.id, jourActuel, engagements);
+      const heureComplete = maintenant.toLocaleTimeString('fr-FR', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+      
+      const engagementsAvecValidation = engagements.map(eng => ({
+        ...eng,
+        date_validation: eng.valide ? maintenant.toISOString() : null,
+        heure_validation: eng.valide ? heureComplete : null
+      }));
+
+      const result = await validerEtapeDefi(defi.id, jourActuel, engagementsAvecValidation);
       setEtapeValidee(true);
 
       if (result.progressionIncrementee) {
-        setMessage(`✓ Journée validée ! Progression : ${result.newProgress}/${defi.duree}`);
+        setMessage(`✓ Journée validée le ${dateJourActuelle} à ${heureComplete} ! Progression : ${result.newProgress}/${defi.duree}`);
         if (onProgressionUpdate) {
           onProgressionUpdate(result.newProgress);
         }
@@ -108,6 +185,25 @@ export default function JournalDefiPersonnalise({ defi, jourActuel, onProgressio
     );
   }
 
+  const creneauActuel = getCreneauActuel();
+  const afficherIndicateurCreneau = () => {
+    if (creneauActuel === "matin") {
+      return { emoji: "☀️", texte: "Créneau matin actif (5h-14h)", couleur: "#FCD34D" };
+    } else if (creneauActuel === "soir") {
+      return { emoji: "🌙", texte: "Créneau soir actif (17h-minuit)", couleur: "#C084FC" };
+    } else {
+      return { emoji: "⏸️", texte: "Hors créneau (déclaration: 5h-14h, validation: 17h-minuit)", couleur: "#94A3B8" };
+    }
+  };
+  const indicateur = afficherIndicateurCreneau();
+  
+  const dateComplete = heureActuelle.toLocaleDateString('fr-FR', { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* En-tête stylé */}
@@ -118,13 +214,27 @@ export default function JournalDefiPersonnalise({ defi, jourActuel, onProgressio
         padding: '24px',
         color: 'white'
       }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '8px' }}>{defi.nom}</h2>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '0.875rem', opacity: 0.9 }}>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '4px' }}>{defi.nom}</h2>
+        <p style={{ fontSize: '0.875rem', opacity: 0.8, marginBottom: '12px', textTransform: 'capitalize' }}>
+          📆 {dateComplete}
+        </p>
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '16px', fontSize: '0.875rem', opacity: 0.9 }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             📅 Jour {jourActuel} / {defi.duree}
           </span>
           <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             ✅ {defi.progress || 0} jours validés
+          </span>
+          <span style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '4px',
+            padding: '4px 12px',
+            background: 'rgba(255, 255, 255, 0.2)',
+            borderRadius: '8px',
+            borderLeft: `3px solid ${indicateur.couleur}`
+          }}>
+            {indicateur.emoji} {heureActuelle.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} • {indicateur.texte}
           </span>
         </div>
       </div>
@@ -152,8 +262,26 @@ export default function JournalDefiPersonnalise({ defi, jourActuel, onProgressio
           borderRadius: '16px',
           boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
           padding: '24px',
-          border: '2px solid #BFDBFE'
+          border: '2px solid #BFDBFE',
+          opacity: !estMatin() ? 0.6 : 1,
+          position: 'relative'
         }}>
+          {!estMatin() && (
+            <div style={{
+              position: 'absolute',
+              top: '12px',
+              right: '12px',
+              padding: '6px 12px',
+              background: '#FEF3C7',
+              color: '#92400E',
+              fontSize: '0.75rem',
+              fontWeight: 'bold',
+              borderRadius: '8px',
+              border: '1px solid #FCD34D'
+            }}>
+              ⏰ Disponible de 5h à 14h
+            </div>
+          )}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
             <div style={{ fontSize: '2.5rem' }}>☀️</div>
             <div>
@@ -167,38 +295,51 @@ export default function JournalDefiPersonnalise({ defi, jourActuel, onProgressio
             {engagements.map((eng, index) => (
               <div key={index} style={{
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
+                flexDirection: 'column',
                 background: 'white',
                 padding: '16px',
                 borderRadius: '12px',
                 boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
                 border: '2px solid #DBEAFE'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
-                  <span style={{ color: '#2563EB', fontWeight: 'bold', fontSize: '1.125rem' }}>{index + 1}</span>
-                  <span style={{ color: '#1F2937', fontWeight: '500' }}>{eng.texte}</span>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                    <span style={{ color: '#2563EB', fontWeight: 'bold', fontSize: '1.125rem' }}>{index + 1}</span>
+                    <span style={{ color: '#1F2937', fontWeight: '500' }}>{eng.texte}</span>
+                  </div>
+                  <button
+                    onClick={() => supprimerEngagement(index)}
+                    style={{
+                      marginLeft: '12px',
+                      width: '32px',
+                      height: '32px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: '#FEE2E2',
+                      color: '#DC2626',
+                      borderRadius: '50%',
+                      border: 'none',
+                      cursor: 'pointer'
+                    }}
+                    onMouseOver={(e) => e.target.style.background = '#FECACA'}
+                    onMouseOut={(e) => e.target.style.background = '#FEE2E2'}
+                  >
+                    ✕
+                  </button>
                 </div>
-                <button
-                  onClick={() => supprimerEngagement(index)}
-                  style={{
-                    marginLeft: '12px',
-                    width: '32px',
-                    height: '32px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: '#FEE2E2',
-                    color: '#DC2626',
-                    borderRadius: '50%',
-                    border: 'none',
-                    cursor: 'pointer'
-                  }}
-                  onMouseOver={(e) => e.target.style.background = '#FECACA'}
-                  onMouseOut={(e) => e.target.style.background = '#FEE2E2'}
-                >
-                  ✕
-                </button>
+                {eng.heure_declaration && (
+                  <div style={{ 
+                    marginTop: '8px', 
+                    paddingTop: '8px', 
+                    borderTop: '1px solid #E5E7EB',
+                    fontSize: '0.75rem', 
+                    color: '#6B7280',
+                    fontStyle: 'italic'
+                  }}>
+                    📝 Déclaré le {eng.date_jour} à {eng.heure_declaration}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -279,11 +420,11 @@ export default function JournalDefiPersonnalise({ defi, jourActuel, onProgressio
           {/* Bouton sauvegarde */}
           <button
             onClick={sauvegarderDeclaration}
-            disabled={engagements.length === 0}
+            disabled={engagements.length === 0 || !estMatin()}
             style={{
               width: '100%',
               padding: '16px',
-              background: engagements.length === 0 
+              background: (engagements.length === 0 || !estMatin()) 
                 ? 'linear-gradient(to right, #D1D5DB, #9CA3AF)' 
                 : 'linear-gradient(to right, #10B981, #059669)',
               color: 'white',
@@ -292,7 +433,7 @@ export default function JournalDefiPersonnalise({ defi, jourActuel, onProgressio
               fontSize: '1.125rem',
               boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
               border: 'none',
-              cursor: engagements.length === 0 ? 'not-allowed' : 'pointer'
+              cursor: (engagements.length === 0 || !estMatin()) ? 'not-allowed' : 'pointer'
             }}
             onMouseOver={(e) => {
               if (engagements.length > 0) {
@@ -317,8 +458,26 @@ export default function JournalDefiPersonnalise({ defi, jourActuel, onProgressio
           borderRadius: '16px',
           boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
           padding: '24px',
-          border: '2px solid #E9D5FF'
+          border: '2px solid #E9D5FF',
+          opacity: !estSoir() && !etapeValidee ? 0.6 : 1,
+          position: 'relative'
         }}>
+          {!estSoir() && !etapeValidee && (
+            <div style={{
+              position: 'absolute',
+              top: '12px',
+              right: '12px',
+              padding: '6px 12px',
+              background: '#FEF3C7',
+              color: '#92400E',
+              fontSize: '0.75rem',
+              fontWeight: 'bold',
+              borderRadius: '8px',
+              border: '1px solid #FCD34D'
+            }}>
+              ⏰ Disponible de 17h à minuit
+            </div>
+          )}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
             <div style={{ fontSize: '2.5rem' }}>🌙</div>
             <div>
@@ -330,43 +489,60 @@ export default function JournalDefiPersonnalise({ defi, jourActuel, onProgressio
           {/* Checklist */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
             {engagements.map((eng, index) => (
-              <label
-                key={index}
-                style={{
+              <div key={index} style={{
+                background: 'white',
+                borderRadius: '12px',
+                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+                border: '2px solid #F3E8FF',
+                padding: '16px'
+              }}>
+                <label style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '16px',
-                  padding: '16px',
-                  background: 'white',
-                  borderRadius: '12px',
-                  boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-                  border: '2px solid #F3E8FF',
                   cursor: 'pointer'
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={eng.valide}
-                  onChange={() => toggleEngagement(index)}
-                  disabled={etapeValidee}
-                  style={{
-                    width: '24px',
-                    height: '24px',
-                    accentColor: '#9333EA',
-                    cursor: etapeValidee ? 'not-allowed' : 'pointer'
-                  }}
-                />
-                <span style={{
-                  fontSize: '1rem',
-                  fontWeight: '500',
-                  flex: 1,
-                  textDecoration: eng.valide ? 'line-through' : 'none',
-                  color: eng.valide ? '#6B7280' : '#1F2937'
                 }}>
-                  {eng.texte}
-                </span>
-                {eng.valide && <span style={{ color: '#10B981', fontSize: '1.25rem' }}>✓</span>}
-              </label>
+                  <input
+                    type="checkbox"
+                    checked={eng.valide}
+                    onChange={() => toggleEngagement(index)}
+                    disabled={etapeValidee}
+                    style={{
+                      width: '24px',
+                      height: '24px',
+                      accentColor: '#9333EA',
+                      cursor: etapeValidee ? 'not-allowed' : 'pointer'
+                    }}
+                  />
+                  <span style={{
+                    fontSize: '1rem',
+                    fontWeight: '500',
+                    flex: 1,
+                    textDecoration: eng.valide ? 'line-through' : 'none',
+                    color: eng.valide ? '#6B7280' : '#1F2937'
+                  }}>
+                    {eng.texte}
+                  </span>
+                  {eng.valide && <span style={{ color: '#10B981', fontSize: '1.25rem' }}>✓</span>}
+                </label>
+                {eng.heure_declaration && (
+                  <div style={{ 
+                    marginTop: '8px', 
+                    paddingTop: '8px', 
+                    borderTop: '1px solid #F3E8FF',
+                    fontSize: '0.75rem', 
+                    color: '#6B7280',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    fontStyle: 'italic'
+                  }}>
+                    <span>📝 Déclaré: {eng.heure_declaration}</span>
+                    {eng.valide && eng.heure_validation && (
+                      <span>✅ Validé: {eng.heure_validation}</span>
+                    )}
+                  </div>
+                )}
+              </div>
             ))}
           </div>
 
@@ -409,20 +585,31 @@ export default function JournalDefiPersonnalise({ defi, jourActuel, onProgressio
           {!etapeValidee && (
             <button
               onClick={validerJournee}
+              disabled={!estSoir()}
               style={{
                 width: '100%',
                 padding: '16px',
-                background: 'linear-gradient(to right, #9333EA, #DB2777)',
+                background: !estSoir() 
+                  ? 'linear-gradient(to right, #D1D5DB, #9CA3AF)' 
+                  : 'linear-gradient(to right, #9333EA, #DB2777)',
                 color: 'white',
                 borderRadius: '12px',
                 fontWeight: 'bold',
                 fontSize: '1.125rem',
                 boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
                 border: 'none',
-                cursor: 'pointer'
+                cursor: !estSoir() ? 'not-allowed' : 'pointer'
               }}
-              onMouseOver={(e) => e.target.style.background = 'linear-gradient(to right, #7E22CE, #BE185D)'}
-              onMouseOut={(e) => e.target.style.background = 'linear-gradient(to right, #9333EA, #DB2777)'}
+              onMouseOver={(e) => {
+                if (estSoir()) {
+                  e.target.style.background = 'linear-gradient(to right, #7E22CE, #BE185D)';
+                }
+              }}
+              onMouseOut={(e) => {
+                if (estSoir()) {
+                  e.target.style.background = 'linear-gradient(to right, #9333EA, #DB2777)';
+                }
+              }}
             >
               ✓ Valider la journée
             </button>
