@@ -97,9 +97,31 @@ import PhaseCard from '../components/PhaseCard';
 import Feedback from '../components/Feedback';
 import Navigation from '../components/Navigation';
 import StartPreparationModal from '../components/StartPreparationModal';
+import { useSupabase } from '../lib/supabaseClient';
 // ...existing code...
 
 export default function PreparationJeune() {
+  // Récupération du userId via Supabase
+  const supabase = useSupabase();
+  const [userId, setUserId] = useState(null);
+  const [authError, setAuthError] = useState(null);
+  useEffect(() => {
+    let ignore = false;
+    async function fetchUser() {
+      const { data, error } = await supabase.auth.getUser();
+      if (!ignore) {
+        if (error || !data?.user) {
+          setUserId(null);
+          setAuthError("Vous devez être connecté pour démarrer la préparation et voir l'analyse des repas.");
+        } else {
+          setUserId(data.user.id);
+          setAuthError(null);
+        }
+      }
+    }
+    fetchUser();
+    return () => { ignore = true; };
+  }, [supabase]);
   // === ÉTAT POUR L’EXPANSION/RÉDUCTION DES PHASES ===
   const [phasesOuvertes, setPhasesOuvertes] = useState(phasesMetier.map(() => false));
 
@@ -413,7 +435,11 @@ const DebugPanel = () => (
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onSave={handleStartPreparationModal}
+                userId={userId}
               />
+              {authError && (
+                <div style={{color:'#FF6B6B',fontWeight:700,marginTop:12}}>{authError}</div>
+              )}
               <div aria-live="polite" style={{ minHeight: 24, marginTop: 8 }}>
                 {/* Zone de feedback dynamique pour lecteurs d’écran */}
               </div>
