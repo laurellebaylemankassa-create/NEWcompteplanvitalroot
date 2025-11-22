@@ -1,0 +1,119 @@
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(30, 42, 70, 0.18);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-content {
+  background: linear-gradient(120deg, #f7fafc 60%, #e3f0ff 100%);
+  border-radius: 22px;
+  box-shadow: 0 8px 32px rgba(30,42,70,0.18);
+  max-width: 520px;
+  width: 95vw;
+  padding: 2.2rem 2rem 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.3rem;
+  border: 1.5px solid #e3eaf2;
+  animation: modalIn 0.4s cubic-bezier(.4,1.6,.6,1) 1;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(40px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+.modal-content h2 {
+  font-size: 1.5rem;
+  color: #1976d2;
+  margin-bottom: 0.2em;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+.modal-info > div {
+  margin-bottom: 0.3rem;
+  font-size: 1.08em;
+  color: #2c3e50;
+}
+.modal-phases h3 {
+  color: #1976d2;
+  font-size: 1.1em;
+  margin-bottom: 0.2em;
+}
+.modal-phases ul {
+  padding-left: 1.2rem;
+  margin: 0;
+  color: #374151;
+  font-size: 0.98em;
+}
+.jalon-today {
+  background: #e3f0ff;
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  margin-bottom: 0.5em;
+  color: #1976d2;
+  font-weight: 600;
+}
+.jalon-critere {
+  margin-top: 0.3rem;
+  color: #374151;
+  font-weight: 500;
+}
+.jalon-conseil {
+  color: #43a047;
+  font-size: 0.97em;
+  margin-top: 0.2em;
+}
+.modal-message, .modal-projection {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 0.7em 1em 0.9em 1em;
+  margin-bottom: 0.2em;
+  border-left: 4px solid #1976d2;
+}
+.modal-message h4, .modal-projection h4 {
+  margin: 0 0 0.3em 0;
+  color: #1976d2;
+  font-size: 1em;
+}
+.modal-analyse {
+  background: #fffbe6;
+  border: 1px solid #ffe082;
+  border-radius: 8px;
+  padding: 0.7em 1em;
+  color: #b00020;
+  font-size: 0.98em;
+  margin-bottom: 0.2em;
+}
+.modal-actions {
+  display: flex;
+  gap: 1.2em;
+  justify-content: flex-end;
+  margin-top: 0.7em;
+}
+.modal-actions button {
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: 0.7em 1.5em;
+  font-weight: 700;
+  font-size: 1.08em;
+  cursor: pointer;
+  box-shadow: 0 2px 8px 0 rgba(25,118,210,0.10);
+  transition: background 0.18s, color 0.18s;
+}
+.modal-actions button:hover {
+  background: #1251a3;
+}
+@media (max-width: 600px) {
+  .modal-content {
+    padding: 1.1rem 0.3rem;
+    max-width: 99vw;
+  }
+}
