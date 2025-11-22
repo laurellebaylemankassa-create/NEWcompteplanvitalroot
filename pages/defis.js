@@ -169,12 +169,30 @@ const Defis = () => {
         // Récupérer le type de défi
         const defi = defis.find(d => d.id === defiId);
         const estDefiPersonnalise = defi?.type === 'personnalise' || defi?.type === 'alimentaire' || !defisReferentiel.find(d => d.description === defi?.description);
-        const progressInitial = estDefiPersonnalise ? 0 : 1;
         
-        // On passe le défi en "en cours"
+        // Si défi personnalisé : passer en cours ET ouvrir le journal
+        if (estDefiPersonnalise) {
+            const { error: updateError } = await supabase
+                .from('defis')
+                .update({ progress: 0, status: 'en cours' })
+                .eq('id', defiId);
+            
+            if (updateError) {
+                setError('Erreur lors du démarrage du défi');
+                setActionLoading(false);
+                return;
+            }
+            
+            // Rediriger vers le journal
+            setActionLoading(false);
+            router.push(`/journal-defi/${defiId}`);
+            return;
+        }
+        
+        // Défis classiques : progress = 1 et rester sur la page
         const { error: updateError } = await supabase
             .from('defis')
-            .update({ progress: progressInitial, status: 'en cours' })
+            .update({ progress: 1, status: 'en cours' })
             .eq('id', defiId);
         if (updateError) {
             setError('Erreur lors du démarrage du défi');
@@ -314,7 +332,10 @@ const Defis = () => {
                                     {estDefiPersonnalise && (
                                         <button
                                             style={{ marginTop: 10, marginLeft: 10, padding: '8px 20px', borderRadius: 8, background: '#d32f2f', color: '#fff', border: 'none', cursor: actionLoading === defi.id ? 'wait' : 'pointer', fontWeight: 600, fontSize: 16, opacity: actionLoading === defi.id ? 0.7 : 1 }}
-                                            onClick={() => handleSupprimerDefi(defi.id)}
+                                            onClick={() => {
+                                                console.log('🗑️ Clic bouton Supprimer, defiId:', defi.id);
+                                                handleSupprimerDefi(defi.id);
+                                            }}
                                             disabled={!!actionLoading}
                                         >
                                             🗑️ Supprimer
