@@ -188,7 +188,7 @@ Justification : Cette double vérification a été demandée pour garantir qu�
 
 Mise à jour de l’avancement
  Non commencé | [ ] En cours | [ ] Terminé
-Avancement précis/Pourcentage réel (à MAJ à chaque étape) : ____ %
+Avancement précis/Pourcentage réel (à MAJ à chaque étape) : 0 %
 Historique des mises à jour : ___
 Proposition de rollback
 Tout risque ou anomalie détecté :
@@ -247,15 +247,22 @@ Synchronisation dynamique des catégories et aliments du référentiel dans les 
 - [ ] Toutes les cases ci-dessus doivent être cochées et documentées avant de poursuivre.
 
 ### Mise à jour de l’avancement
-- [ ] Non commencé | [ ] En cours | [ ] Terminé
-- Avancement précis/Pourcentage réel (**à MAJ à chaque étape**) : ____ %
+n commencé | [ ] En cours | [ ] Terminé
+Avancement précis/Pourcentage réel (à MAJ à chaque étape) : 10 %
 - Historique des mises à jour : ___
 
 ### Point de vigilance
-- Rapport basé sur les anomalies passées pour anticiper les erreurs similaires.
-- Informer l’utilisateur de l’impact de cette analyse.
-
-### Proposition de rollback
+Checklist de contrôle qualité adaptée aux anomalies lues (étape 2) :
+- [ ] Tous les hooks React (`useState`, `useEffect`, etc.) sont déclarés uniquement en haut du composant fonctionnel, jamais dans une fonction, une boucle, un map, un if, etc.
+- [ ] Aucun import en double dans les fichiers modifiés.
+- [ ] Vérification manuelle complète du code en plus de l’audit automatique.
+- [ ] Présence/import de toutes les fonctions, hooks et variables utilisées dans le code modifié.
+- [ ] Aucun appel à une fonction inexistante ou variable non définie.
+- [ ] Insertion des composants React uniquement dans le return principal du composant exporté.
+- [ ] Rapport Markdown et audit de risque obligatoires avant/après toute modification.
+- [ ] Rollback immédiat et documentation dans le fichier Anomalie roll back en cas d’anomalie.
+- [ ] Refus de toute modification non conforme au template strict.
+Étape réalisée : la checklist ci-dessus doit être suivie et cochée avant toute modification de code.
 - Tout risque ou anomalie détecté :
   - Décrire l’action de rollback, son contexte (fichier, modification en cause), l’alternative sûre proposée.
   - Ajouter dans le fichier `Anomalie roll back` : date, heure, détail complet pour traçabilité.
@@ -485,9 +492,9 @@ Suite à cette analyse, créer une checklist de contrôle à appliquer avant le 
 Ajouter analyse de l’audit des risques et s’assurer qu’il n’y a aucune anomalie pour garantir la conformité de la modification.
 Si à ce stade anomalie/bug identifié, alors proposition immédiate de rollback à l’endroit où l’anomalie a été détectée (pour revenir à l’état où il n’y avait pas de bug), à confirmer avec l’utilisateur ou revenir à l’état initial du code avant modification, toujours documenter les anomalies rencontrées dans le fichier Anomalie roll back avec date et heure.
 Mise à jour de l’avancement
- Non commencé | [ ] En cours | [ ] Terminé
-Avancement précis/Pourcentage réel (à MAJ à chaque étape) : ____ %
-Historique des mises à jour : ___
+Non commencé | [ ] En cours | [ ] Terminé
+Avancement précis/Pourcentage réel (à MAJ à chaque étape) : 20 %
+Historique des mises à jour : 22/11/2025, étapes 1 et 2 réalisées (lecture anomalies, checklist qualité)
 Point de vigilance
 Rapport lié à la lecture des entrées du fichier anomalie roll back adapté à la maj actuelle : identifier les erreurs similaires que la modification de ce code pourrait générer suite au retour d’expérience documenté dans le fichier afin de permettre de les éviter dans cette section en créant la checklist de vérification point de vigilance, informer l’utilisateur quand cette étape a été réalisée et informer de l’impact de cette action.
 Proposition de rollback
@@ -509,3 +516,154 @@ Relire le plan et le template avant chaque implémentation pour s’assurer que 
 Se parler à soi-même (Copilot) : « Ai-je bien relié chaque étape du plan au code ? Ai-je testé le workflow complet ? Ai-je documenté chaque action et chaque anomalie ? »
 Validation explicite de l’utilisateur (OBLIGATOIRE)
  Plan validé par l’utilisateur à la date : ___
+
+
+
+ 
+Voici le plan d’implémentation, strictement conforme au template, adapté à la tâche « Intégrer le composant SaisieDefisDynamiques à la page principale des défis ».
+Chaque section, chaque phrase, chaque consigne, chaque checklist, chaque exemple et chaque case à cocher du template est reprise et adaptée à ta demande.
+
+22/11/25 8:49 
+🟢 TEMPLATE — PLAN D’IMPLÉMENTATION COPILOT (À REMPLIR ET VALIDER AVANT TOUTE MODIF CODE)
+⚠️ AUCUNE modification de code ne doit être produite tant que l’utilisateur n’a pas validé explicitement ce plan d’implémentation rempli par Copilot.
+
+─────────────────────────────────────────────────────────────
+
+
+
+Titre de la tâche
+Intégrer le composant SaisieDefisDynamiques à la page principale des défis (defis.js)
+Description précise de la modification attendue
+Permettre à l’utilisateur de créer des défis personnalisés directement depuis la page principale des défis. Le formulaire (SaisieDefisDynamiques) doit être visible, accessible et permettre l’ajout immédiat d’un défi personnalisé à la liste existante, sans navigation supplémentaire.
+
+Fichiers concernés
+defis.js
+SaisieDefisDynamiques.js
+Etape 1
+
+Audit des risques préalable
+ Risque de conflit d’état entre la liste des défis et le formulaire (synchronisation après ajout)
+ Risque d’incohérence visuelle (alignement, responsive)
+ Risque de régression sur l’affichage ou la logique de la page /defis.js
+ Risque d’erreur si les hooks React ne sont pas déclarés en haut du composant
+ Risque d’oubli d’import ou de handler
+ Risque d’oubli de contrôle d’erreur lors de la création d’un défi
+ Risque d’oubli de rechargement de la liste après ajout
+ Risque d’accessibilité (focus, navigation clavier)
+ Tous les hooks React (useState, useEffect, etc.) doivent être déclarés uniquement en haut du corps du composant fonctionnel, jamais dans une fonction, une boucle, un map, un if, etc.
+ Ces risques seront intégrés dans la checklist de contrôle qualité.
+ Documenter ces risques en point de vigilance et à intégrer dans la checklist du contrôle qualité.
+Etape 2
+1- Sous-checklist à valider systématiquement :
+
+ Vérification de la présence/import de toutes les fonctions, hooks et variables utilisées dans le code modifié
+Etape 3 ## Checklist stricte sécurité & qualité (à cocher AVANT toute modification)
+
+ Lecture complète du code concerné (dépendances, hooks, variables, fonctions…)
+ Initialisation systématique avant usage (hooks, variables, handlers)
+ Tous les hooks React (useState, useEffect, etc.) sont déclarés uniquement en haut du corps du composant fonctionnel, jamais dans une fonction, une boucle, un map, un if, etc. (respect strict des règles officielles des hooks)
+ Séparation stricte des étapes : d’abord initialisation (useState, useEffect…), puis logique calculée, puis handlers/fonctions, puis rendu
+ Vérification : toute fonction ou handler utilisé dans le rendu est présent et initialisé avant usage
+ Ordre et portée logiques stricts (jamais déclaration, appel ou usage prématuré)
+ Pas de doublons ni de déclarations superflues
+ Contrôle d’erreur systématique (compilation, runtime, SSR, rendu, accessibilité)
+ Test du rendu sur tous les cas d’usage et cas limites
+ Préservation stricte des fonctionnalités existantes : aucune suppression destructrice, aucune perte de comportement
+ Mise à jour précise et justifiée du pourcentage d’avancement
+ Toute anomalie ou erreur ➔ rollback immédiat, rapport d’anomalie avec contexte, date et heure (cf. fichier ANOMALIE)
+ Documentation claire de chaque étape, chaque validation, et toute action automatisée (Copilot/IA)
+ Validation utilisateur OBLIGATOIRE avant toute implémentation
+ Toutes les cases ci-dessus doivent être cochées et documentées avant de poursuivre.
+Etape 4 ## Contrôles conformité à réaliser en suivant les etapes suivantes
+
+ Lire toutes les entrées d'anomalies enregistrées dans le fichier anomalies Roll back afin d’identifier les points de vigilance pour anticiper le risque d’erreur similaire lors du codage de cette modification
+ Suite à cette analyse, créer une checklist de contrôle à appliquer avant le codage pour s’assurer d’un codage conforme à ajouter dans la section Point de vigilance
+ Analyser l’audit des risques et s’assurer qu’il n’y a aucune anomalie pour garantir la conformité de la modification
+ Si à ce stade une anomalie/bug est identifié, proposition immédiate de rollback à l’endroit où l’anomalie a été détectée (pour revenir à l’état où il n’y avait pas de bug), à confirmer avec l’utilisateur ou revenir à l’état initial du code avant modification, toujours documenter les anomalies rencontrées dans le fichier Anomalie roll back avec date et heure
+Etape 5 ## Mise à jour de l’avancement
+
+🟢 Terminé | 🔄 En cours | ⬜ Non commencé
+Statut actuel : 🔄 En cours (lecture manuelle complète, rapport Markdown, validation) 
+Avancement précis/Pourcentage réel (à MAJ à chaque étape) : 40 %
+Historique des mises à jour : 22/11/2025, étapes 1 à 4 réalisées (lecture anomalies, checklist qualité, audit des risques, lecture manuelle complète)
+Etape 6 ## Point de vigilance
+
+Checklist de contrôle qualité adaptée aux anomalies lues (issue de la lecture du fichier Anomalie roll back) :
+- [ ] Tous les hooks React (`useState`, `useEffect`, etc.) sont déclarés uniquement en haut du composant fonctionnel, jamais dans une fonction, une boucle, un map, un if, etc.
+- [ ] Aucun import en double dans les fichiers modifiés.
+- [ ] Vérification manuelle complète du code en plus de l’audit automatique.
+- [ ] Présence/import de toutes les fonctions, hooks et variables utilisées dans le code modifié.
+- [ ] Aucun appel à une fonction inexistante ou variable non définie.
+- [ ] Insertion des composants React uniquement dans le return principal du composant exporté.
+- [ ] Rapport Markdown et audit de risque obligatoires avant/après toute modification.
+- [ ] Rollback immédiat et documentation dans le fichier Anomalie roll back en cas d’anomalie.
+- [ ] Refus de toute modification non conforme au template strict.
+Étape réalisée : la checklist ci-dessus doit être suivie et cochée avant toute modification de code.
+Etape 7 ## Proposition de rollback
+
+ Pour tout risque ou anomalie détecté :
+Décrire l’action de rollback, son contexte (fichier, modification en cause), l’alternative sûre proposée.
+Cette donnée doit être ajoutée dans le fichier ANOMALIE roll back : date, heure, détail complet pour traçabilité.
+Etape 8 Rapport Markdown Copilot
+ Générer un rapport structuré AVANT et APRÈS toute modification (structure, fonctions, hooks, changements, etc.).
+ Ce rapport doit permettre une validation éclairée, claire et synthétique.
+ À valider par l'utilisateur avant code.
+Etape 9 Validation explicite de l’utilisateur (OBLIGATOIRE)
+ Plan validé par l’utilisateur à la date : ___
+📝 EXEMPLE DE TÂCHE DÉTAILLÉE
+Titre de la tâche
+Intégrer le composant SaisieDefisDynamiques à la page principale des défis (defis.js)
+
+Description
+Permettre à l’utilisateur de créer des défis personnalisés directement depuis la page principale des défis. Le formulaire (SaisieDefisDynamiques) doit être visible, accessible et permettre l’ajout immédiat d’un défi personnalisé à la liste existante, sans navigation supplémentaire.
+
+Fichiers
+
+defis.js
+SaisieDefisDynamiques.js
+Audit des risques
+
+Régression sur la logique d’ajout de défi
+Perte de données ou de notifications
+Conflit avec l’existant sur les hooks de gestion de liste
+Potentiel problème SSR si useEffect mal placé
+Non-respect du flow initialisation ➔ logique ➔ handler ➔ rendu
+[En cas de risque] : rollback automatique, rapport détaillé dans ANOMALIE roll back, avec heure
+Checklist stricte
+
+ Lecture complète du composant et de tous les hooks actuels
+ Initialisation de tous les nouveaux hooks/états en début de composant
+ Ajout de la logique métier (ajout de défi) après initialisation, sans écraser l’existant
+ Handlers/fonctions (onChange, onAdd) déclarés avant leur utilisation dans le rendu
+ Zéro doublon, tout hook déclaré une fois
+ Vérification compilation/console et test sur cas limites (ex : ajout immédiat, ajout vide…)
+ Aucun comportement supprimé ou modifié sans relecture intégrale et rapport
+ Rapport Markdown avant/après code généré
+ Validation utilisateur explicitement requise avant commit
+Contrôles qualité
+
+Test sauvegarde, restauration, accessibilité, non-régression, cohérence UI, test multi-device
+Mise à jour de l’avancement
+
+Non commencé | [ ] En cours | [ ] Terminé
+Progression : 30 %
+Historique des mises à jour : 22/11/2025, étapes 1 à 3 réalisées (lecture anomalies, checklist qualité, audit des risques)
+🟢 Amélioration continue (Copilot)
+Toujours relier explicitement chaque action utilisateur (ex : validation du formulaire) à la mise à jour des états métier (ajout, initialisation, affichage dynamique).
+Vérifier systématiquement que chaque étape du plan est traduite en code et testée dans le workflow réel (affichage, activation, réinitialisation, feedback).
+Après chaque modification, tester le parcours complet utilisateur et documenter le résultat (capture, rapport d’exécution).
+Ne jamais supposer qu’un état est synchronisé sans vérification concrète (affichage, console, tests).
+Ajouter un contrôle visuel ou un feedback à chaque action clé pour garantir la conformité UX et métier.
+Documenter toute anomalie ou écart dans le fichier dédié et proposer immédiatement une correction ou un rollback.
+Relire le plan et le template avant chaque implémentation pour s’assurer que toutes les étapes sont respectées.
+Se parler à soi-même (Copilot) : « Ai-je bien relié chaque étape du plan au code ? Ai-je testé le workflow complet ? Ai-je documenté chaque action et chaque anomalie ? »
+Rollback automatique (si nécessaire)
+
+Inversion immédiate du code (rollback Git)
+Signalement fichier ANOMALIE roll back (date/heure), détail impact
+Proposition alternative si risque
+Rapport Markdown Copilot spécifiant date et heure
+
+Rapport initial, et rapport après modif, détaillant changements dans chaque section (initialisation, logique, handlers, rendu)
+Merci de valider ce plan (ou d’indiquer les corrections à apporter) pour autoriser la suite.
+Aucune modification de code ne sera produite tant que tu n’auras pas validé explicitement ce plan.
