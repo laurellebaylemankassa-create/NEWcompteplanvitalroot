@@ -16,7 +16,10 @@ const StartPreparationModal = ({ isOpen, onClose, onSave, analyseComportement = 
     });
   }, []);
   const [startDate, setStartDate] = useState('');
-  const [duration, setDuration] = useState(30); // Valeur par défaut
+  // La durée recommandée est 30 jours (métier)
+  const dureeRecommandee = 30;
+  // Durée réelle calculée automatiquement (date du jour -> date de début du jeûne)
+  const [dureeReelle, setDureeReelle] = useState(null);
   const [goal, setGoal] = useState('');
   // Message personnel (texte ou audio/vidéo)
   const [msgType, setMsgType] = useState('texte');
@@ -39,29 +42,128 @@ const StartPreparationModal = ({ isOpen, onClose, onSave, analyseComportement = 
     { id: 9, label: "Plage alimentaire limitée à 45 minutes par repas", jalon: 7, phase: "Palier 4", conseil: "Mange lentement, savoure chaque bouchée." },
   ];
 
-  // Calcul date de début de préparation
-  const dateDebutPrep = startDate && duration ? new Date(new Date(startDate).getTime() - (duration * 24 * 60 * 60 * 1000)) : null;
-  // Critères non réalisables
-  const criteresNonReal = startDate && duration ? criteresMetier.filter(c => {
-    const dateJalon = new Date(new Date(startDate).getTime() - (c.jalon * 24 * 60 * 60 * 1000));
-    return dateDebutPrep > dateJalon;
-  }) : [];
+  // Calcul dynamique des phases et critères réalisables
+  function addDays(date, days) {
+    const d = new Date(date);
+    d.setDate(d.getDate() + days);
+    return d;
+  }
 
-  // Détermination du jalon actuel (premier critère à réaliser)
-  const jalonActuel = criteresMetier.reduce((acc, c) => {
-    if (!acc && duration >= c.jalon) return c;
-    return acc;
-  }, null);
-
-  // Récap phases (groupées)
-  const phases = [
-    { label: "J-30 à J-18 : FONDATIONS", criteres: [criteresMetier[0].label] },
-    { label: "J-17 : Palier 1", criteres: [criteresMetier[1].label, criteresMetier[2].label] },
-    { label: "J-14 : Palier 2", criteres: [criteresMetier[3].label, criteresMetier[4].label] },
-    { label: "J-12 : Palier 3", criteres: [criteresMetier[5].label] },
-    { label: "J-7 : Palier 4", criteres: [criteresMetier[6].label, criteresMetier[7].label, criteresMetier[8].label] },
-    { label: "J-0 : Lancement du jeûne", criteres: [] },
+  // Définition des phases métier avec bornes dynamiques
+  const phasesMetier = [
+    {
+      key: 'fondations',
+      label: 'J-30 à J-18 : FONDATIONS',
+      objectif: "Stabiliser les quantités et installer une base alimentaire saine pour la suite.",
+      debut: 30,
+      fin: 18,
+      criteres: [criteresMetier[0]],
+    },
+    {
+      key: 'palier1',
+      label: 'J-17 : Palier 1',
+      objectif: "Réduire les glucides le soir et activer la digestion après chaque repas.",
+      debut: 17,
+      fin: 15,
+      criteres: [criteresMetier[1], criteresMetier[2]],
+    },
+    {
+      key: 'palier2',
+      label: 'J-14 : Palier 2',
+      objectif: "Éliminer les produits transformés et sucrés pour alléger la charge métabolique.",
+      debut: 14,
+      fin: 13,
+      criteres: [criteresMetier[3], criteresMetier[4]],
+    },
+    {
+      key: 'palier3',
+      label: 'J-12 : Palier 3',
+      objectif: "Préparer le corps à la cétose par 2 jours de jeûne plein.",
+      debut: 12,
+      fin: 8,
+      criteres: [criteresMetier[5]],
+    },
+    {
+      key: 'palier4',
+      label: 'J-7 : Palier 4',
+      objectif: "Optimiser l’hydratation, limiter la fenêtre alimentaire et avancer l’heure du dernier repas.",
+      debut: 7,
+      fin: 1,
+      criteres: [criteresMetier[6], criteresMetier[7], criteresMetier[8]],
+    },
+    {
+      key: 'lancement',
+      label: 'J-0 : Lancement du jeûne',
+      objectif: "Entrer dans la phase de jeûne avec un corps prêt et sécurisé.",
+      debut: 0,
+      fin: 0,
+      criteres: [],
+    },
   ];
+
+  // Calcul des bornes réelles de chaque phase (dates)
+  let phasesAffichees = [];
+  let jalonActuel = null;
+  let jourCourant = null;
+  useEffect(() => {
+    if (startDate) {
+      const dateFin = new Date(startDate);
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      // Calcul de la durée réelle (en jours)
+      const diff = Math.max(0, Math.round((dateFin - today) / (1000 * 60 * 60 * 24)));
+      setDureeReelle(diff);
+    } else {
+      setDureeReelle(null);
+    }
+  }, [startDate]);
+
+  if (startDate && dureeReelle !== null) {
+    const dateFin = new Date(startDate);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    jourCourant = dureeReelle;
+    phasesAffichees = phasesMetier.map(phase => {
+      // Calcul des bornes réelles
+      const datePhaseDebut = addDays(dateFin, -phase.debut);
+      const datePhaseFin = addDays(dateFin, -phase.fin);
+      // Phase réalisable ?
+      const phaseRealisable = dureeReelle >= phase.debut;
+      // Critères réalisables ?
+      const criteres = phase.criteres.map(critere => {
+        const critereRealisable = dureeReelle >= critere.jalon;
+        // Critère actif du jour ?
+        const isActif = !jalonActuel && jourCourant === critere.jalon;
+        if (isActif) jalonActuel = critere;
+        return {
+          ...critere,
+          realisable: critereRealisable,
+          isActif,
+          dateDebut: datePhaseDebut,
+          dateFin: datePhaseFin,
+        };
+      });
+      return {
+        ...phase,
+        dateDebut: datePhaseDebut,
+        dateFin: datePhaseFin,
+        realisable: phaseRealisable,
+        criteres,
+      };
+    });
+    // Si aucun critère actif trouvé, prendre le plus proche à venir
+    if (!jalonActuel) {
+      for (const phase of phasesAffichees) {
+        for (const critere of phase.criteres) {
+          if (critere.realisable && jourCourant > critere.jalon) {
+            jalonActuel = critere;
+            break;
+          }
+        }
+        if (jalonActuel) break;
+      }
+    }
+  }
 
   const handleSave = () => {
     if (!startDate || !goal) {
@@ -85,15 +187,71 @@ const StartPreparationModal = ({ isOpen, onClose, onSave, analyseComportement = 
         <h2>🌙 Démarrer ma préparation au jeûne</h2>
         <div className={styles['modal-info']}>
           <div><b>📅 Date de début choisie :</b> <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} /></div>
-          <div><b>⏳ Durée de préparation :</b> <input type="number" min="1" value={duration} onChange={e => setDuration(e.target.value)} /> jours</div>
+          <div style={{marginTop:4}}>
+            <b>⏳ Durée de préparation réelle :</b> {dureeReelle !== null ? `${dureeReelle} jours` : '—'}
+            <span style={{marginLeft:8, color:'#64748b', fontSize:'0.95em'}}>
+              (du {dureeReelle !== null && startDate ? (new Date(new Date(startDate).getTime() - dureeReelle*24*60*60*1000)).toLocaleDateString('fr-FR') : '—'} au {startDate ? new Date(startDate).toLocaleDateString('fr-FR') : '—'})
+            </span>
+          </div>
           <div><b>🎯 Objectif :</b> <input type="text" value={goal} onChange={e => setGoal(e.target.value)} placeholder="Ex : Jeûne de 5 jours le 15/12/2025" /></div>
         </div>
+        {/* Message métier si durée réelle < recommandée */}
+        {dureeReelle !== null && dureeReelle < dureeRecommandee && (
+          <div style={{background:'#fef3c7',color:'#92400e',padding:'8px 12px',borderRadius:8,margin:'10px 0',fontWeight:500}}>
+            ⚠️ Le temps de préparation recommandé est de {dureeRecommandee} jours.<br/>
+            Il vous reste seulement {dureeReelle} jours avant le jeûne.<br/>
+            Pensez à mieux organiser la prochaine fois pour bénéficier de toutes les phases de préparation !
+          </div>
+        )}
         <section className={styles['modal-phases']}>
           <h3>🗓️ Phases de préparation</h3>
-          <ul>
-            {phases.map(phase => (
-              <li key={phase.label}><b>{phase.label}</b> : {phase.criteres.join(", ")}</li>
-            ))}
+          <ul style={{paddingLeft:0}}>
+            {phasesAffichees.length > 0 ?
+              // Trie : phases actives d'abord, puis phases grisées, ordre métier conservé
+              [...phasesAffichees].sort((a, b) => {
+                if (a.realisable === b.realisable) return 0;
+                return a.realisable ? -1 : 1;
+              }).map(phase => (
+                <li key={phase.label} style={{
+                  opacity: phase.realisable ? 1 : 0.5,
+                  listStyle: 'none',
+                  marginBottom: 8,
+                  background: phase.realisable ? '#f1f5f9' : '#e2e8f0',
+                  borderRadius: 8,
+                  padding: '8px 12px',
+                  border: phase.realisable ? '2px solid #38bdf8' : '1px dashed #94a3b8',
+                  position: 'relative',
+                }}>
+                  <b>{phase.label}</b>
+                  <span style={{fontSize:'0.92em',marginLeft:8,color:'#64748b'}}>
+                    {phase.dateDebut && phase.dateFin ?
+                      `(${phase.dateDebut.toLocaleDateString('fr-FR')} au ${phase.dateFin.toLocaleDateString('fr-FR')})`
+                      : ''}
+                  </span>
+                  {/* Objectif de la phase, affiché en haut */}
+                  {phase.objectif && (
+                    <div style={{fontStyle:'italic',color:'#0e7490',margin:'4px 0 4px 0',fontSize:'0.98em',background:'#e0f2fe',padding:'4px 8px',borderRadius:6}}>
+                      🎯 Objectif : {phase.objectif}
+                    </div>
+                  )}
+                  <ul style={{marginTop:4,marginBottom:0,paddingLeft:18}}>
+                    {phase.criteres.map(critere => (
+                      <li key={critere.label} style={{
+                        color: critere.isActif ? '#0ea5e9' : critere.realisable ? '#334155' : '#94a3b8',
+                        fontWeight: critere.isActif ? 700 : 400,
+                        textDecoration: critere.realisable ? 'none' : 'line-through',
+                        display: 'flex',
+                        alignItems: 'center',
+                      }}>
+                        {!critere.realisable && <span title="Critère non réalisable" style={{marginRight:4}}>🔒</span>}
+                        {critere.label}
+                        {critere.isActif && <span style={{marginLeft:6,fontSize:'0.95em'}}>⬅️</span>}
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))
+              : <li style={{color:'#64748b'}}>Veuillez saisir une date et une durée pour voir les phases.</li>}
           </ul>
         </section>
         {jalonActuel && (
