@@ -423,6 +423,8 @@ import { useDefis } from './DefisContext';
 import { defisReferentiel } from '../lib/defisReferentiel';
 import { supabase } from '../lib/supabaseClient';
 
+// Note : supabase importé pour l'enregistrement des défis personnalisés
+
 // Sous-formulaires pour chaque défi (logique spécifique)
 function DefiPasDeDessert({ defi, refreshDefis }) {
     const [confirmation, setConfirmation] = useState(false);
@@ -614,21 +616,53 @@ export default function SaisieDefisDynamiques() {
     const [message, setMessage] = useState('');
 
     // Validation simple
-    const isValid = nom.trim() && description.trim();
+    const isValid = nom.trim() && description.trim() && duree.trim();
 
-    // Handler d’enregistrement (logique Supabase à ajouter ensuite)
-    const handleSave = (e) => {
+    // Handler d'enregistrement avec insertion Supabase
+    const handleSave = async (e) => {
         e.preventDefault();
         setErreur(''); setMessage('');
         if (!isValid) {
             setErreur('Merci de remplir tous les champs obligatoires.');
             return;
         }
-        // Ici, on ajoutera la logique d’enregistrement Supabase
-        setMessage('Défi personnalisé prêt à être enregistré (logique à finaliser).');
-        setShowForm(false);
-        // Réinitialisation des champs
-        setNom(''); setDescription(''); setType('alimentaire'); setTheme(''); setDuree(''); setUnite('jour'); setCriteres(''); setRecurrence('unique');
+
+        // Insertion dans Supabase
+        const { data, error: insertError } = await supabase
+            .from('defis')
+            .insert([{
+                type: type || 'personnalise',
+                theme: theme || 'Défi perso',
+                nom,
+                description,
+                duree: parseInt(duree, 10),
+                unite: unite || 'jour',
+                status: 'disponible',
+                progress: 0
+            }]);
+
+        if (insertError) {
+            console.error('Erreur insertion défi :', insertError.message);
+            setErreur(`❌ Erreur : ${insertError.message}`);
+            return;
+        }
+
+        setMessage('✅ Défi personnalisé créé avec succès !');
+        await refreshDefis();
+
+        // Réinitialisation après 2 secondes
+        setTimeout(() => {
+            setNom('');
+            setDescription('');
+            setType('alimentaire');
+            setTheme('');
+            setDuree('');
+            setUnite('jour');
+            setCriteres('');
+            setRecurrence('unique');
+            setMessage('');
+            setShowForm(false);
+        }, 2000);
     };
 
     return (
@@ -697,41 +731,6 @@ export default function SaisieDefisDynamiques() {
                         Enregistrer le défi
                     </button>
                 </form>
-            )}
-            {/* Affichage des défis existants */}
-            {defisEnCours && defisEnCours.length > 0 && (
-                <div>
-                    {defisEnCours.map(defi => {
-                        if (defi.nom === '🍎 Pas de dessert par automatisme') {
-                            return <DefiPasDeDessert key={defi.id} defi={defi} refreshDefis={refreshDefis} />;
-                        }
-                        if (defi.nom === '🧠 Je suis plus fort·e que mes excuses') {
-                            return <DefiExcuses key={defi.id} defi={defi} refreshDefis={refreshDefis} />;
-                        }
-                        if (defi.nom === '💡 J’écoute mon ventre') {
-                            return <DefiEcouteVentre key={defi.id} defi={defi} refreshDefis={refreshDefis} />;
-                        }
-                        if (defi.nom === '🚫 Le faux allié') {
-                            return <DefiFauxAllie key={defi.id} defi={defi} refreshDefis={refreshDefis} />;
-                        }
-                        if (defi.nom === '🌡️ Chaud devant… mais doux !') {
-                            return <DefiChaudDoux key={defi.id} defi={defi} refreshDefis={refreshDefis} />;
-                        }
-                        if (defi.nom === '🔄 Je brise la chaîne') {
-                            return <DefiBriseChaine key={defi.id} defi={defi} refreshDefis={refreshDefis} />;
-                        }
-                        if (defi.nom === '🔥 1 vraie faim = 1 vrai repas') {
-                            return <DefiVraieFaim key={defi.id} defi={defi} refreshDefis={refreshDefis} />;
-                        }
-                        if (defi.nom === '✨ Je me programme du plaisir') {
-                            return <DefiPlaisir key={defi.id} defi={defi} refreshDefis={refreshDefis} />;
-                        }
-                        if (defi.nom === '💧 1 cru par jour') {
-                            return <DefiUnCru key={defi.id} defi={defi} refreshDefis={refreshDefis} />;
-                        }
-                        return null;
-                    })}
-                </div>
             )}
         </div>
     );

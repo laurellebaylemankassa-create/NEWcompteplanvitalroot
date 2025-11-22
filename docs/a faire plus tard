@@ -1,0 +1,15 @@
+Je vois le problème !
+
+La logique de validation automatique existe MAIS elle ne gère que 1 seul défi : "🧀 1 portion ça suffit" (ligne 21).
+1 
+Le défi "🍎 Pas de dessert par automatisme" n'est PAS pris en compte dans la fonction getDefiApplicable() !
+
+Pour que ça fonctionne, il faut :
+
+Détecter si l'utilisateur a saisi un repas SANS dessert
+Si le défi "Pas de dessert par automatisme" est en cours → valider automatiquement une étape
+Veux-tu que j'ajoute cette logique ? Il faudrait :
+
+Vérifier dans SaisieRepas.js si un dessert a été ajouté
+Si NON et que le défi est actif → +1 étape validée
+Dis-moi "OUI" si tu veux que j'implémente cette validation automatique pour tous les défis alimentaires.

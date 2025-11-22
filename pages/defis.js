@@ -1,8 +1,10 @@
 import BandeauDefiActif from '../components/BandeauDefiActif';
+import SaisieDefisDynamiques from '../components/SaisieDefisDynamiques';
 
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { defisReferentiel } from '../lib/defisReferentiel';
+import { useRouter } from 'next/router';
 
 // Composant retour en arrière
 function RetourArriere() {
@@ -52,23 +54,23 @@ const Defis = () => {
     };
     // Hooks d'état
     const [defis, setDefis] = useState([]);
+    const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [tab, setTab] = useState('disponibles'); // onglet actif
     const [actionLoading, setActionLoading] = useState(false); // Pour feedback bouton
 
-    // Récupérer les défis (mono-utilisateur)
-    useEffect(() => {
-        async function fetchDefis() {
-            setLoading(true);
-            const { data, error } = await supabase
-                .from('defis')
-                .select('*');
-            if (error) {
-                setError('Erreur lors du chargement des défis');
-                setLoading(false);
-                return;
-            }
+    // Fonction de chargement des défis (réutilisable)
+    const loadDefis = async () => {
+        setLoading(true);
+        const { data, error } = await supabase
+            .from('defis')
+            .select('*');
+        if (error) {
+            setError('Erreur lors du chargement des défis');
+            setLoading(false);
+            return;
+        }
             // Mise à jour des noms si manquants ou incorrects
             if (data && data.length > 0) {
                 for (const defi of data) {
@@ -126,17 +128,48 @@ const Defis = () => {
                 setLoading(false);
                 return;
             }
-        }
-        fetchDefis();
+    };
+
+    // useEffect pour charger les défis au montage
+    useEffect(() => {
+        loadDefis();
     }, []);
+
+    // Handler pour supprimer un défi personnalisé
+    const handleSupprimerDefi = async (defiId) => {
+        if (!window.confirm('Voulez-vous vraiment supprimer ce défi personnalisé ?')) {
+            return;
+        }
+        
+        setActionLoading(defiId);
+        const { error: deleteError } = await supabase
+            .from('defis')
+            .delete()
+            .eq('id', defiId);
+        
+        if (deleteError) {
+            setError('Erreur lors de la suppression du défi');
+            setActionLoading(false);
+            return;
+        }
+        
+        await loadDefis();
+        setActionLoading(false);
+    };
 
     // Handler pour démarrer un défi
     const handleCommencerDefi = async (defiId) => {
         setActionLoading(defiId); // Pour feedback visuel
-        // On passe le défi en "en cours" (progress = 1, status = 'en cours')
+        
+        // Récupérer le type de défi
+        const defi = defis.find(d => d.id === defiId);
+        const estDefiPersonnalise = defi?.type === 'personnalise' || defi?.type === 'alimentaire' || !defisReferentiel.find(d => d.description === defi?.description);
+        const progressInitial = estDefiPersonnalise ? 0 : 1;
+        
+        // On passe le défi en "en cours"
         const { error: updateError } = await supabase
             .from('defis')
-            .update({ progress: 1, status: 'en cours' })
+            .update({ progress: progressInitial, status: 'en cours' })
             .eq('id', defiId);
         if (updateError) {
             setError('Erreur lors du démarrage du défi');
@@ -189,11 +222,11 @@ const Defis = () => {
     // Filtres selon l'onglet
     const defisDisponibles = defis.filter(defi => defi.progress === 0);
     const defisEnCours = defis.filter(defi => {
-        const max = defisReferentiel.find(d => d.description === defi.description)?.duree || 1;
+        const max = defi.duree || defisReferentiel.find(d => d.description === defi.description)?.duree || 1;
         return defi.progress > 0 && defi.progress < max;
     });
     const defisTermines = defis.filter(defi => {
-        const max = defisReferentiel.find(d => d.description === defi.description)?.duree || 1;
+        const max = defi.duree || defisReferentiel.find(d => d.description === defi.description)?.duree || 1;
         return defi.progress >= max;
     });
 
@@ -240,6 +273,17 @@ const Defis = () => {
                         cursor: 'pointer'
                     }}
                 >Défis terminés</button>
+                <button
+                    onClick={() => setTab('creer')}
+                    style={{
+                        padding: '8px 24px',
+                        borderRadius: 8,
+                        border: tab === 'creer' ? '2px solid #9c27b0' : '1px solid #ccc',
+                        background: tab === 'creer' ? '#f3e5f5' : '#fff',
+                        fontWeight: tab === 'creer' ? 700 : 400,
+                        cursor: 'pointer'
+                    }}
+                >Créer un défi</button>
             </div>
             {tab === 'disponibles' && (
                 <>
@@ -247,13 +291,14 @@ const Defis = () => {
                     <ul style={{ listStyle: 'none', padding: 0 }}>
                         {defisDisponibles.length === 0 && <li>Aucun défi disponible.</li>}
                         {defisDisponibles.map(defi => {
-                            const max = defisReferentiel.find(d => d.description === defi.description)?.duree || 1;
+                            const max = defi.duree || defisReferentiel.find(d => d.description === defi.description)?.duree || 1;
+                            const estDefiPersonnalise = defi.type === 'personnalise' || defi.type === 'alimentaire' || !defisReferentiel.find(d => d.description === defi.description);
                             return (
                                 <li key={defi.id} style={{ marginBottom: 24, border: '1px solid #eee', borderRadius: 10, padding: 20, background: '#fff' }}>
                                     <h2 style={{ margin: 0, fontSize: 22 }}>{defi.nom}</h2>
                                     <div style={{ margin: '8px 0', color: '#1976d2', fontWeight: 600 }}>Durée : {max} {defi.unite}</div>
                                     <div style={{ marginBottom: 12, color: '#555' }}>Ce qu’il faut faire : <br /><span style={{ fontWeight: 500 }}>{defi.description}</span></div>
-                                    <div style={{ marginBottom: 10, color: '#ff9800', fontWeight: 500 }}>Récompense : possibilité de débloquer un badge</div>
+                                    <div style={{ marginBottom: 10, color: '#ff9800', fontWeight: 500 }}>Récompense : possibilité de débloquer un badge</div>
                                     <button
                                         style={{ marginTop: 10, padding: '8px 24px', borderRadius: 8, background: '#1976d2', color: '#fff', border: 'none', cursor: actionLoading === defi.id ? 'wait' : 'pointer', fontWeight: 700, fontSize: 16, opacity: actionLoading === defi.id ? 0.7 : 1 }}
                                         onClick={() => handleCommencerDefi(defi.id)}
@@ -261,6 +306,15 @@ const Defis = () => {
                                     >
                                         {actionLoading === defi.id ? 'Démarrage...' : 'Commencer ce défi'}
                                     </button>
+                                    {estDefiPersonnalise && (
+                                        <button
+                                            style={{ marginTop: 10, marginLeft: 10, padding: '8px 20px', borderRadius: 8, background: '#d32f2f', color: '#fff', border: 'none', cursor: actionLoading === defi.id ? 'wait' : 'pointer', fontWeight: 600, fontSize: 16, opacity: actionLoading === defi.id ? 0.7 : 1 }}
+                                            onClick={() => handleSupprimerDefi(defi.id)}
+                                            disabled={!!actionLoading}
+                                        >
+                                            🗑️ Supprimer
+                                        </button>
+                                    )}
                                 </li>
                             );
                         })}
@@ -282,13 +336,22 @@ const Defis = () => {
                                     <div>Progression : {defi.progress} / {max}</div>
                                     <div>Status : {defi.status}</div>
                                     <div style={{ fontSize: 12, color: '#888' }}>Créé le : {new Date(defi.created_at).toLocaleDateString('fr-FR')}</div>
-                                    <button
-                                        style={{ marginTop: 10, padding: '6px 16px', borderRadius: 6, background: '#80cbc4', color: '#fff', border: 'none', cursor: actionLoading === defi.id ? 'wait' : 'pointer', opacity: actionLoading === defi.id ? 0.7 : 1 }}
-                                        onClick={() => handleAccomplirEtape(defi)}
-                                        disabled={!!actionLoading}
-                                    >
-                                        {actionLoading === defi.id ? 'Mise à jour...' : 'J’ai accompli une étape'}
-                                    </button>
+                                    {(defi.type === 'personnalise' || defi.type === 'alimentaire' || !defisReferentiel.find(d => d.description === defi.description)) ? (
+                                        <button
+                                            style={{ marginTop: 10, padding: '6px 16px', borderRadius: 6, background: '#9c27b0', color: '#fff', border: 'none', cursor: 'pointer' }}
+                                            onClick={() => router.push('/journal-defi/' + defi.id)}
+                                        >
+                                            📔 Ouvrir le journal
+                                        </button>
+                                    ) : (
+                                        <button
+                                            style={{ marginTop: 10, padding: '6px 16px', borderRadius: 6, background: '#80cbc4', color: '#fff', border: 'none', cursor: actionLoading === defi.id ? 'wait' : 'pointer', opacity: actionLoading === defi.id ? 0.7 : 1 }}
+                                            onClick={() => handleAccomplirEtape(defi)}
+                                            disabled={!!actionLoading}
+                                        >
+                                            {actionLoading === defi.id ? 'Mise à jour...' : 'J\'ai accompli une étape'}
+                                        </button>
+                                    )}
                                     <button
                                         style={{ marginTop: 10, marginLeft: 10, padding: '6px 16px', borderRadius: 6, background: '#e57373', color: '#fff', border: 'none', cursor: actionLoading === defi.id ? 'wait' : 'pointer', opacity: actionLoading === defi.id ? 0.7 : 1 }}
                                         onClick={() => handleReinitialiserDefi(defi)}
@@ -333,6 +396,12 @@ const Defis = () => {
                             );
                         })}
                     </ul>
+                </>
+            )}
+            {tab === 'creer' && (
+                <>
+                    <p>Créez vos propres défis personnalisés et suivez-les au quotidien.</p>
+                    <SaisieDefisDynamiques refreshDefis={loadDefis} />
                 </>
             )}
         </div>

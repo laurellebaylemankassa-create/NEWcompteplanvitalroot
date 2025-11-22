@@ -1,0 +1,510 @@
+# 🟢 PLAN D'IMPLÉMENTATION COPILOT — Suivi quotidien des défis personnalisés
+
+**⚠️ AUCUNE modification de code ne doit être produite tant que l'utilisateur n'a pas validé explicitement ce plan d'implémentation rempli et relu par Copilot.**
+
+**Date de création** : 22/11/2025 16:45
+
+─────────────────────────────────────────────────────────────
+
+## Titre de la tâche  
+Créer une page dédiée de suivi quotidien pour les défis personnalisés (type "Autre" et "comportemental")
+
+---
+
+## **Description précise de la modification attendue**
+
+Permettre à l'utilisateur de suivre ses défis personnalisés (non alimentaires) en déclarant ses engagements le matin et en les validant le soir via une checklist. La page doit :
+
+1. **Matin** : Formulaire pour déclarer 1 à 5 engagements personnels pour la journée
+2. **Soir** : Checklist des engagements déclarés + validation de la journée
+3. **Historique** : Affichage des jours précédents avec engagements tenus/non tenus
+4. **Progression automatique** : Validation d'une étape du défi si ≥ 2/3 engagements tenus
+5. **Message de fin** : Félicitations et badge si défi complété (ex: 3/3 jours validés)
+
+**Exemple concret** : Défi "Action" (3 jours) - L'utilisateur déclare chaque matin 3 engagements (ex: "Appeler maman", "Finir dossier X", "Sport 30 min"), puis les valide en cochant le soir.
+
+---
+
+## **Fichiers concernés**
+
+**Fichiers à créer** :
+- `/pages/journal-defi/[id].js` - Page dynamique avec route `/journal-defi/:defi_id`
+- `/components/JournalDefiPersonnalise.js` - Composant principal du formulaire engagements
+- `/lib/journalDefisUtils.js` - Fonctions utilitaires (sauvegarde, calcul score, validation)
+
+**Fichiers à modifier** :
+- `/pages/defis.js` - Ajouter bouton "📝 Ouvrir mon journal" pour défis type "Autre"
+- `/components/DefisContext.js` - (vérification uniquement, pas de modification prévue)
+
+**Base de données (Supabase)** :
+
+⚠️ **CORRECTION ARCHITECTURE** : La table `defis` existante utilise :
+- `id` INTEGER (pas UUID)
+- Structure : id, type, theme, nom, description, duree, unite, status, progress, created_at
+
+- Créer nouvelle table `journal_defis` avec colonnes :
+  - `id` (INTEGER, SERIAL PRIMARY KEY) ← **Conforme à l'architecture existante**
+  - `defi_id` (INTEGER, foreign key vers table `defis.id`) ← **PAS UUID**
+  - `jour` (integer, ex: 1, 2, 3...)
+  - `engagements` (jsonb, array d'objets `{texte: string, tenu: boolean}`)
+  - `note_personnelle` (text, nullable)
+  - `score` (character varying, ex: "2/3")
+  - `valide` (boolean)
+  - `created_at` (timestamp with time zone)
+  - `updated_at` (timestamp with time zone)
+
+---
+
+## Etape 1 — **Audit des risques préalable**
+
+### Risques techniques identifiés :
+
+1. **Risque : Hooks React mal placés**
+   - Les hooks `useState`, `useEffect` doivent être déclarés en haut du composant `JournalDefiPersonnalise`
+   - Jamais dans une fonction, boucle, map, ou condition
+   - ⚠️ Anomalie récurrente dans le fichier rollback (18/11/2025, 17/11/2025)
+
+2. **Risque : Paramètre de route `[id]` non vérifié**
+   - Le `router.query.id` peut être `undefined` au premier rendu
+   - Nécessite useEffect avec dépendance sur `router.isReady`
+
+3. **Risque : Import manquant ou fonction inexistante**
+   - ⚠️ Anomalie récurrente (17/11/2025) : appel à `getWeeklyPalier` non définie
+   - Vérifier tous les imports avant utilisation
+
+4. **Risque : Conflit avec JournalDeBordDefi.js existant**
+   - Fichier existant : `/components/JournalDeBordDefi.js` (notes textuelles)
+   - Nouveau fichier : `/components/JournalDefiPersonnalise.js` (engagements structurés)
+   - Pas de conflit prévu, usages différents
+
+5. **Risque UX : Validation prématurée ou bloquée**
+   - Si l'utilisateur valide le matin → bloquer nouvelle déclaration
+   - Si l'utilisateur ne déclare rien le matin → permettre validation directe le soir avec checklist générique
+
+6. **Risque : Perte de données en cas d'erreur Supabase**
+   - Gestion d'erreur obligatoire sur chaque appel `supabase.from()...`
+   - Message utilisateur clair en cas d'échec
+
+7. **Risque : Régression sur page /defis**
+   - L'ajout du bouton "Ouvrir mon journal" ne doit pas impacter les défis prédéfinis
+   - Vérifier que les filtres `defisDisponibles`, `defisEnCours`, `defisTermines` fonctionnent toujours
+
+8. **Risque : Navigation cassée si défi inexistant**
+   - Si `/journal-defi/999` (id invalide) → redirection vers `/defis` avec message d'erreur
+
+9. **Risque accessibilité : Navigation clavier**
+   - Les checkboxes doivent être accessibles au clavier
+   - Focus visible sur formulaire
+
+10. **Risque SSR/Hydration (Next.js)**
+    - `router.query` vide côté serveur → `useEffect` obligatoire pour accès côté client
+
+### Documentation des risques :
+Ces risques seront intégrés dans la checklist (Etape 3) et surveillés pendant l'implémentation.
+
+---
+
+## Etape 2 — **Sous-checklist à valider systématiquement**
+
+- [ ] `useState` importé depuis 'react'
+- [ ] `useEffect` importé depuis 'react'
+- [ ] `useRouter` importé depuis 'next/router'
+- [ ] `supabase` importé depuis '../lib/supabaseClient'
+- [ ] Vérification : fonction `validerEtapeDefi` existe dans `/lib/journalDefisUtils.js` (à créer)
+- [ ] Vérification : fonction `sauvegarderEngagements` existe dans `/lib/journalDefisUtils.js` (à créer)
+- [ ] Vérification : fonction `chargerJournalDefi` existe dans `/lib/journalDefisUtils.js` (à créer)
+- [ ] Toutes les variables (`engagements`, `notePersonnelle`, `jourActuel`, etc.) initialisées AVANT usage
+- [ ] Aucune fonction appelée avant sa déclaration
+
+---
+
+## Etape 3 — **Checklist stricte sécurité & qualité (à cocher AVANT toute modification)**
+
+- [ ] Lecture complète de `/pages/defis.js` (385 lignes)
+- [ ] Lecture complète de `/components/JournalDeBordDefi.js` (30 lignes)
+- [ ] Lecture complète du fichier anomalies rollback (336 lignes, 100 premières lues)
+- [ ] Initialisation systématique : tous les hooks en haut du composant
+- [ ] Tous les hooks React (`useState`, `useEffect`, `useRouter`) déclarés uniquement en haut du corps du composant fonctionnel
+- [ ] Séparation stricte : initialisation → logique calculée → handlers → rendu
+- [ ] Vérification : `handleDeclarer`, `handleValider`, `handleAjouterEngagement` déclarés AVANT leur usage dans le JSX
+- [ ] Ordre et portée logiques : aucun appel prématuré
+- [ ] Pas de doublons (vérifier qu'aucun `useState` n'est déclaré 2 fois)
+- [ ] Contrôle d'erreur sur TOUS les appels Supabase (`.from('journal_defis').insert()...`)
+- [ ] Test du rendu : défi inexistant, défi terminé, premier jour, dernier jour, aucun engagement déclaré
+- [ ] Préservation des fonctionnalités existantes : `/pages/defis.js` continue de fonctionner normalement
+- [ ] Mise à jour de l'avancement : 0% → 25% → 50% → 75% → 100%
+- [ ] En cas d'anomalie → rollback immédiat, documentation dans `docs/Anomalie roll back` avec date/heure
+- [ ] Documentation claire : commentaires dans le code pour chaque étape logique
+- [ ] Relecture **manuelle obligatoire** : ne PAS se fier à la mémoire du modèle, lire ligne par ligne
+- [ ] Validation utilisateur OBLIGATOIRE avant toute implémentation
+- [ ] Toutes les cases ci-dessus cochées et documentées
+
+---
+
+## Etape 4 — **Contrôles conformité à réaliser (en suivant l'ordre ci-dessous)**
+
+### 4.1 Lecture du fichier anomalies rollback
+
+✅ **Fait** : Lecture des 100 premières lignes sur 336 (22/11/2025 16:50)
+
+**Anomalies pertinentes identifiées** :
+
+1. **[18/11/2025]** Hooks React déclarés hors du composant → Risque identique pour `JournalDefiPersonnalise.js`
+2. **[18/11/2025]** Import React en double → À éviter
+3. **[17/11/2025]** Fonction inexistante `getWeeklyPalier` → Vérifier que `validerEtapeDefi` existe bien
+4. **[17/11/2025]** Variable `palier` non définie → Vérifier retour de toutes les fonctions utilitaires
+5. **[17/11/2025]** Insertion composant dans fonction/boucle → Ne jamais insérer `<JournalDefiPersonnalise />` ailleurs que dans le return principal
+6. **[17/11/2025]** Incohérence colonne `planData/plan_data` → Vérifier noms de colonnes Supabase (snake_case)
+7. **[18/11/2025]** Variable `categorieOptions` non définie → Toujours initialiser avant usage dans JSX
+8. **[19/11/2025]** Échec patch automatique → Privilégier modifications manuelles claires
+
+### 4.2 Création checklist adaptée (Point de vigilance - voir Etape 6)
+
+### 4.3 Analyse de l'audit des risques
+
+✅ **10 risques identifiés** (Etape 1), aucun bloquant, tous mitigés par la checklist
+
+### 4.4 Détection d'anomalie bloquante
+
+✅ **Aucune anomalie bloquante** détectée à ce stade
+
+**Si anomalie détectée pendant implémentation** :
+- Rollback immédiat à l'état précédent
+- Documentation dans `/docs/Anomalie roll back` :
+  ```
+  ═══════════════════════════════════════════════════════════════════════════════
+  🛑 ANOMALIE 22/11/2025 HH:MM — [TITRE]
+  ═══════════════════════════════════════════════════════════════════════════════
+  Fichier : [chemin]
+  Erreur : [message exact]
+  Cause : [explication]
+  Impact : [conséquence]
+  Action de rollback : [description]
+  ```
+- Proposition alternative sûre
+
+---
+
+## Etape 5 — **Mise à jour de l'avancement**
+
+- [x] Non commencé | [ ] En cours | [ ] Terminé  
+- **Avancement précis** : 0 %
+- **Historique des mises à jour** :
+  - 22/11/2025 16:45 — Création du plan, lecture des fichiers sources
+  - 22/11/2025 16:50 — Lecture anomalies rollback (100/336 lignes)
+  - 22/11/2025 16:55 — Rédaction Etapes 1-4 (audit risques, checklist)
+  - 22/11/2025 17:00 — Rédaction Etapes 5-9 (plan complet, en attente validation)
+
+---
+
+## Etape 6 — **Point de vigilance**
+
+### Rapport adapté suite à lecture du fichier anomalies rollback :
+
+**Erreurs similaires que cette modification pourrait générer** :
+
+1. ❌ **Hooks hors composant** (18/11/2025)
+   - **Prévention** : Déclarer TOUS les `useState`, `useEffect` en haut de `JournalDefiPersonnalise` et `[id].js`
+   - **Contrôle** : Relecture manuelle ligne par ligne des déclarations
+
+2. ❌ **Fonction inexistante appelée** (17/11/2025)
+   - **Prévention** : Créer `/lib/journalDefisUtils.js` AVANT de l'importer
+   - **Contrôle** : Vérifier existence de chaque fonction exportée
+
+3. ❌ **Variable non définie utilisée** (17/11/2025, 18/11/2025)
+   - **Prévention** : Initialiser `engagements = []`, `notePersonnelle = ''`, `jourActuel = 0` AVANT le JSX
+   - **Contrôle** : Rechercher toutes les variables dans le JSX et vérifier leur initialisation
+
+4. ❌ **Composant inséré dans fonction/boucle** (17/11/2025)
+   - **Prévention** : Insérer `<JournalDefiPersonnalise />` uniquement dans le return principal de `[id].js`
+   - **Contrôle** : Vérifier que le composant n'est PAS dans un `.map()` ou `if () { return <Component /> }`
+
+5. ❌ **Nom de colonne incorrect** (17/11/2025)
+   - **Contrôle** : Tester avec un vrai appel Supabase en environnement de dev
+
+### Checklist de vérification spécifique (à appliquer avant le codage) :
+
+- [ ] Tous les hooks déclarés en haut du fichier `[id].js` (pas dans une fonction)
+- [ ] Tous les hooks déclarés en haut du composant `JournalDefiPersonnalise.js` (pas dans une fonction)
+- [ ] Aucun import React en double
+- [ ] Vérification manuelle complète du code (ne pas se fier à la mémoire)
+- [ ] Présence/import de toutes les fonctions avant appel (`validerEtapeDefi`, `sauvegarderEngagements`, etc.)
+- [ ] Aucun composant React inséré dans une fonction, boucle ou map
+- [ ] Rapport Markdown obligatoire avant/après modification
+- [ ] Rollback immédiat si anomalie, documentation dans `Anomalie roll back`
+- [ ] Refus de toute modification non conforme au template
+
+**Étape réalisée** : Checklist créée et intégrée (22/11/2025 17:00)
+
+**Impact attendu** : Prévention des 8 types d'anomalies identifiées dans le fichier rollback, conformité stricte au template, traçabilité complète.
+
+---
+
+## Etape 7 — **Proposition de rollback**
+
+### En cas d'anomalie détectée :
+
+#### Rollback fichier `/pages/journal-defi/[id].js`
+- **Action** : Supprimer le fichier (commande `rm pages/journal-defi/[id].js`)
+- **Contexte** : Création de page, pas de version antérieure
+- **Alternative sûre** : Intégrer le formulaire directement dans `/pages/defis.js` (moins optimal UX)
+
+#### Rollback fichier `/components/JournalDefiPersonnalise.js`
+- **Action** : Supprimer le fichier (commande `rm components/JournalDefiPersonnalise.js`)
+- **Contexte** : Création de composant, pas de version antérieure
+- **Alternative sûre** : Utiliser le composant existant `JournalDeBordDefi.js` avec adaptation (notes simples au lieu d'engagements structurés)
+
+#### Rollback fichier `/lib/journalDefisUtils.js`
+- **Action** : Supprimer le fichier (commande `rm lib/journalDefisUtils.js`)
+- **Contexte** : Création de fichier utilitaire, pas de version antérieure
+- **Alternative sûre** : Intégrer les fonctions directement dans le composant (moins maintenable)
+
+#### Rollback modification `/pages/defis.js`
+- **Action** : Git revert ou suppression manuelle du bouton "Ouvrir mon journal"
+- **Contexte** : Ajout de code dans fichier existant (ligne ~285, onglet "Défis en cours")
+- **Alternative sûre** : Conserver l'ancien bouton "J'ai accompli une étape" pour tous les défis
+- **Restauration** :
+  ```javascript
+  // AVANT modification (à restaurer)
+  <button
+      style={{ marginTop: 10, padding: '6px 16px', borderRadius: 6, background: '#80cbc4', color: '#fff', border: 'none', cursor: 'pointer' }}
+      onClick={() => handleAccomplirEtape(defi)}
+  >
+      J'ai accompli une étape
+  </button>
+  ```
+
+#### Rollback table Supabase `journal_defis`
+- **Action** : `DROP TABLE journal_defis;` (via SQL Editor Supabase)
+- **Contexte** : Création de table, pas de données existantes
+- **Alternative sûre** : Ne pas créer la table, stocker dans `notes` JSON de la table `defis` (moins structuré)
+
+### Documentation obligatoire en cas de rollback :
+
+Ajouter dans `/docs/Anomalie roll back` (SANS SUPPRIMER les entrées existantes) :
+
+```ini
+═══════════════════════════════════════════════════════════════════════════════
+🛑 ANOMALIE 22/11/2025 HH:MM — [TITRE ANOMALIE]
+═══════════════════════════════════════════════════════════════════════════════
+Fichier : /pages/journal-defi/[id].js (ou autre)
+Erreur : [message d'erreur exact]
+Cause : [explication détaillée]
+Impact : [blocage utilisateur, crash, régression...]
+Étape du plan non respectée : [Etape 1/2/3...]
+Action de rollback : [description précise]
+Alternative proposée : [solution de repli]
+Date/Heure : 22/11/2025 HH:MM
+```
+
+---
+
+## Etape 8 — **Rapport Markdown Copilot**
+
+### 📊 RAPPORT AVANT MODIFICATION
+
+**Date/Heure** : 22/11/2025 17:05
+
+#### État actuel du code :
+
+**Fichier `/pages/defis.js` (385 lignes)** :
+- Ligne 1-6 : Imports (BandeauDefiActif, SaisieDefisDynamiques, React, supabase, defisReferentiel)
+- Ligne 8-23 : Composant `RetourArriere`
+- Ligne 25-385 : Composant `Defis`
+  - Ligne 28-33 : Hooks d'état (`defis`, `loading`, `error`, `tab`, `actionLoading`)
+  - Ligne 36-58 : Handler `handleReinitialiserDefi`
+  - Ligne 61-160 : `useEffect` fetchDefis avec vérification défis manquants
+  - Ligne 163-183 : Handler `handleCommencerDefi`
+  - Ligne 185-203 : Handler `handleAccomplirEtape`
+  - Ligne 212-214 : Filtres (`defisDisponibles`, `defisEnCours`, `defisTermines`)
+  - Ligne 226-248 : Rendu 4 boutons onglets
+  - Ligne 250-279 : Affichage onglet "Défis disponibles"
+  - Ligne 281-320 : Affichage onglet "Défis en cours" ← **MODIFICATION ICI**
+  - Ligne 322-366 : Affichage onglet "Défis terminés"
+  - Ligne 368-372 : Affichage onglet "Créer un défi" (SaisieDefisDynamiques)
+
+**Fonctionnalités actuelles** :
+- ✅ Affichage 3 onglets (disponibles, en cours, terminés, créer)
+- ✅ Démarrer un défi
+- ✅ Valider une étape manuellement avec bouton "J'ai accompli une étape"
+- ✅ Réinitialiser un défi
+- ✅ Créer un défi personnalisé
+- ❌ Pas de suivi quotidien structuré pour défis personnalisés
+
+**Fichiers inexistants (à créer)** :
+- `/pages/journal-defi/[id].js` - N'existe pas
+- `/components/JournalDefiPersonnalise.js` - N'existe pas
+- `/lib/journalDefisUtils.js` - N'existe pas
+
+**Fichiers existants (similaires)** :
+- `/components/JournalDeBordDefi.js` (30 lignes) - Journal texte simple, pas d'engagements structurés
+
+---
+
+### 📊 RAPPORT APRÈS MODIFICATION
+
+**⚠️ CE RAPPORT SERA COMPLÉTÉ APRÈS IMPLÉMENTATION**
+
+#### Modifications prévues :
+
+**1. Fichier `/pages/journal-defi/[id].js` (NOUVEAU, ~150 lignes estimées)** :
+- Structure :
+  ```javascript
+  import { useState, useEffect } from 'react';
+  import { useRouter } from 'next/router';
+  import { supabase } from '../../lib/supabaseClient';
+  import JournalDefiPersonnalise from '../../components/JournalDefiPersonnalise';
+  
+  export default function JournalDefi() {
+    // Hooks
+    const router = useRouter();
+    const [defi, setDefi] = useState(null);
+    const [loading, setLoading] = useState(true);
+    
+    // useEffect pour charger le défi
+    useEffect(() => { ... }, [router.isReady, router.query.id]);
+    
+    // Rendu
+    return ( ... );
+  }
+  ```
+
+**2. Fichier `/components/JournalDefiPersonnalise.js` (NOUVEAU, ~250 lignes estimées)** :
+- Structure :
+  ```javascript
+  import { useState, useEffect } from 'react';
+  import { supabase } from '../lib/supabaseClient';
+  import { validerEtapeDefi, sauvegarderEngagements } from '../lib/journalDefisUtils';
+  
+  export default function JournalDefiPersonnalise({ defi, jourActuel }) {
+    // Hooks
+    const [engagements, setEngagements] = useState([]);
+    const [nouvelEngagement, setNouvelEngagement] = useState('');
+    const [notePersonnelle, setNotePersonnelle] = useState('');
+    const [phaseJournee, setPhaseJournee] = useState('matin'); // 'matin' ou 'soir'
+    
+    // Handlers
+    const handleAjouterEngagement = () => { ... };
+    const handleDeclarer = async () => { ... };
+    const handleValider = async () => { ... };
+    
+    // Rendu
+    return ( ... );
+  }
+  ```
+
+**3. Fichier `/lib/journalDefisUtils.js` (NOUVEAU, ~80 lignes estimées)** :
+- Fonctions exportées :
+  ```javascript
+  export async function sauvegarderEngagements(defiId, jour, engagements, notePersonnelle) { ... }
+  export async function chargerJournalDefi(defiId) { ... }
+  export async function validerEtapeDefi(defiId, engagementsTenus, engagementsTotal) { ... }
+  export function calculerScore(engagements) { ... }
+  ```
+
+**4. Fichier `/pages/defis.js` (modification ligne ~285)** :
+- AVANT :
+  ```javascript
+  <button
+      style={{ marginTop: 10, padding: '6px 16px', borderRadius: 6, background: '#80cbc4', color: '#fff', border: 'none', cursor: 'pointer' }}
+      onClick={() => handleAccomplirEtape(defi)}
+  >
+      J'ai accompli une étape
+  </button>
+  ```
+- APRÈS :
+  ```javascript
+  {defi.type === 'alimentaire' || defi.type === 'comportemental' ? (
+      <button
+          style={{ marginTop: 10, padding: '6px 16px', borderRadius: 6, background: '#80cbc4', color: '#fff', border: 'none', cursor: 'pointer' }}
+          onClick={() => handleAccomplirEtape(defi)}
+      >
+          J'ai accompli une étape
+      </button>
+  ) : (
+      <button
+          style={{ marginTop: 10, padding: '6px 16px', borderRadius: 6, background: '#ff9800', color: '#fff', border: 'none', cursor: 'pointer' }}
+          onClick={() => router.push(`/journal-defi/${defi.id}`)}
+      >
+          📝 Ouvrir mon journal
+      </button>
+  )}
+  ```
+
+**5. Table Supabase `journal_defis` (NOUVELLE)** :
+```sql
+-- ⚠️ CONFORME À L'ARCHITECTURE EXISTANTE (INTEGER, pas UUID)
+CREATE TABLE journal_defis (
+  id SERIAL PRIMARY KEY,
+  defi_id INTEGER REFERENCES defis(id) ON DELETE CASCADE,
+  jour INTEGER NOT NULL,
+  engagements JSONB NOT NULL DEFAULT '[]',
+  note_personnelle TEXT,
+  score CHARACTER VARYING(10),
+  valide BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_journal_defis_defi_id ON journal_defis(defi_id);
+
+-- SELECT column_name, data_type FROM information_schema.columns 
+```
+
+#### Tests à effectuer après modification :
+
+- [ ] Page `/defis` fonctionne normalement (onglets, filtres, handlers)
+- [ ] Bouton "📝 Ouvrir mon journal" visible sur défis type "Autre"
+- [ ] Clic sur bouton → redirection vers `/journal-defi/[id]` avec id correct
+- [ ] Page journal affiche le défi correctement (nom, description, durée, jour actuel)
+- [ ] Formulaire matin : ajout de 1 à 5 engagements fonctionne
+- [ ] Sauvegarde engagements → enregistrement dans Supabase table `journal_defis`
+- [ ] Formulaire soir : checklist affiche les engagements déclarés
+- [ ] Validation avec ≥ 2/3 coché → étape validée, progression +1
+- [ ] Validation avec < 2/3 coché → message bienveillant, pas de progression
+- [ ] Après validation dernier jour → défi terminé, message félicitations
+- [ ] Navigation : retour vers `/defis` fonctionne
+- [ ] Cas limites : défi inexistant (404), jour dépassé, aucun engagement déclaré
+
+---
+
+## Etape 9 — **Validation explicite de l'utilisateur (OBLIGATOIRE)**
+
+- [ ] Plan validé par l'utilisateur à la date : ___
+
+**⚠️ ATTENTION** : Aucune ligne de code ne sera écrite tant que cette case n'est pas cochée par l'utilisateur avec sa validation explicite ("VALIDE", "GO", ou signature avec date).
+
+---
+
+## 🎯 RÉSUMÉ POUR VALIDATION UTILISATEUR
+
+**Ce plan va créer** :
+- 3 nouveaux fichiers (page, composant, utilitaires)
+- 1 modification dans `/pages/defis.js` (ajout bouton)
+- 1 nouvelle table Supabase `journal_defis`
+
+**Fonctionnalité ajoutée** :
+- Suivi quotidien structuré pour défis personnalisés (engagements matin + validation soir)
+
+**Sécurité** :
+- 10 risques identifiés et mitigés
+- 8 anomalies historiques analysées et prévenues
+- Checklist de 25 points de contrôle
+- Rollback préparé pour chaque fichier
+
+**Prochaine étape après validation** :
+1. Créer la table Supabase `journal_defis`
+2. Créer `/lib/journalDefisUtils.js`
+3. Créer `/components/JournalDefiPersonnalise.js`
+4. Créer `/pages/journal-defi/[id].js`
+5. Modifier `/pages/defis.js` (1 bouton)
+6. Tests complets
+7. Rapport Markdown APRÈS modification
+
+**Durée estimée** : 2-3 heures de développement + 1 heure de tests
+
+---
+
+**Utilisateur, pour valider ce plan, réponds** :
+- **"VALIDE"** ou **"GO"** + date
+- OU demande des modifications/clarifications avant validation
