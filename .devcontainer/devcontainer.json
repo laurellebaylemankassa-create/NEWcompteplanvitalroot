@@ -1,0 +1,46 @@
+{
+  "name": "Mon Plan Vital Root - Development",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-20-bullseye",
+  "hostRequirements": {
+    "cpus": 2,
+    "memory": "4gb",
+    "storage": "32gb"
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": {
+      "label": "Application Next.js",
+      "onAutoForward": "notify"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "github.copilot",
+        "github.copilot-chat"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit"
+        }
+      }
+    }
+  },
+  "postCreateCommand": "npm install",
+  "postAttachCommand": "echo 'Environment ready! Run npm run dev to start the development server.'",
+  "remoteUser": "node",
+  "containerEnv": {
+    "NODE_ENV": "development"
+  }
+}
