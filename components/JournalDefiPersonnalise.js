@@ -98,42 +98,64 @@ export default function JournalDefiPersonnalise({ defi, jourActuel, onProgressio
   };
 
   if (!journalCharge) {
-    return <div className="text-center py-4">Chargement...</div>;
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="text-4xl mb-3">⏳</div>
+          <div className="text-gray-600 font-medium">Chargement...</div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6 p-4 bg-white rounded-lg shadow">
-      {/* En-tête */}
-      <div className="border-b pb-4">
-        <h2 className="text-xl font-bold text-gray-800">{defi.nom}</h2>
-        <p className="text-sm text-gray-600">
-          Jour {jourActuel} / {defi.duree} - Progression : {defi.progress || 0} jours validés
-        </p>
+    <div className="space-y-6">
+      {/* En-tête stylé */}
+      <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-2xl shadow-xl p-6 text-white">
+        <h2 className="text-2xl font-bold mb-2">{defi.nom}</h2>
+        <div className="flex items-center gap-4 text-sm opacity-90">
+          <span className="flex items-center gap-1">
+            📅 Jour {jourActuel} / {defi.duree}
+          </span>
+          <span className="flex items-center gap-1">
+            ✅ {defi.progress || 0} jours validés
+          </span>
+        </div>
       </div>
 
       {/* Message de feedback */}
       {message && (
-        <div className={`p-3 rounded ${message.includes("✓") ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}`}>
-          {message}
+        <div className={`p-4 rounded-xl shadow-md animate-fade-in ${
+          message.includes("✓") 
+            ? "bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 text-green-800" 
+            : "bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-300 text-yellow-800"
+        }`}>
+          <div className="font-semibold">{message}</div>
         </div>
       )}
 
       {/* SECTION MATIN : Déclaration des engagements */}
       {!etapeValidee && (
-        <div className="border rounded-lg p-4 bg-blue-50">
-          <h3 className="font-bold text-blue-900 mb-3">☀️ Ce matin</h3>
-          <p className="text-sm text-gray-700 mb-4">
-            Déclarez 1 à 5 engagements concrets pour aujourd\'hui
-          </p>
+        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl shadow-lg p-6 border-2 border-blue-200">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="text-4xl">☀️</div>
+            <div>
+              <h3 className="text-xl font-bold text-blue-900">Ce matin</h3>
+              <p className="text-sm text-blue-700">Déclarez 1 à 5 engagements concrets pour aujourd\'hui</p>
+            </div>
+          </div>
 
           {/* Liste des engagements déclarés */}
-          <div className="space-y-2 mb-4">
+          <div className="space-y-3 mb-5">
             {engagements.map((eng, index) => (
-              <div key={index} className="flex items-center justify-between bg-white p-2 rounded border">
-                <span className="text-sm">{eng.texte}</span>
+              <div key={index} className="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border-2 border-blue-100 hover:border-blue-300 transition-colors">
+                <div className="flex items-center gap-3 flex-1">
+                  <span className="text-blue-600 font-bold text-lg">{index + 1}</span>
+                  <span className="text-gray-800 font-medium">{eng.texte}</span>
+                </div>
                 <button
                   onClick={() => supprimerEngagement(index)}
-                  className="text-red-600 hover:text-red-800 text-sm"
+                  className="ml-3 w-8 h-8 flex items-center justify-center bg-red-100 text-red-600 hover:bg-red-200 rounded-full transition-colors"
                 >
                   ✕
                 </button>
@@ -143,35 +165,40 @@ export default function JournalDefiPersonnalise({ defi, jourActuel, onProgressio
 
           {/* Ajout nouvel engagement */}
           {engagements.length < 5 && (
-            <div className="flex gap-2 mb-4">
-              <input
-                type="text"
-                value={nouvelEngagement}
-                onChange={(e) => setNouvelEngagement(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && ajouterEngagement()}
-                placeholder="Ex: Boire 2L d\'eau"
-                className="flex-1 px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 text-sm"
-              />
-              <button
-                onClick={ajouterEngagement}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
-              >
-                Ajouter
-              </button>
+            <div className="mb-5">
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  value={nouvelEngagement}
+                  onChange={(e) => setNouvelEngagement(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && ajouterEngagement()}
+                  placeholder="Ex: Boire 2L d\'eau, Marcher 30min..."
+                  className="flex-1 px-4 py-3 border-2 border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                />
+                <button
+                  onClick={ajouterEngagement}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold shadow-md hover:shadow-lg transition-all"
+                >
+                  + Ajouter
+                </button>
+              </div>
+              <p className="text-xs text-blue-600 mt-2 ml-1">
+                {engagements.length}/5 engagements • Appuyez sur Entrée pour ajouter
+              </p>
             </div>
           )}
 
           {/* Note personnelle */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Note personnelle (optionnelle)
+          <div className="mb-5">
+            <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+              <span>📝</span> Note personnelle (optionnelle)
             </label>
             <textarea
               value={notePersonnelle}
               onChange={(e) => setNotePersonnelle(e.target.value)}
               placeholder="Contexte, motivation, objectif du jour..."
               rows={3}
-              className="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 text-sm"
+              className="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
             />
           </div>
 
@@ -179,7 +206,7 @@ export default function JournalDefiPersonnalise({ defi, jourActuel, onProgressio
           <button
             onClick={sauvegarderDeclaration}
             disabled={engagements.length === 0}
-            className="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed font-bold text-lg shadow-lg hover:shadow-xl transition-all"
           >
             💾 Sauvegarder mes engagements
           </button>
