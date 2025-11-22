@@ -99,25 +99,31 @@ export default function JournalDefiPersonnalise({ defi, jourActuel, onProgressio
 
   if (!journalCharge) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <div className="text-4xl mb-3">⏳</div>
-          <div className="text-gray-600 font-medium">Chargement...</div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 0' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>⏳</div>
+          <div style={{ color: '#6B7280', fontWeight: '500' }}>Chargement...</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* En-tête stylé */}
-      <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-2xl shadow-xl p-6 text-white">
-        <h2 className="text-2xl font-bold mb-2">{defi.nom}</h2>
-        <div className="flex items-center gap-4 text-sm opacity-90">
-          <span className="flex items-center gap-1">
+      <div style={{ 
+        background: 'linear-gradient(to right, #8B5CF6, #4F46E5)', 
+        borderRadius: '16px', 
+        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)', 
+        padding: '24px',
+        color: 'white'
+      }}>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '8px' }}>{defi.nom}</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '0.875rem', opacity: 0.9 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             📅 Jour {jourActuel} / {defi.duree}
           </span>
-          <span className="flex items-center gap-1">
+          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             ✅ {defi.progress || 0} jours validés
           </span>
         </div>
@@ -125,37 +131,71 @@ export default function JournalDefiPersonnalise({ defi, jourActuel, onProgressio
 
       {/* Message de feedback */}
       {message && (
-        <div className={`p-4 rounded-xl shadow-md animate-fade-in ${
-          message.includes("✓") 
-            ? "bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 text-green-800" 
-            : "bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-300 text-yellow-800"
-        }`}>
-          <div className="font-semibold">{message}</div>
+        <div style={{
+          padding: '16px',
+          borderRadius: '12px',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+          background: message.includes("✓") 
+            ? 'linear-gradient(to right, #ECFDF5, #D1FAE5)' 
+            : 'linear-gradient(to right, #FEF3C7, #FED7AA)',
+          border: message.includes("✓") ? '2px solid #86EFAC' : '2px solid #FCD34D',
+          color: message.includes("✓") ? '#065F46' : '#92400E'
+        }}>
+          <div style={{ fontWeight: '600' }}>{message}</div>
         </div>
       )}
 
       {/* SECTION MATIN : Déclaration des engagements */}
       {!etapeValidee && (
-        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl shadow-lg p-6 border-2 border-blue-200">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="text-4xl">☀️</div>
+        <div style={{
+          background: 'linear-gradient(to bottom right, #EFF6FF, #ECFEFF)',
+          borderRadius: '16px',
+          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+          padding: '24px',
+          border: '2px solid #BFDBFE'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+            <div style={{ fontSize: '2.5rem' }}>☀️</div>
             <div>
-              <h3 className="text-xl font-bold text-blue-900">Ce matin</h3>
-              <p className="text-sm text-blue-700">Déclarez 1 à 5 engagements concrets pour aujourd\'hui</p>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#1E3A8A', marginBottom: '4px' }}>Ce matin</h3>
+              <p style={{ fontSize: '0.875rem', color: '#1D4ED8' }}>Déclarez 1 à 5 engagements concrets pour aujourd\'hui</p>
             </div>
           </div>
 
           {/* Liste des engagements déclarés */}
-          <div className="space-y-3 mb-5">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
             {engagements.map((eng, index) => (
-              <div key={index} className="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border-2 border-blue-100 hover:border-blue-300 transition-colors">
-                <div className="flex items-center gap-3 flex-1">
-                  <span className="text-blue-600 font-bold text-lg">{index + 1}</span>
-                  <span className="text-gray-800 font-medium">{eng.texte}</span>
+              <div key={index} style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                background: 'white',
+                padding: '16px',
+                borderRadius: '12px',
+                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+                border: '2px solid #DBEAFE'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                  <span style={{ color: '#2563EB', fontWeight: 'bold', fontSize: '1.125rem' }}>{index + 1}</span>
+                  <span style={{ color: '#1F2937', fontWeight: '500' }}>{eng.texte}</span>
                 </div>
                 <button
                   onClick={() => supprimerEngagement(index)}
-                  className="ml-3 w-8 h-8 flex items-center justify-center bg-red-100 text-red-600 hover:bg-red-200 rounded-full transition-colors"
+                  style={{
+                    marginLeft: '12px',
+                    width: '32px',
+                    height: '32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: '#FEE2E2',
+                    color: '#DC2626',
+                    borderRadius: '50%',
+                    border: 'none',
+                    cursor: 'pointer'
+                  }}
+                  onMouseOver={(e) => e.target.style.background = '#FECACA'}
+                  onMouseOut={(e) => e.target.style.background = '#FEE2E2'}
                 >
                   ✕
                 </button>
@@ -165,32 +205,58 @@ export default function JournalDefiPersonnalise({ defi, jourActuel, onProgressio
 
           {/* Ajout nouvel engagement */}
           {engagements.length < 5 && (
-            <div className="mb-5">
-              <div className="flex gap-3">
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ display: 'flex', gap: '12px' }}>
                 <input
                   type="text"
                   value={nouvelEngagement}
                   onChange={(e) => setNouvelEngagement(e.target.value)}
                   onKeyPress={(e) => e.key === "Enter" && ajouterEngagement()}
                   placeholder="Ex: Boire 2L d\'eau, Marcher 30min..."
-                  className="flex-1 px-4 py-3 border-2 border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                  style={{
+                    flex: 1,
+                    padding: '12px 16px',
+                    border: '2px solid #BFDBFE',
+                    borderRadius: '12px',
+                    fontSize: '1rem',
+                    outline: 'none'
+                  }}
                 />
                 <button
                   onClick={ajouterEngagement}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold shadow-md hover:shadow-lg transition-all"
+                  style={{
+                    padding: '12px 24px',
+                    background: '#2563EB',
+                    color: 'white',
+                    borderRadius: '12px',
+                    fontWeight: '600',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                    border: 'none',
+                    cursor: 'pointer'
+                  }}
+                  onMouseOver={(e) => e.target.style.background = '#1D4ED8'}
+                  onMouseOut={(e) => e.target.style.background = '#2563EB'}
                 >
                   + Ajouter
                 </button>
               </div>
-              <p className="text-xs text-blue-600 mt-2 ml-1">
+              <p style={{ fontSize: '0.75rem', color: '#2563EB', marginTop: '8px', marginLeft: '4px' }}>
                 {engagements.length}/5 engagements • Appuyez sur Entrée pour ajouter
               </p>
             </div>
           )}
 
           {/* Note personnelle */}
-          <div className="mb-5">
-            <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '0.875rem',
+              fontWeight: '600',
+              color: '#374151',
+              marginBottom: '8px'
+            }}>
               <span>📝</span> Note personnelle (optionnelle)
             </label>
             <textarea
@@ -198,7 +264,15 @@ export default function JournalDefiPersonnalise({ defi, jourActuel, onProgressio
               onChange={(e) => setNotePersonnelle(e.target.value)}
               placeholder="Contexte, motivation, objectif du jour..."
               rows={3}
-              className="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                border: '2px solid #BFDBFE',
+                borderRadius: '12px',
+                fontSize: '1rem',
+                outline: 'none',
+                resize: 'vertical'
+              }}
             />
           </div>
 
@@ -206,7 +280,30 @@ export default function JournalDefiPersonnalise({ defi, jourActuel, onProgressio
           <button
             onClick={sauvegarderDeclaration}
             disabled={engagements.length === 0}
-            className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed font-bold text-lg shadow-lg hover:shadow-xl transition-all"
+            style={{
+              width: '100%',
+              padding: '16px',
+              background: engagements.length === 0 
+                ? 'linear-gradient(to right, #D1D5DB, #9CA3AF)' 
+                : 'linear-gradient(to right, #10B981, #059669)',
+              color: 'white',
+              borderRadius: '12px',
+              fontWeight: 'bold',
+              fontSize: '1.125rem',
+              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+              border: 'none',
+              cursor: engagements.length === 0 ? 'not-allowed' : 'pointer'
+            }}
+            onMouseOver={(e) => {
+              if (engagements.length > 0) {
+                e.target.style.background = 'linear-gradient(to right, #059669, #047857)';
+              }
+            }}
+            onMouseOut={(e) => {
+              if (engagements.length > 0) {
+                e.target.style.background = 'linear-gradient(to right, #10B981, #059669)';
+              }
+            }}
           >
             💾 Sauvegarder mes engagements
           </button>
@@ -215,54 +312,134 @@ export default function JournalDefiPersonnalise({ defi, jourActuel, onProgressio
 
       {/* SECTION SOIR : Validation des engagements */}
       {engagements.length > 0 && (
-        <div className="border rounded-lg p-4 bg-purple-50">
-          <h3 className="font-bold text-purple-900 mb-3">🌙 Ce soir</h3>
-          <p className="text-sm text-gray-700 mb-4">
-            Cochez les engagements accomplis (minimum 2/3 pour valider la journée)
-          </p>
+        <div style={{
+          background: 'linear-gradient(to bottom right, #FAF5FF, #FCE7F3)',
+          borderRadius: '16px',
+          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+          padding: '24px',
+          border: '2px solid #E9D5FF'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+            <div style={{ fontSize: '2.5rem' }}>🌙</div>
+            <div>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#581C87', marginBottom: '4px' }}>Ce soir</h3>
+              <p style={{ fontSize: '0.875rem', color: '#7E22CE' }}>Cochez les engagements accomplis (minimum 2/3 pour valider la journée)</p>
+            </div>
+          </div>
 
           {/* Checklist */}
-          <div className="space-y-2 mb-4">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
             {engagements.map((eng, index) => (
               <label
                 key={index}
-                className="flex items-center gap-3 p-3 bg-white rounded border cursor-pointer hover:bg-gray-50"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '16px',
+                  padding: '16px',
+                  background: 'white',
+                  borderRadius: '12px',
+                  boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+                  border: '2px solid #F3E8FF',
+                  cursor: 'pointer'
+                }}
               >
                 <input
                   type="checkbox"
                   checked={eng.valide}
                   onChange={() => toggleEngagement(index)}
                   disabled={etapeValidee}
-                  className="w-5 h-5 text-purple-600 focus:ring-purple-500"
+                  style={{
+                    width: '24px',
+                    height: '24px',
+                    accentColor: '#9333EA',
+                    cursor: etapeValidee ? 'not-allowed' : 'pointer'
+                  }}
                 />
-                <span className={`text-sm ${eng.valide ? "line-through text-gray-500" : "text-gray-800"}`}>
+                <span style={{
+                  fontSize: '1rem',
+                  fontWeight: '500',
+                  flex: 1,
+                  textDecoration: eng.valide ? 'line-through' : 'none',
+                  color: eng.valide ? '#6B7280' : '#1F2937'
+                }}>
                   {eng.texte}
                 </span>
+                {eng.valide && <span style={{ color: '#10B981', fontSize: '1.25rem' }}>✓</span>}
               </label>
             ))}
           </div>
 
           {/* Score actuel */}
-          <div className="mb-4 p-3 bg-white rounded border">
-            <span className="text-sm font-medium">Score actuel : </span>
-            <span className="text-lg font-bold text-purple-700">{calculerScore(engagements)}</span>
-            <span className="text-sm text-gray-600 ml-2">
-              ({engagements.filter(e => e.valide).length} sur {engagements.length})
-            </span>
+          <div style={{
+            marginBottom: '20px',
+            padding: '20px',
+            background: 'linear-gradient(to right, #FFFFFF, #FAF5FF)',
+            borderRadius: '12px',
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+            border: '2px solid #E9D5FF'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <span style={{ fontSize: '0.875rem', fontWeight: '500', color: '#374151', display: 'block', marginBottom: '4px' }}>Score actuel</span>
+                <span style={{
+                  fontSize: '1.875rem',
+                  fontWeight: 'bold',
+                  background: 'linear-gradient(to right, #9333EA, #DB2777)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}>
+                  {calculerScore(engagements)}
+                </span>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div>
+                  <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#9333EA' }}>
+                    {engagements.filter(e => e.valide).length}
+                  </span>
+                  <span style={{ color: '#6B7280', fontSize: '1.25rem' }}> / {engagements.length}</span>
+                </div>
+                <p style={{ fontSize: '0.75rem', color: '#4B5563', marginTop: '4px' }}>engagements validés</p>
+              </div>
+            </div>
           </div>
 
           {/* Bouton validation */}
           {!etapeValidee && (
             <button
               onClick={validerJournee}
-              className="w-full py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+              style={{
+                width: '100%',
+                padding: '16px',
+                background: 'linear-gradient(to right, #9333EA, #DB2777)',
+                color: 'white',
+                borderRadius: '12px',
+                fontWeight: 'bold',
+                fontSize: '1.125rem',
+                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                border: 'none',
+                cursor: 'pointer'
+              }}
+              onMouseOver={(e) => e.target.style.background = 'linear-gradient(to right, #7E22CE, #BE185D)'}
+              onMouseOut={(e) => e.target.style.background = 'linear-gradient(to right, #9333EA, #DB2777)'}
             >
               ✓ Valider la journée
             </button>
           )}
 
           {etapeValidee && (
-            <div className="w-full py-2 bg-gray-200 text-gray-700 rounded text-center font-medium">
+            <div style={{
+              width: '100%',
+              padding: '16px',
+              background: 'linear-gradient(to right, #D1FAE5, #A7F3D0)',
+              color: '#065F46',
+              borderRadius: '12px',
+              textAlign: 'center',
+              fontWeight: 'bold',
+              fontSize: '1.125rem',
+              border: '2px solid #86EFAC'
+            }}>
               ✓ Journée déjà validée
             </div>
           )}
@@ -271,13 +448,33 @@ export default function JournalDefiPersonnalise({ defi, jourActuel, onProgressio
 
       {/* Aide contextuelle */}
       {engagements.length === 0 && !etapeValidee && (
-        <div className="border-l-4 border-blue-500 bg-blue-50 p-4">
-          <p className="text-sm text-blue-900">
-            <strong>Comment ça marche ?</strong><br />
-            1. Le matin : déclarez 1 à 5 engagements concrets<br />
-            2. Le soir : cochez ceux que vous avez accomplis<br />
-            3. Si ≥ 2/3 validés → votre progression augmente de 1 jour
-          </p>
+        <div style={{
+          background: 'linear-gradient(to right, #FFFBEB, #FED7AA)',
+          borderLeft: '4px solid #FBBF24',
+          borderRadius: '0 12px 12px 0',
+          padding: '20px',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+            <span style={{ fontSize: '1.5rem' }}>💡</span>
+            <div>
+              <p style={{ fontSize: '1rem', fontWeight: 'bold', color: '#1F2937', marginBottom: '12px' }}>Comment ça marche ?</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.875rem', color: '#374151' }}>
+                <p style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                  <span style={{ fontWeight: 'bold', color: '#2563EB' }}>1.</span>
+                  <span><strong style={{ color: '#1D4ED8' }}>Le matin ☀️</strong> : déclarez 1 à 5 engagements concrets</span>
+                </p>
+                <p style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                  <span style={{ fontWeight: 'bold', color: '#9333EA' }}>2.</span>
+                  <span><strong style={{ color: '#7E22CE' }}>Le soir 🌙</strong> : cochez ceux que vous avez accomplis</span>
+                </p>
+                <p style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                  <span style={{ fontWeight: 'bold', color: '#10B981' }}>3.</span>
+                  <span><strong style={{ color: '#059669' }}>Si ≥ 2/3 validés</strong> → votre progression augmente de 1 jour 🎯</span>
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
