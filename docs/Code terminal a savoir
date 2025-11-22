@@ -9,3 +9,35 @@ git restore --source=origin/main -- "Nom exact du fichier"
 
 git pull --rebase
 add + commit → pull --rebase → push
+
+process plusieurs branche
+1️⃣ Vérifie que tout est bien commité et poussé sur ta branche
+(ce que tu viens de faire → “working tree clean” et “branch is up to date”)
+
+2️⃣ Vas sur la branche main : 
+git checkout main
+git pull --rebase # récupère la dernière version "main" du serveur
+3️⃣ Fusionne ("merge") ou "rebase" ta branche active dans main
+Option A — Merge facile :
+git merge AVANCEMENT-IDEAUX-/TBS-OBJECTIF-POIDS
+Cela va intégrer les changements sans perdre l’historique.
+Option B — Rebase pour garder un historique linéaire :
+git rebase AVANCEMENT-IDEAUX-/TBS-OBJECTIF-POIDS
+Mais attention : le merge est plus simple si tu débutes ou si plusieurs personnes bossent sur “main”.
+
+4️⃣ Résous les éventuels conflits puis :
+git add .
+git commit -m "Fusion des modifications depuis AVANCEMENT-IDEAUX-/TBS-OBJECTIF-POIDS"
+
+5️⃣ Pousse les changements sur le serveur :
+git push origin main
+
+🚦 Récap workflow classique
+Travail terminé sur la feature branche : commit + push
+Basculer sur main : git checkout main && git pull
+Fuse la branche dans main : git merge nom_de_branche
+Résous conflits si besoin
+Push la branche main : git push origin main
+💡 Pro tips :
+Sur GitHub, tu peux aussi ouvrir une "Pull Request" de ta branche vers main → bon pour révisions et tests.
+Après le merge, tu peux supprimer ta branche de travail si elle n’est plus utile.

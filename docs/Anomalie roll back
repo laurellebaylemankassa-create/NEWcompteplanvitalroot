@@ -1,3 +1,17 @@
+
+═══════════════════════════════════════════════════════════════════════════════
+🛑 ANOMALIE 22/11/2025 — IMPORT MANQUANT StartPreparationModal
+═══════════════════════════════════════════════════════════════════════════════
+Fichier : /pages/preparation-jeune.js
+Erreur : Runtime ReferenceError « StartPreparationModal is not defined » lors du clic sur le bouton de démarrage de la préparation.
+Cause : Oubli d’import du composant StartPreparationModal après refonte du code et réorganisation des imports.
+Impact : Plantage de la page, impossibilité d’ouvrir la modale de saisie de la date de début de jeûne, blocage du workflow utilisateur.
+Étape du plan non respectée : contrôle qualité des imports, test du rendu sur cas limites, vérification compilation/console.
+Procédure corrective :
+	1. Ajout immédiat de l’import manquant en haut du fichier : `import StartPreparationModal from '../components/StartPreparationModal';`
+	2. Test du rendu et de la fonctionnalité de la modale.
+	3. Documentation de l’anomalie dans ce fichier et dans l’audit d’amélioration continue.
+Action requise : Relecture systématique des imports après toute refonte, test du parcours utilisateur complet, validation utilisateur avant clôture.
 ═══════════════════════════════════════════════════════════════════════════════
 🛑 ANOMALIE 18/11/2025 — AUDIT RIGOUREUX POST-CORRECTION
 ═══════════════════════════════════════════════════════════════════════════════
