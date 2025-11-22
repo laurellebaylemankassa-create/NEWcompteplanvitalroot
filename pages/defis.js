@@ -142,19 +142,24 @@ const Defis = () => {
         }
         
         setActionLoading(defiId);
+        console.log('Suppression défi ID:', defiId);
+        
         const { error: deleteError } = await supabase
             .from('defis')
             .delete()
             .eq('id', defiId);
         
         if (deleteError) {
+            console.error('Erreur suppression:', deleteError);
             setError('Erreur lors de la suppression du défi');
             setActionLoading(false);
             return;
         }
         
+        console.log('Défi supprimé, rechargement...');
         await loadDefis();
         setActionLoading(false);
+        alert('✅ Défi supprimé avec succès !');
     };
 
     // Handler pour démarrer un défi
