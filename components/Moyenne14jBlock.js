@@ -31,6 +31,14 @@ export default function Moyenne14jBlock({ selectedDate, bilan }) {
         if (!jours[d]) jours[d] = 0;
         jours[d] += r.kcal || 0;
       });
+      // Compter le nombre de jours avec données réelles
+      const nbJoursAvecDonnees = Object.keys(jours).length;
+      // Si moins de 10 jours avec données sur 14j → données insuffisantes
+      if (nbJoursAvecDonnees < 10) {
+        console.log('[Moyenne14j] Données insuffisantes:', nbJoursAvecDonnees, 'jours sur 14');
+        setLoading(false);
+        return;
+      }
       // Calculer total 14j et moyenne 14j
       let total = 0;
       for (let i=0; i<14; ++i) {

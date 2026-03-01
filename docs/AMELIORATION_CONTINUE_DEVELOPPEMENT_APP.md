@@ -1,5 +1,302 @@
 # 🆕 À PRÉVOIR — Bilan hebdomadaire alimentaire (ajouts futurs)
 
+## ⚠️ RÉFLEXION CRITIQUE : Gestion périodes de jeûne dans bilans
+**Date identification :** 2026-02-14  
+**Priorité :** 🔴 CRITIQUE (impacte cohérence statistiques)  
+**Statut :** 🤔 Réflexion en cours  
+**Temps estimé :** 8-10h (analyse + conception + implémentation)
+
+### Problématique identifiée
+
+**Situation actuelle :**
+Le système de calcul du bilan hebdomadaire ne différencie pas :
+- ❌ **Jours non saisis** (oubli utilisateur, données manquantes)
+- ❌ **Jours de jeûne intentionnel** (protocole préparation jeûne, mode jeûne activé)
+
+**Exemple concret - Semaine préparation jeûne :**
+```
+Lundi-Mardi      : Alimentation normale (1700 kcal/jour) = 3400 kcal
+Mercredi-Vendredi: JEÛNE INTENTIONNEL (fenêtre 3 jours) = 0 kcal
+Samedi-Dimanche  : Reprise alimentation (1700 kcal/jour) = 3400 kcal
+
+Total semaine : 6800 kcal sur 7 jours
+```
+
+**Calcul actuel (FAUX) :**
+```javascript
+nbJoursSaisis = 4 jours (lun/mar/sam/dim)
+apportsTotaux = 6800 kcal
+objectifHebdo = 1730 × 4 = 6920 kcal
+Écart = -120 kcal
+
+⚠️ Message affiché : "Semaine en déficit, tu es sous ton objectif"
+```
+
+**Calcul attendu (CORRECT) :**
+```javascript
+nbJoursAlimentation = 4 jours
+nbJoursJeuneIntentionnel = 3 jours
+nbJoursNonSaisis = 0 jour
+
+apportsTotaux = 6800 kcal (sur 4 jours alimentation)
+objectifHebdo = 1730 × 4 = 6920 kcal (calculé sur jours alimentation uniquement)
+Écart = -120 kcal
+
+✓ Message adapté : "Semaine mixte : 4j alimentation + 3j jeûne.
+   Phase alimentation : 6800/6920 kcal (objectif respecté)"
+```
+
+---
+
+### Impacts actuels (bugs silencieux)
+
+1. **Bilan hebdomadaire faussé**
+   - Stats calculées sur jours saisis sans tenir compte du contexte jeûne
+   - Messages inadaptés ("tu es en déficit" alors que c'est un jeûne planifié)
+   - Objectif hebdo mal calculé
+
+2. **Bilan mensuel incohérent**
+   - Semaines de jeûne comptent comme "semaines incomplètes"
+   - Moyenne mensuelle biaisée
+   - Tendances faussées
+
+3. **Moyenne 14j incorrecte**
+   - Calcul sur tous les jours sans distinction jeûne/alimentation
+   - Comparaison N/N-1 invalide si une semaine est en mode jeûne
+
+4. **Encouragements inappropriés**
+   - "Données insuffisantes" affiché alors que jeûne intentionnel
+   - Pas de reconnaissance du protocole suivi
+   - Démotivant pour utilisateur
+
+---
+
+### Solution architecturale proposée
+
+#### **1. Marqueur type de journée en base**
+
+**Nouvelle table : `calendrier_utilisateur`**
+```sql
+CREATE TABLE calendrier_utilisateur (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id),
+  date DATE NOT NULL,
+  type_journee TEXT CHECK (type_journee IN (
+    'alimentation_normale',
+    'jeune_intentionnel',
+    'preparation_jeune',
+    'reprise_alimentaire',
+    'non_saisi'
+  )),
+  mode_app TEXT CHECK (mode_app IN ('normal', 'jeune', 'preparation_jeune', 'reprise')),
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(user_id, date)
+);
+```
+
+**OU ajout colonne dans table existante `semaines_validees` :**
+```sql
+ALTER TABLE semaines_validees 
+ADD COLUMN jours_jeune_intentionnel INTEGER DEFAULT 0,
+ADD COLUMN jours_alimentation INTEGER DEFAULT 0,
+ADD COLUMN mode_semaine TEXT CHECK (mode_semaine IN ('normal', 'mixte_jeune', 'jeune_complet'));
+```
+
+#### **2. Détection automatique mode jeûne**
+
+Dans `pages/suivi.js` lors de la validation :
+```javascript
+// Récupérer mode app actuel (depuis contexte ou localStorage)
+const modeApp = getModeApp(); // 'normal' | 'jeune' | 'preparation_jeune'
+
+// Compter jours par type
+const joursAlimentation = new Set();
+const joursJeune = [];
+
+// Si mode préparation jeûne, identifier fenêtres de jeûne
+if (modeApp === 'preparation_jeune') {
+  const fenetresJeune = getFenetresJeunePlanifiees(selectedWeekStart);
+  joursJeune = fenetresJeune; // Ex: ['2026-02-12', '2026-02-13', '2026-02-14']
+}
+
+repasData.forEach(r => {
+  if (!joursJeune.includes(r.date)) {
+    joursAlimentation.add(r.date);
+  }
+});
+
+const nbJoursAlimentation = joursAlimentation.size;
+const nbJoursJeune = joursJeune.length;
+const nbJoursNonSaisis = 7 - nbJoursAlimentation - nbJoursJeune;
+```
+
+#### **3. Calcul objectif adapté**
+
+```javascript
+// Objectif calculé UNIQUEMENT sur jours alimentation
+const objectifHebdo = objectifJour × nbJoursAlimentation;
+
+// Sauvegarde en base
+const bilanToInsert = {
+  // ... champs existants
+  nb_jours_alimentation: nbJoursAlimentation,
+  nb_jours_jeune: nbJoursJeune,
+  nb_jours_non_saisis: nbJoursNonSaisis,
+  mode_semaine: nbJoursJeune > 0 ? 'mixte_jeune' : 'normal',
+  objectif_hebdo: objectifHebdo // Ajusté sur jours alimentation
+};
+```
+
+#### **4. Messages contextuels dans bilan**
+
+**BilanHebdoModal.js - Bandeau adapté :**
+```javascript
+{bilan?.nb_jours_jeune > 0 && (
+  <div style={{
+    background: '#e0f2fe',
+    border: '2px solid #0284c7',
+    borderRadius: 8,
+    padding: '1rem 1.5rem',
+    marginBottom: '1.5rem',
+    color: '#075985'
+  }}>
+    <div style={{fontWeight: 700, marginBottom: '0.3rem'}}>
+      🧘 Semaine avec protocole jeûne
+    </div>
+    Cette semaine incluait <b>{bilan.nb_jours_jeune} jour(s) de jeûne intentionnel</b>.
+    Les statistiques portent sur les <b>{bilan.nb_jours_alimentation} jours d'alimentation</b> uniquement.
+  </div>
+)}
+
+{bilan?.nb_jours_non_saisis > 0 && bilan?.nb_jours_jeune === 0 && (
+  <div style={{background: '#fff3cd', ...}}>
+    ⚠️ Données insuffisantes : {bilan.nb_jours_non_saisis} jour(s) non saisi(s).
+  </div>
+)}
+```
+
+**Résumé données principales adapté :**
+```javascript
+<li>
+  Jours avec alimentation : <b>{bilan.nb_jours_alimentation}</b>
+  {bilan.nb_jours_jeune > 0 && (
+    <span style={{color: '#0284c7', marginLeft: '0.5rem'}}>
+      (+ {bilan.nb_jours_jeune} jour(s) jeûne)
+    </span>
+  )}
+</li>
+```
+
+#### **5. Moyenne 14j adaptée**
+
+**Moyenne14jBlock.js - Filtrer jours de jeûne :**
+```javascript
+// Récupérer jours de jeûne sur période 14j
+const { data: joursJeune } = await supabase
+  .from('calendrier_utilisateur')
+  .select('date')
+  .eq('user_id', user_id)
+  .eq('type_journee', 'jeune_intentionnel')
+  .gte('date', fmt(start14))
+  .lte('date', fmt(end));
+
+const datesJeune = new Set(joursJeune?.map(j => j.date) || []);
+
+// Calculer total sur jours alimentation uniquement
+let totalAlimentation = 0;
+let nbJoursAlimentation = 0;
+
+for (let i=0; i<14; ++i) {
+  const d = new Date(start14); d.setDate(start14.getDate()+i);
+  const key = d.toISOString().slice(0,10);
+  
+  if (!datesJeune.has(key)) {
+    totalAlimentation += jours[key] || 0;
+    if (jours[key]) nbJoursAlimentation++;
+  }
+}
+
+const objectifAlimentation = objectifJour × nbJoursAlimentation;
+const surplus14j = totalAlimentation - objectifAlimentation;
+```
+
+---
+
+### Cas d'usage à gérer
+
+| Cas | Semaine | Calcul attendu |
+|-----|---------|----------------|
+| **1. Normal** | 7j alimentation, 0j jeûne | Actuel OK (objectif × 7) |
+| **2. Prépa jeûne** | 4j alim + 3j jeûne | Objectif × 4 seulement |
+| **3. Jeûne complet** | 0j alim + 7j jeûne | Message "Semaine de jeûne" |
+| **4. Données partielles** | 3j alim + 0j jeûne + 4j non saisis | Bandeau avertissement |
+| **5. Mixte complexe** | 2j alim + 3j jeûne + 2j non saisis | Combiner bandeaux |
+
+---
+
+### Questions ouvertes
+
+1. **Source de vérité mode jeûne ?**
+   - Option A : Table `calendrier_utilisateur` (plus flexible)
+   - Option B : Contexte app React (plus simple)
+   - Option C : Colonne dans `semaines_validees` (plus intégré)
+
+2. **Détection automatique fenêtres jeûne ?**
+   - Faut-il un calendrier de planification jeûne ?
+   - Ou marquage manuel par utilisateur ?
+   - Ou détection via absence totale repas + mode app = 'preparation_jeune' ?
+
+3. **Rétrocompatibilité ?**
+   - Comment gérer bilans historiques sans info jeûne ?
+   - Migration données anciennes ?
+   - Distinction possible a posteriori ?
+
+4. **Bilan mensuel ?**
+   - Comment agréger semaines mixtes ?
+   - Affichage "X jours alimentation / Y jours jeûne sur le mois" ?
+   - Tendances mensuelles recalculées ?
+
+---
+
+### Plan d'implémentation (quand priorisation validée)
+
+**Phase 1 : Base de données (2h)**
+- Décision architecture stockage
+- Migration SQL
+- Queries récupération info jeûne
+
+**Phase 2 : Détection mode jeûne (2h)**
+- Hook `useModeApp()` ou récupération contexte
+- Logique identification jours jeûne vs alimentation
+- Tests différents cas d'usage
+
+**Phase 3 : Adaptation calculs (2h)**
+- Modification validationSemaine.js
+- Ajustement objectifHebdo
+- Sauvegarde infos supplémentaires
+
+**Phase 4 : UI bilans (2h)**
+- Bandeaux contextuels
+- Messages adaptés
+- Affichage détaillé composition semaine
+
+**Phase 5 : Tests & validation (2h)**
+- Tests unitaires calculs
+- Tests UI tous cas d'usage
+- Validation utilisateur
+
+---
+
+### Prochaines actions
+
+1. **Décision architecture :** Valider option stockage info jeûne
+2. **Analyse code existant :** Comment mode jeûne géré actuellement dans app ?
+3. **Maquette UI :** Valider messages/bandeaux avec utilisateur
+4. **Priorisation :** Intégrer dans roadmap (urgent ou peut attendre ?)
+
+---
+
 ## Message doux personnalisé Section 7 "Comment tu manges"
 **Date identification :** 2026-01-21  
 **Priorité :** 🟡 Moyenne  

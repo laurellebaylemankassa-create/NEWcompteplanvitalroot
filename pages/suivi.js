@@ -93,7 +93,21 @@ function isInLast7Days(dateString, refDateString) {
 }
 
 function Snackbar({ open, message, type = "info", onClose }) {
+  useEffect(() => {
+    if (!open) return;
+    // Auto-close : 3s pour success, 5s pour warning/info, jamais pour error
+    if (type !== "error") {
+      const delay = type === "success" ? 3000 : 5000;
+      const timer = setTimeout(onClose, delay);
+      return () => clearTimeout(timer);
+    }
+  }, [open, type, onClose]);
+  
   if (!open) return null;
+  
+  // Couleurs selon type
+  const bgColor = type === "error" ? "#f44336" : type === "warning" ? "#ff9800" : "#4caf50";
+  
   return (
     <div
       style={{
@@ -101,7 +115,7 @@ function Snackbar({ open, message, type = "info", onClose }) {
         bottom: 32,
         left: "50%",
         transform: "translateX(-50%)",
-        background: type === "error" ? "#f44336" : "#4caf50",
+        background: bgColor,
         color: "#fff",
         padding: "12px 32px",
         borderRadius: 32,
@@ -111,12 +125,18 @@ function Snackbar({ open, message, type = "info", onClose }) {
         fontSize: 16,
         minWidth: 180,
         textAlign: "center",
+        cursor: "pointer",
       }}
       onClick={onClose}
       tabIndex={0}
       aria-live="polite"
     >
       {message}
+      {type !== "error" && (
+        <div style={{fontSize: 11, marginTop: 4, opacity: 0.9}}>
+          (se ferme automatiquement)
+        </div>
+      )}
     </div>
   );
 }
@@ -456,6 +476,8 @@ export default function Suivi() {
   const [feedbackData, setFeedbackData] = useState(null);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [derniereSemaineValidee, setDerniereSemaineValidee] = useState(null);
+  // État pour objectif personnalisé de la semaine courante
+  const [objectifSemaineCourante, setObjectifSemaineCourante] = useState('');
   // Bilan hebdo : état modal et données
   const [showBilanModal, setShowBilanModal] = useState(false);
   const [bilanData, setBilanData] = useState(null);
@@ -517,6 +539,30 @@ export default function Suivi() {
   useEffect(() => {
     if (typeof window !== 'undefined' && selectedDate) {
       setPrepValid(localStorage.getItem('prep_valid_' + selectedDate) === '1');
+    }
+  }, [selectedDate]);
+
+  // Charger l'objectif personnalisé de la semaine courante
+  useEffect(() => {
+    if (typeof window !== 'undefined' && selectedDate) {
+      // Utiliser les mêmes fonctions que pour la validation pour garantir la cohérence
+      const monday = getMonday(selectedDate);
+      const weekStart = formatDate(monday, 'yyyy-MM-dd');
+      
+      console.log('🎯 [SUIVI] Chargement objectif pour la semaine:', weekStart);
+      console.log('🎯 [SUIVI] selectedDate:', selectedDate);
+      
+      // Charger l'objectif depuis localStorage
+      const objectif = localStorage.getItem(`objectif_semaine_${weekStart}`);
+      console.log('🎯 [SUIVI] Objectif trouvé dans localStorage:', objectif);
+      
+      if (objectif) {
+        setObjectifSemaineCourante(objectif);
+        console.log('🎯 [SUIVI] Objectif mis à jour dans l\'état');
+      } else {
+        setObjectifSemaineCourante('');
+        console.log('🎯 [SUIVI] Aucun objectif trouvé, état vidé');
+      }
     }
   }, [selectedDate]);
 
@@ -1046,6 +1092,12 @@ export default function Suivi() {
         console.log('[LOG BILAN] Liste des repas (id, date, kcal) :', repasData.map(r => ({id: r.id, date: r.date, kcal: r.kcal})));
       } else {
         console.log('[LOG BILAN] Aucun repas trouvé pour cette période.');
+        // ⚠️ Semaine vide : on permet la validation, le bilan affichera un message adapté
+        setSnackbar({ 
+          open: true, 
+          message: "⚠️ Aucune donnée saisie. Le bilan sera enregistré comme 'indisponible' pour cette semaine.", 
+          type: "warning" 
+        });
       }
       // Log du total kcal calculé
       const totalKcalLog = repasData.reduce((sum, r) => sum + (Number(r.kcal) || 0), 0);
@@ -1105,7 +1157,27 @@ export default function Suivi() {
       // Calcul des données Section 1 du bilan (apports totaux, objectif, etc.)
       const apportsTotaux = repasData.reduce((sum, r) => sum + (Number(r.kcal) || 0), 0);
       const objectifJour = calculs?.apport_calorique_cible || 1730; // Objectif calorique journalier (apport cible, pas TDEE !)
-      const objectifHebdo = objectifJour * 7; // Objectif hebdomadaire
+      
+      // ⚠️ CORRECTION STATS : Compter uniquement jours avec données réelles
+      // Grouper repas par jour pour identifier jours avec saisie
+      const joursAvecDonnees = new Set();
+      repasData.forEach(r => {
+        if (r.date && r.kcal > 0) {
+          joursAvecDonnees.add(r.date);
+        }
+      });
+      const nbJoursSaisis = joursAvecDonnees.size;
+      
+      // Objectif ajusté selon jours réels (évite fausser stats si semaine incomplète)
+      const objectifHebdo = nbJoursSaisis > 0 ? objectifJour * nbJoursSaisis : objectifJour * 7;
+      
+      console.log('[LOG BILAN] Ajustement objectif:', {
+        joursAvecDonnees: nbJoursSaisis,
+        objectifJour,
+        objectifHebdo,
+        apportsTotaux
+      });
+      
       const kcalExtras = repasData.filter(r => r.est_extra).reduce((sum, r) => sum + (Number(r.kcal) || 0), 0);
       
       // Calcul tendance 7j et projection poids
@@ -1261,6 +1333,10 @@ export default function Suivi() {
       
       // ═══════════════════════════════════════════════════════════
       
+      // Charger objectif personnalisé de cette semaine depuis localStorage
+      const objectifPerso = localStorage.getItem(`objectif_semaine_${selectedWeekStart}`);
+      console.log('[LOG BILAN] Objectif personnalisé pour cette semaine:', objectifPerso);
+      
       let insertOk = false;
       const bilanToInsert = {
         weekStart: selectedWeekStart,
@@ -1277,6 +1353,7 @@ export default function Suivi() {
         apports_totaux: Math.round(apportsTotaux),
         objectif_hebdo: objectifHebdo,
         projection_poids: tendance.projection_poids,
+        nb_jours_saisis: nbJoursSaisis,
         // Données extras
         kcal_extras: Math.round(kcalExtras),
         budget_extras: Math.round(budgetExtras),
@@ -1286,6 +1363,8 @@ export default function Suivi() {
         note_utilisateur: noteUtilisateur || null,
         nb_repas_satiete: nbRepasSatiete || 0,
         nb_repas_ressenti: nbRepasRessenti || 0,
+        // Objectif personnalisé utilisateur pour cette semaine
+        objectif_perso: objectifPerso || null,
         // PHASE 2 - Données ABC (Lectures A, B, C + Fragilités)
         bilan_abc: {
           lectureA: lectureA || null,
@@ -1332,6 +1411,7 @@ export default function Suivi() {
           extras: extrasInfo.count,
           budgetExtras,
           variation,
+          nbJoursSaisis,
           // Section 7 - Données ressenti
           satieteMoyenne,
           humeurDominante,
@@ -1418,6 +1498,32 @@ export default function Suivi() {
       }}>
         🥗 Suivi alimentaire du jour
       </h1>
+      
+      {/* Bandeau objectif personnel de la semaine */}
+      {objectifSemaineCourante && (
+        <div style={{
+          maxWidth: 650,
+          margin: '0 auto 1.5rem',
+          padding: '1rem 1.3rem',
+          background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+          border: '2px solid #fbbf24',
+          borderRadius: 10,
+          boxShadow: '0 2px 8px rgba(251, 191, 36, 0.2)'
+        }}>
+          <div style={{display: 'flex', alignItems: 'center', gap: '0.8rem'}}>
+            <div style={{fontSize: '1.5rem'}}>🎯</div>
+            <div style={{flex: 1}}>
+              <div style={{fontWeight: 700, color: '#92400e', marginBottom: '0.3rem', fontSize: '0.95rem'}}>
+                Mon objectif pour cette semaine
+              </div>
+              <div style={{color: '#78716c', fontSize: '0.95rem', lineHeight: 1.5, fontStyle: 'italic'}}>
+                {objectifSemaineCourante}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div style={{textAlign:'center', marginBottom:'1.5rem'}}>
         <button onClick={handleRefresh} style={{
           background:'#1976d2', color:'#fff', border:'none', borderRadius:8, padding:'8px 22px', fontWeight:600, fontSize:16, cursor:'pointer'
@@ -2304,6 +2410,7 @@ export default function Suivi() {
         onClose={() => setShowBilanModal(false)}
         bilan={bilanData}
         selectedDate={selectedDate} // On transmet explicitement la date sélectionnée
+        modeValidation={true} // Mode validation dimanche : afficher VERT + JAUNE
         onLearnMore={() => {
           setShowBilanModal(false);
           // TODO: ouvrir la section "en savoir plus" ou naviguer vers l’historique détaillé
