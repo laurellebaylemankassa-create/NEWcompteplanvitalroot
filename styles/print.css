@@ -1,0 +1,80 @@
+/* ========================================
+   STYLES IMPRESSION PDF - BilanHebdoModal
+   ======================================== */
+@media print {
+  /* Masquer les éléments de la page historique (titre, liste, lien retour) */
+  .page-title,
+  .bilans-list,
+  .historique-bilans-page > p,
+  .historique-bilans-page > div > a,
+  .historique-bilans-page > a {
+    display: none !important;
+  }
+  
+  /* Réinitialiser le backdrop pour l'impression */
+  .bilan-modal-backdrop {
+    position: static !important;
+    background: white !important;
+    width: 100% !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+  
+  /* Modale en mode statique */
+  [role="dialog"] {
+    position: static !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 1.5cm !important;
+    box-shadow: none !important;
+    background: white !important;
+    min-height: auto !important;
+  }
+  
+  /* Masquer tous les boutons */
+  button {
+    display: none !important;
+  }
+  
+  /* === FORCER L'OUVERTURE DES ACCORDÉONS === */
+  
+  /* Forcer l'affichage des divs accordéons avec classe print-expand */
+  .print-expand {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+  
+  /* Forcer tous les <details> à être ouverts */
+  details {
+    display: block !important;
+  }
+  
+  /* Optimiser mise en page */
+  body {
+    margin: 0;
+    padding: 0;
+    background: white !important;
+  }
+  
+  /* Pagination propre */
+  section {
+    page-break-inside: avoid;
+    margin-bottom: 1.5rem;
+  }
+  
+  h1, h2, h3, h4 {
+    page-break-after: avoid;
+  }
+  
+  /* Couleurs imprimables */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

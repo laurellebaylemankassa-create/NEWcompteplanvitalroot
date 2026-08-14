@@ -4,9 +4,41 @@ import styles from './BilanHebdoModal.module.css';
 import { calculerTendance7j } from '../lib/validationSemaine';
 
 // Squelette minimal pour repartir étape par étape selon le plan métier
-export default function BilanHebdoModal({ open, onClose, bilan, onLearnMore, selectedDate }) {
-    // Gestion fermeture modale
-    if (!open) return null;
+export default function BilanHebdoModal({ open, onClose, bilan, onLearnMore, selectedDate, modeValidation = false }) {
+    // Log des props reçues
+    console.log('📊 [BILAN MODAL] Composant rendu avec props:', {
+      open,
+      hasBilan: !!bilan,
+      bilanWeekStart: bilan?.weekStart,
+      hasBilanABC: !!bilan?.bilan_abc,
+      selectedDate
+    });
+    
+    // Charger l'objectif personnalisé de cette semaine depuis localStorage
+    const [objectifPersoSemaine, setObjectifPersoSemaine] = React.useState('');
+    
+    React.useEffect(() => {
+      // Prioriser l'objectif déjà sauvegardé en base
+      if (bilan?.objectif_perso) {
+        console.log('🎯 [BILAN MODAL] Objectif personnalisé chargé depuis la base:', bilan.objectif_perso);
+        setObjectifPersoSemaine(bilan.objectif_perso);
+      } else if (bilan?.weekStart) {
+        // Fallback : charger depuis localStorage si pas en base
+        const objectifSauvegarde = localStorage.getItem(`objectif_semaine_${bilan.weekStart}`);
+        if (objectifSauvegarde) {
+          console.log('🎯 [BILAN MODAL] Objectif personnalisé chargé depuis localStorage:', objectifSauvegarde);
+          setObjectifPersoSemaine(objectifSauvegarde);
+        }
+      }
+    }, [bilan?.weekStart, bilan?.objectif_perso]);
+    
+    // Fonction téléchargement PDF (print)
+    const handleDownloadPDF = () => {
+      console.log('📊 [BILAN MODAL] Bouton PDF cliqué dans la modale');
+      console.log('📊 [BILAN MODAL] Appel window.print()');
+      window.print();
+      console.log('📊 [BILAN MODAL] window.print() exécuté');
+    };
     
     // 📱 Détection responsive dynamique (se met à jour au resize)
     const [isMobile, setIsMobile] = React.useState(
@@ -23,9 +55,9 @@ export default function BilanHebdoModal({ open, onClose, bilan, onLearnMore, sel
     }, []);
     
     // Styles responsive basés sur isMobile
-    const modalWidth = isMobile ? '95%' : '90%';
-    const modalMaxWidth = isMobile ? '100vw' : '900px';
-    const modalPadding = isMobile ? '4rem 0.8rem 1.5rem 0.8rem' : '3rem 2rem 2rem 2rem';
+    const modalWidth = isMobile ? '95%' : '95%';
+    const modalMaxWidth = isMobile ? '100vw' : '1400px';  // Élargi pour PC
+    const modalPadding = isMobile ? '4rem 0.8rem 1.5rem 0.8rem' : '3rem 3rem 2rem 3rem';
     const fontSize = isMobile ? '0.88rem' : '1rem';
     const titleFontSize = isMobile ? '1.3rem' : '1.8rem';
     const titleMarginBottom = isMobile ? '0.5rem' : '0.7rem';
@@ -106,7 +138,15 @@ export default function BilanHebdoModal({ open, onClose, bilan, onLearnMore, sel
                 Extras : <b>{bilan.extras}</b><br/>
                 Poids calorique extras : <b>{bilan.kcalExtras}</b> kcal<br/>
                 Budget extras : <b>{bilan.budgetExtras}</b> kcal<br/>
-                <span style={{color:'#64748b'}}>→ Cette semaine, les extras sont à la fois présents (fréquence) et très lourds (intensité).</span>
+                <span style={{color:'#64748b'}}>→ {bilan.nbJoursSaisis < 2 ? (
+                  'Analyse non disponible : données insuffisantes.'
+                ) : bilan.extras === 0 ? (
+                  'Aucun extra cette semaine, l\'impact est nul.'
+                ) : bilan.kcalExtras > bilan.budgetExtras ? (
+                  'Cette semaine, les extras sont à la fois présents (fréquence) et très lourds (intensité).'
+                ) : (
+                  'Cette semaine, les extras sont présents mais leur intensité reste modérée.'
+                )}</span>
               </div>
             </>
           )}
@@ -115,11 +155,24 @@ export default function BilanHebdoModal({ open, onClose, bilan, onLearnMore, sel
     }
     // Bloc "Lecture de la semaine" (diagnostic global)
     function BlocLectureSemaine() {
-      const { apportsTotaux, objectifHebdo, kcalExtras, extras, budgetExtras } = bilan || {};
+      const { apportsTotaux, objectifHebdo, kcalExtras, extras, budgetExtras, nbJoursSaisis } = bilan || {};
       // Log au début de la fonction
       console.log('[LectureSemaine] Début BlocLectureSemaine');
       // Log des valeurs d'entrée
-      console.log('[LectureSemaine] apportsTotaux:', apportsTotaux, 'objectifHebdo:', objectifHebdo, 'kcalExtras:', kcalExtras, 'extras:', extras, 'budgetExtras:', budgetExtras);
+      console.log('[LectureSemaine] apportsTotaux:', apportsTotaux, 'objectifHebdo:', objectifHebdo, 'kcalExtras:', kcalExtras, 'extras:', extras, 'budgetExtras:', budgetExtras, 'nbJoursSaisis:', nbJoursSaisis);
+      
+      // Si données insuffisantes (< 2 jours), afficher message adapté
+      if (nbJoursSaisis < 2) {
+        return (
+          <section style={{marginBottom: '2rem', background: '#f8fafc', borderRadius: 10, padding: '1.1rem 1.3rem', boxShadow: '0 1px 4px #cbd5e1', border: '2px dashed #cbd5e1'}}>
+            <h4 style={{color: '#64748b', marginBottom: '0.7rem', fontSize: '1.08rem'}}>Lecture de la semaine</h4>
+            <div style={{fontStyle: 'italic', color: '#94a3b8', fontSize: '0.98rem'}}>
+              📊 Données insuffisantes pour générer une lecture fiable (seulement {nbJoursSaisis} jour avec saisie).
+            </div>
+          </section>
+        );
+      }
+      
       if (
         typeof apportsTotaux !== 'number' ||
         typeof objectifHebdo !== 'number' ||
@@ -498,6 +551,7 @@ export default function BilanHebdoModal({ open, onClose, bilan, onLearnMore, sel
   
     function AccordionTendance() {
       const [open, setOpen] = useState(false);
+      
       return (
         <div style={{marginTop: '0.5rem'}}>
           <button
@@ -511,8 +565,7 @@ export default function BilanHebdoModal({ open, onClose, bilan, onLearnMore, sel
           >
             {open ? 'Masquer le détail ▲' : 'Voir le détail ▼'}
           </button>
-          {open && (
-            <div id="tendance-details" style={{marginTop: '0.7rem', background: '#f0f6ff', borderRadius: 8, padding: '1rem 1.2rem', boxShadow: '0 1px 4px #b3d8f7'}}>
+          <div id="tendance-details" className="print-expand" style={{display: open ? 'block' : 'none', marginTop: '0.7rem', background: '#f0f6ff', borderRadius: 8, padding: '1rem 1.2rem', boxShadow: '0 1px 4px #b3d8f7'}}>
               {/* Section 2.1 - Tendance 7j (semaine courante) */}
               {(() => {
                 const { apportsTotaux, objectifHebdo } = bilan || {};
@@ -554,8 +607,7 @@ export default function BilanHebdoModal({ open, onClose, bilan, onLearnMore, sel
               
               {/* Step 3 - Moyenne 14j */}
               <Moyenne14jBlock selectedDate={selectedDate} bilan={bilan} />
-            </div>
-          )}
+          </div>
         </div>
       );
     }
@@ -814,6 +866,7 @@ export default function BilanHebdoModal({ open, onClose, bilan, onLearnMore, sel
     {/* Overlay cliquable pour fermer */}
     <div 
       onClick={onClose}
+      className="bilan-modal-backdrop"
       style={{
         position: 'fixed',
         top: 0,
@@ -851,6 +904,32 @@ export default function BilanHebdoModal({ open, onClose, bilan, onLearnMore, sel
         minHeight: isMobile ? '100vh' : 'auto'
       }}
     >
+      {/* Bouton télécharger PDF fixe en haut à gauche */}
+      <button
+        onClick={handleDownloadPDF}
+        style={{
+          position: 'absolute',
+          top: isMobile ? '0.5rem' : '1rem',
+          left: isMobile ? '0.5rem' : '1rem',
+          background: '#2563eb',
+          border: 'none',
+          borderRadius: '8px',
+          padding: isMobile ? '0.5rem 0.8rem' : '0.6rem 1rem',
+          fontSize: isMobile ? '0.85rem' : '0.95rem',
+          cursor: 'pointer',
+          color: '#ffffff',
+          fontWeight: 600,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.4rem',
+          zIndex: 10001,
+          boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)'
+        }}
+      >
+        <span>📥</span>
+        {!isMobile && <span>PDF</span>}
+      </button>
+      
       {/* Bouton fermeture fixe en haut à droite - HORS de la div scrollable */}
       <button
         onClick={onClose}
@@ -925,6 +1004,62 @@ export default function BilanHebdoModal({ open, onClose, bilan, onLearnMore, sel
         <div style={{fontStyle: 'italic', color: '#1976d2', marginBottom: '1.2rem', fontSize: '1.01rem'}}>
           Ton corps évolue dans le temps. Ce bilan te montre la trajectoire, pas un jugement.
         </div>
+        
+        {/* Bandeau avertissement si semaine partiellement documentée (1-4 jours) */}
+        {bilan?.nbJoursSaisis >= 1 && bilan?.nbJoursSaisis < 5 && (
+          <div style={{
+            marginBottom: '1.5rem',
+            padding: '1rem 1.2rem',
+            background: 'linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%)',
+            border: '2px solid #ffc107',
+            borderRadius: 10,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.8rem',
+            boxShadow: '0 2px 8px rgba(255, 193, 7, 0.2)'
+          }}>
+            <div style={{fontSize: '1.8rem', flexShrink: 0}}>⚠️</div>
+            <div style={{flex: 1}}>
+              <div style={{fontWeight: 700, color: '#856404', marginBottom: '0.5rem', fontSize: '1.05rem'}}>
+                Semaine partiellement documentée : {bilan.nbJoursSaisis} jour{bilan.nbJoursSaisis > 1 ? 's' : ''} sur 7
+              </div>
+              <div style={{color: '#856404', fontSize: '0.93rem', lineHeight: 1.6}}>
+                <div style={{marginBottom: '0.4rem'}}>
+                  <strong>Important :</strong> L'objectif affiché ({typeof bilan.objectifHebdo === 'number' ? bilan.objectifHebdo.toLocaleString() : '—'} kcal) est calculé sur{' '}
+                  <strong>{bilan.nbJoursSaisis} jour{bilan.nbJoursSaisis > 1 ? 's' : ''} uniquement</strong>, pas sur la semaine complète.
+                </div>
+                {bilan.nbJoursSaisis < 4 && (
+                  <div style={{marginTop: '0.5rem', fontStyle: 'italic', fontSize: '0.88rem', opacity: 0.9}}>
+                    Ce bilan ne peut pas déterminer si les jours non documentés correspondent à un jeûne ou à des oublis de saisie. Interprète ces statistiques avec prudence.
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Si vraiment AUCUNE donnée saisie (0 kcal total), afficher message 'Bilan indisponible' */}
+        {(bilan?.apportsTotaux === 0 || !bilan?.apportsTotaux) && (bilan?.extras === 0 || !bilan?.extras) ? (
+          <section style={{
+            marginTop: '2rem',
+            marginBottom: '2rem',
+            padding: '3rem 2rem',
+            background: '#f8fafc',
+            borderRadius: 12,
+            textAlign: 'center',
+            border: '2px dashed #cbd5e1',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.05)'
+          }}>
+            <div style={{fontSize: '3rem', marginBottom: '1rem'}}>📭</div>
+            <h3 style={{color: '#64748b', fontSize: '1.3rem', marginBottom: '0.7rem', fontWeight: 600}}>
+              Bilan indisponible
+            </h3>
+            <p style={{color: '#94a3b8', fontSize: '1.05rem', maxWidth: '500px', margin: '0 auto', lineHeight: 1.5}}>
+              Aucune donnée n'a été saisie pour cette semaine. Le bilan ne peut pas être généré.
+            </p>
+          </section>
+        ) : (
+          <>
         {/* Bloc diagnostic dynamique métier (Lecture de la semaine) */}
         {BlocLectureSemaine()}
         {/* Résumé des données principales */}
@@ -944,26 +1079,47 @@ export default function BilanHebdoModal({ open, onClose, bilan, onLearnMore, sel
                 typeof bilan?.apportsTotaux === 'number' ? bilan.apportsTotaux : '—'
               }</span> kcal
             </li>
-            {/* Objectif hebdomadaire (incluant extras) */}
+            {/* Objectif hebdomadaire (incluant extras) - Libellé adapté selon contexte */}
             <li style={{marginBottom: 8}}>
-              <span style={{fontWeight:600}}>Objectif hebdomadaire (incluant extras)&nbsp;:</span> <span style={{fontWeight:700}}>{
+              <span style={{fontWeight:600}}>
+                {bilan?.nbJoursSaisis >= 5 
+                  ? 'Objectif hebdomadaire (incluant extras)' 
+                  : `Objectif sur ${bilan?.nbJoursSaisis || '—'} jour${bilan?.nbJoursSaisis > 1 ? 's' : ''} (incluant extras)`
+                }&nbsp;:
+              </span> <span style={{fontWeight:700}}>{
                 typeof bilan?.objectifHebdo === 'number' ? bilan.objectifHebdo : '—'
               }</span> kcal
             </li>
-            {/* Écart hebdomadaire */}
+            {/* Écart hebdomadaire - Libellé adapté selon contexte */}
             <li style={{marginBottom: 8}}>
-              <span style={{fontWeight:600}}>Écart hebdomadaire&nbsp;:</span> <span style={{fontWeight:700, color:'#e53935'}}>{
+              <span style={{fontWeight:600}}>
+                {bilan?.nbJoursSaisis >= 5 ? 'Écart hebdomadaire' : `Écart sur ${bilan?.nbJoursSaisis || '—'} jour${bilan?.nbJoursSaisis > 1 ? 's' : ''}`}&nbsp;:
+              </span> <span style={{fontWeight:700, color:'#e53935'}}>{
                 typeof bilan?.apportsTotaux === 'number' && typeof bilan?.objectifHebdo === 'number'
                   ? ((bilan.apportsTotaux - bilan.objectifHebdo) > 0 ? '+' : '') + (bilan.apportsTotaux - bilan.objectifHebdo) + ' kcal'
                   : '—'
               }</span>
             </li>
           </ul>
-          {/* Phrase de lecture automatique selon l'écart */}
+          {/* Phrase de lecture automatique selon l'écart - Adaptée selon contexte */}
           <div style={{marginTop: '0.7rem', fontStyle: 'italic', color: '#1976d2', fontSize: '1.04rem'}}>
             {(() => {
               if (typeof bilan?.apportsTotaux === 'number' && typeof bilan?.objectifHebdo === 'number') {
                 const ecart = bilan.apportsTotaux - bilan.objectifHebdo;
+                const nbJours = bilan?.nbJoursSaisis || 7;
+                
+                // Message adapté si données partielles
+                if (nbJours < 5) {
+                  if (ecart < -100) {
+                    return `Sur les ${nbJours} jour${nbJours > 1 ? 's' : ''} saisi${nbJours > 1 ? 's' : ''}, un déficit énergétique est observé.`;
+                  } else if (ecart > 100) {
+                    return `Sur les ${nbJours} jour${nbJours > 1 ? 's' : ''} saisi${nbJours > 1 ? 's' : ''}, un surplus énergétique est observé.`;
+                  } else {
+                    return `Sur les ${nbJours} jour${nbJours > 1 ? 's' : ''} saisi${nbJours > 1 ? 's' : ''}, l'apport est proche de l'objectif.`;
+                  }
+                }
+                
+                // Message normal si semaine complète (5+ jours)
                 if (ecart < -100) {
                   return "Cette semaine crée un déficit énergétique. Elle va dans le sens de la perte de poids.";
                 } else if (ecart > 100) {
@@ -1021,7 +1177,9 @@ export default function BilanHebdoModal({ open, onClose, bilan, onLearnMore, sel
         <SectionCommentMange bilan={bilan} selectedDate={selectedDate} />
         
         {/* PHASE 3 - Bloc Objectif Personnalisé Semaine Prochaine */}
-        <BlocObjectifSemaineProchaine />
+        <BlocObjectifSemaineProchaine bilanArchive={!!bilan?.objectif_perso} objectifArchive={objectifPersoSemaine} />
+        </>
+        )}
       </div>
     </div>
     </div>
@@ -1056,9 +1214,8 @@ function SectionCommentMange({ bilan, selectedDate }) {
       >
         {open ? 'Masquer le détail ▲' : 'Comment j’ai mangé cette semaine ▼'}
       </button>
-      {open && (
-        <div id="comment-mange-details" style={{marginTop: '0.7rem', background: '#f7faff', borderRadius: 10, padding: '1.1rem 1.3rem', boxShadow: '0 1px 4px #b3d8f7'}}>
-          {aucuneDonnee ? (
+      <div id="comment-mange-details" className="print-expand" style={{display: open ? 'block' : 'none', marginTop: '0.7rem', background: '#f7faff', borderRadius: 10, padding: '1.1rem 1.3rem', boxShadow: '0 1px 4px #b3d8f7'}}>
+        {aucuneDonnee ? (
             <div style={{fontStyle: 'italic', color: '#64748b', padding: '1rem', textAlign: 'center'}}>
               Aucune donnée de ressenti saisie cette semaine.<br/>
               Pense à compléter ton journal pour un suivi plus précis ! 📝
@@ -1127,15 +1284,13 @@ function SectionCommentMange({ bilan, selectedDate }) {
             </>
           )}
         </div>
-      )}
     </div>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════
 // BLOC OBJECTIF PERSONNALISÉ SEMAINE PROCHAINE (hors modal principal)
-// ═══════════════════════════════════════════════════════════════
-function BlocObjectifSemaineProchaine() {
+function BlocObjectifSemaineProchaine({ modeValidation, objectifArchive }) {
   const [objectifPerso, setObjectifPerso] = useState('');
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -1170,60 +1325,110 @@ function BlocObjectifSemaineProchaine() {
   
   if (loading) return null;
   
+  // MODE HISTORIQUE : Afficher uniquement le BLOC VERT en lecture seule
+  if (!modeValidation) {
+    return (
+      <section style={{
+        marginTop: '2rem',
+        padding: '1.5rem',
+        background: '#e8f5e9',
+        borderRadius: 10,
+        border: '2px solid #4caf50',
+        boxShadow: '0 2px 8px rgba(76, 175, 80, 0.2)'
+      }}>
+        <h4 style={{color: '#2e7d32', fontSize: '1.15rem', marginBottom: '0.5rem'}}>
+          🎯 Mon objectif pour cette semaine
+        </h4>
+        <p style={{fontSize: '1.05rem', color: '#1b5e20', marginBottom: '0.5rem', lineHeight: 1.6, fontStyle: 'italic'}}>
+          {objectifArchive || 'Aucun objectif défini'}
+        </p>
+        <div style={{marginTop: '0.7rem', fontSize: '0.88rem', color: '#558b2f'}}>
+          ✅ Cet objectif avait été défini lors de la validation de la semaine précédente.
+        </div>
+      </section>
+    );
+  }
+  
+  // MODE VALIDATION (DIMANCHE) : Afficher BLOC VERT (si objectifArchive) + BLOC JAUNE
   return (
-    <section style={{
-      marginTop: '2rem',
-      padding: '1.5rem',
-      background: '#fef3c7',
-      borderRadius: 10,
-      border: '2px solid #fbbf24',
-      boxShadow: '0 2px 8px rgba(251, 191, 36, 0.2)'
-    }}>
-      <h4 style={{color: '#d97706', fontSize: '1.15rem', marginBottom: '0.5rem'}}>
-        🎯 Mon objectif pour la semaine prochaine
-      </h4>
-      <p style={{fontSize: '0.95rem', color: '#78716c', marginBottom: '1rem'}}>
-        Prends un moment pour noter ce que tu veux améliorer. C'est ton engagement, pas une consigne.
-      </p>
+    <>
+      {/* Bloc 1 : Objectif de la semaine QUI SE TERMINE (défini semaine N-1) */}
+      {objectifArchive && (
+        <section style={{
+          marginTop: '2rem',
+          padding: '1.5rem',
+          background: '#e8f5e9',
+          borderRadius: 10,
+          border: '2px solid #4caf50',
+          boxShadow: '0 2px 8px rgba(76, 175, 80, 0.2)'
+        }}>
+          <h4 style={{color: '#2e7d32', fontSize: '1.15rem', marginBottom: '0.5rem'}}>
+            🎯 Mon objectif pour cette semaine
+          </h4>
+          <p style={{fontSize: '1.05rem', color: '#1b5e20', marginBottom: '0.5rem', lineHeight: 1.6, fontStyle: 'italic'}}>
+            {objectifArchive}
+          </p>
+          <div style={{marginTop: '0.7rem', fontSize: '0.88rem', color: '#558b2f'}}>
+            ✅ Cet objectif avait été défini lors de la validation de la semaine précédente.
+          </div>
+        </section>
+      )}
       
-      <textarea
-        value={objectifPerso}
-        onChange={(e) => setObjectifPerso(e.target.value)}
-        placeholder="Ex : Continuer les bonnes choses et rectifier les écarts identifiés. Plus de journée comme dimanche 25 janvier !"
-        rows={4}
-        style={{
-          width: '100%',
-          padding: '0.8rem',
-          borderRadius: 8,
-          border: '2px solid #fbbf24',
-          fontSize: '1rem',
-          fontFamily: 'inherit',
-          resize: 'vertical',
-          boxSizing: 'border-box'
-        }}
-      />
-      
-      <button
-        onClick={handleSave}
-        style={{
-          marginTop: '0.7rem',
-          background: saved ? '#22c55e' : '#d97706',
-          color: '#fff',
-          border: 'none',
-          borderRadius: 8,
-          padding: '0.6rem 1.2rem',
-          fontWeight: 600,
-          cursor: 'pointer',
-          fontSize: '1rem',
-          transition: 'background 0.3s'
-        }}
-      >
-        {saved ? '✅ Enregistré !' : 'Enregistrer mon objectif'}
-      </button>
-      
-      <div style={{marginTop: '1rem', fontSize: '0.9rem', color: '#78716c', fontStyle: 'italic'}}>
-        💡 Cet objectif sera affiché en début de semaine prochaine pour te rappeler ta direction.
-      </div>
-    </section>
+      {/* Bloc 2 : Textarea pour définir l'objectif de la semaine PROCHAINE */}
+      <section style={{
+        marginTop: '2rem',
+        padding: '1.5rem',
+        background: '#fef3c7',
+        borderRadius: 10,
+        border: '2px solid #fbbf24',
+        boxShadow: '0 2px 8px rgba(251, 191, 36, 0.2)'
+      }}>
+        <h4 style={{color: '#d97706', fontSize: '1.15rem', marginBottom: '0.5rem'}}>
+          🎯 Mon objectif pour la semaine prochaine
+        </h4>
+        <p style={{fontSize: '0.95rem', color: '#78716c', marginBottom: '1rem'}}>
+          Prends un moment pour noter ce que tu veux améliorer. C'est ton engagement, pas une consigne.
+        </p>
+        
+        <textarea
+          value={objectifPerso}
+          onChange={(e) => setObjectifPerso(e.target.value)}
+          placeholder="Ex : Continuer les bonnes choses et rectifier les écarts identifiés. Plus de journée comme dimanche 25 janvier !"
+          rows={4}
+          style={{
+            width: '100%',
+            padding: '0.8rem',
+            borderRadius: 8,
+            border: '2px solid #fbbf24',
+            fontSize: '1rem',
+            fontFamily: 'inherit',
+            resize: 'vertical',
+            boxSizing: 'border-box'
+          }}
+        />
+        
+        <button
+          onClick={handleSave}
+          style={{
+            marginTop: '0.7rem',
+            background: saved ? '#22c55e' : '#d97706',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 8,
+            padding: '0.6rem 1.2rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            fontSize: '1rem',
+            transition: 'background 0.3s'
+          }}
+        >
+          {saved ? '✅ Enregistré !' : 'Enregistrer mon objectif'}
+        </button>
+        
+        <div style={{marginTop: '1rem', fontSize: '0.9rem', color: '#78716c', fontStyle: 'italic'}}>
+          💡 Cet objectif sera affiché en début de semaine prochaine pour te rappeler ta direction.
+        </div>
+      </section>
+    </>
   );
 }

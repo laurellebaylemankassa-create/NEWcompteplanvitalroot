@@ -3,6 +3,7 @@ import { SupabaseProvider, supabase } from '../lib/supabaseClient';
 import { AuthProvider } from '../contexts/AuthContext';
 import { DefisProvider } from '../components/DefisContext';
 import BandeauCompletionProfil from '../components/BandeauCompletionProfil';
+import '../styles/print.css'; // Styles impression PDF
 
 function MyApp({ Component, pageProps }) {
   const [afficherBandeau, setAfficherBandeau] = useState(false);
